@@ -1,0 +1,26 @@
+pluginManagement {
+    repositories {
+        maven { url 'https://maven.aliyun.com/repository/public' }  // jcenter
+        maven { url 'https://maven.aliyun.com/repository/central' } // central
+        maven { url 'https://maven.aliyun.com/repository/google' }  // google
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        maven { url 'https://maven.aliyun.com/repository/public' }  // jcenter
+        maven { url 'https://maven.aliyun.com/repository/central' } // central
+        maven { url 'https://maven.aliyun.com/repository/google' }  // google
+        google()
+        mavenCentral()
+    }
+}
+rootProject.name = "Demo"
+include ':app'
+include ':lib_common'
+include ':lib_business'
+include ':lib_music'
+include ':lib_tools'
