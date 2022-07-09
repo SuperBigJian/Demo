@@ -4,12 +4,12 @@ import android.content.Intent
 import com.alibaba.android.arouter.facade.annotation.Route
 import com.blankj.utilcode.util.NetworkUtils
 import com.blankj.utilcode.util.ShellUtils
-import com.cyaan.lib.business.router.RouterActivityPath
 import com.cyaan.lib.common.ui.BaseActivity
 import com.cyaan.lib.common.utils.OnClick
 import com.cyaan.lib.tools.databinding.ToolsActivityWifiDebugBinding
+import com.cyaan.lib.tools.router.ToolsRouterPath
 
-@Route(path = RouterActivityPath.PAGER_WIFI_DEBUG)
+@Route(path = ToolsRouterPath.PAGER_WIFI_DEBUG)
 class WifiDebugActivity : BaseActivity() {
     private val mBinding by lazy { ToolsActivityWifiDebugBinding.inflate(layoutInflater) }
 

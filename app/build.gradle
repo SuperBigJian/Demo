@@ -31,9 +31,6 @@ android {
             signingConfig signingConfigs.Desaysv_new
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
-        debug {
-            signingConfig signingConfigs.Desaysv_new
-        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -49,9 +46,9 @@ android {
 }
 
 dependencies {
-    implementation project(':lib_business')
-    implementation project(":lib_music")
-    implementation project(":lib_tools")
+    implementation project(":lib_business")
+    implementation project(':component_music')
+    implementation project(":component_tools")
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

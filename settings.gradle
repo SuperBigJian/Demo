@@ -19,8 +19,8 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "Demo"
-include ':app'
 include ':lib_common'
 include ':lib_business'
-include ':lib_music'
-include ':lib_tools'
+include ':component_music'
+include ':component_tools'
+include ':app'
