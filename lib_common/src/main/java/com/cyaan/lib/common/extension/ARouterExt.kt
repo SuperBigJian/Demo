@@ -1,4 +1,4 @@
-package com.cyaan.lib.business.router
+package com.cyaan.lib.common.extension
 
 import android.os.Bundle
 import androidx.core.os.bundleOf

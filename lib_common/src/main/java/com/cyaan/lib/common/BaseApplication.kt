@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.os.Bundle
+import com.alibaba.android.arouter.launcher.ARouter
 import com.cyaan.lib.common.ui.ActivityController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,7 +28,7 @@ abstract class BaseApplication : Application() {
         super.onCreate()
         set(this)
         initTimber()
-        initApp()
+        initARouter()
         scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     }
 
@@ -35,7 +36,17 @@ abstract class BaseApplication : Application() {
         if (mIsDebug) Timber.plant(Timber.DebugTree())
     }
 
-    abstract fun initApp()
+    private fun initARouter() {
+        if (mIsDebug) {
+            // 这两行必须写在init之前，否则这些配置在init过程中将无效
+            // 打印日志
+            ARouter.openLog()
+            // 开启调试模式(如果在InstantRun模式下运行，必须开启调试模式！线上版本需要关闭,否则有安全风险)
+            ARouter.openDebug()
+        }
+        // 尽可能早，推荐在Application中初始化
+        ARouter.init(this)
+    }
 
     private fun set(baseApplication: BaseApplication) {
         appContext = baseApplication

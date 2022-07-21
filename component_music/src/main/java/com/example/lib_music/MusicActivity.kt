@@ -1,9 +1,9 @@
 package com.example.lib_music
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import com.cyaan.lib.common.ui.BaseActivity
 
-class MusicActivity : AppCompatActivity() {
+class MusicActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music)

@@ -1,6 +1,6 @@
 package com.example.demo
 
-import com.cyaan.lib.business.router.routeTo
+import com.cyaan.lib.common.extension.routeTo
 import com.cyaan.lib.common.ui.BaseActivity
 import com.cyaan.lib.common.utils.OnClick
 import com.cyaan.lib.tools.router.ToolsRouterPath
