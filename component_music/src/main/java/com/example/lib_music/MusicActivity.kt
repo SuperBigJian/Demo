@@ -6,6 +6,6 @@ import com.cyaan.lib.common.ui.BaseActivity
 class MusicActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_music)
+        setContentView(R.layout.music_activity_home)
     }
 }

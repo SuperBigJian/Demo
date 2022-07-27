@@ -2,11 +2,8 @@ package com.cyaan.lib.common.ui
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
 import androidx.appcompat.app.AppCompatActivity
-import androidx.viewbinding.ViewBinding
 import timber.log.Timber
-import java.lang.reflect.ParameterizedType
 
 abstract class BaseActivity : AppCompatActivity() {
 

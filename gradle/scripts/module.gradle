@@ -43,7 +43,7 @@ android {
 }
 
 dependencies {
-    compileOnly project(':lib_business')
+    implementation project(':lib_business')
     kapt 'com.alibaba:arouter-compiler:1.5.2'
 }
 
