@@ -1,6 +1,6 @@
 package com.example.demo
 
-import com.cyaan.lib.common.BaseApplication
+import com.cyaan.core.ui.app.BaseApplication
 
-class AppApplication:BaseApplication() {
+class AppApplication : BaseApplication() {
 }

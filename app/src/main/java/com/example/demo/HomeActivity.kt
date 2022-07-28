@@ -1,9 +1,7 @@
 package com.example.demo
 
-import com.cyaan.lib.common.extension.routeTo
-import com.cyaan.lib.common.ui.BaseActivity
-import com.cyaan.lib.common.utils.OnClick
-import com.cyaan.lib.tools.router.ToolsRouterPath
+import com.cyaan.core.base.utils.OnClick
+import com.cyaan.core.ui.app.BaseActivity
 import com.example.demo.databinding.ActivityMainBinding
 
 class HomeActivity : BaseActivity() {
@@ -17,7 +15,7 @@ class HomeActivity : BaseActivity() {
     override fun setListener() {
         mBinding.back.OnClick { finish() }
         mBinding.wifi.OnClick {
-            routeTo(ToolsRouterPath.PAGER_WIFI_DEBUG)
+
         }
     }
 }

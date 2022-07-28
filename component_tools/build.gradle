@@ -1,9 +1,0 @@
-apply from: getRootDir().getPath() + '/gradle/scripts/module.gradle'
-
-android {
-    resourcePrefix "tools_"
-}
-
-dependencies {
-
-}

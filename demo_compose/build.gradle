@@ -7,31 +7,29 @@ android {
     compileSdk 32
 
     defaultConfig {
-        applicationId "com.example.demo"
+        applicationId "com.cyaan.demo.compose"
         minSdk 24
         targetSdk 32
         versionCode 1
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    signingConfigs {
-        Desaysv_new {
-            storeFile file('keystore\\Desaysv\\desaysv-new.keystore')
-            storePassword 'android'
-            keyAlias = 'desaysv'
-            keyPassword 'android'
+        vectorDrawables {
+            useSupportLibrary true
         }
     }
 
     buildTypes {
         release {
             minifyEnabled false
-            signingConfig signingConfigs.Desaysv_new
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    buildFeatures {
+        viewBinding = true
+        compose true
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -39,13 +37,16 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8
     }
-    buildFeatures {
-        viewBinding = true
+    composeOptions {
+        kotlinCompilerExtensionVersion '1.1.1'
     }
-
+    packagingOptions {
+        resources {
+            excludes += '/META-INF/{AL2.0,LGPL2.1}'
+        }
+    }
 }
 
 dependencies {
-    implementation project(':core_base')
     implementation project(':core_ui')
 }

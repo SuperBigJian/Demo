@@ -11,6 +11,8 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        maven { url "https://artifacts.iflytek.com/artifactory/mvn-repo/" }
+        maven { url "https://artifacts.iflytek.com/artifactory/mvn-AndroidPublic-repo/" }
         maven { url 'https://maven.aliyun.com/repository/public' }  // jcenter
         maven { url 'https://maven.aliyun.com/repository/central' } // central
         maven { url 'https://maven.aliyun.com/repository/google' }  // google
@@ -19,8 +21,7 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "Demo"
-include ':lib_common'
-include ':lib_business'
-include ':component_music'
-include ':component_tools'
 include ':app'
+include ':core_ui'
+include ':core_base'
+include ':demo_compose'

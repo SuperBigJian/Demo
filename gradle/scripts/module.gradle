@@ -1,7 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'kotlin-kapt'
-apply from: getRootDir().getPath() + '/gradle/scripts/compose.gradle'
 
 android {
     compileSdk 32
@@ -9,12 +8,6 @@ android {
     defaultConfig {
         minSdk 24
         targetSdk 32
-
-        kapt {
-            arguments {
-                arg("AROUTER_MODULE_NAME", project.getName())
-            }
-        }
     }
 
     buildTypes {
@@ -44,7 +37,6 @@ android {
 
 dependencies {
     implementation project(':lib_business')
-    kapt 'com.alibaba:arouter-compiler:1.5.2'
 }
 
 project.afterEvaluate { p ->
