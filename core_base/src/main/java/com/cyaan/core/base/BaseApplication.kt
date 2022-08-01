@@ -1,8 +1,7 @@
-package com.cyaan.core.ui.app
+package com.cyaan.core.base
 
 import android.app.Activity
 import android.app.Application
-import android.content.Context
 import android.os.Bundle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -13,9 +12,6 @@ import kotlin.properties.Delegates
 abstract class BaseApplication : Application() {
 
     companion object {
-        var appContext: Context by Delegates.notNull()
-            private set
-
         var scope: CoroutineScope by Delegates.notNull()
             private set
     }
@@ -34,7 +30,6 @@ abstract class BaseApplication : Application() {
     }
 
     private fun set(baseApplication: BaseApplication) {
-        appContext = baseApplication
         baseApplication.registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
 
             override fun onActivityPaused(activity: Activity) {

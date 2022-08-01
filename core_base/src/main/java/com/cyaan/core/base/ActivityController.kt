@@ -1,4 +1,4 @@
-package com.cyaan.core.ui.app
+package com.cyaan.core.base
 
 import android.app.Activity
 import java.util.*
