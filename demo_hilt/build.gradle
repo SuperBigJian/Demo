@@ -1,19 +1,20 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'kotlin-kapt'
+    id 'dagger.hilt.android.plugin'
 }
 def cfg = rootProject.ext
 android {
-    compileSdkVersion cfg.android.compileSdk
+    compileSdk cfg.android.compileSdk
 
     defaultConfig {
-        applicationId "com.cyaan.demo.compose"
+        applicationId "com.cyaan.demo.hilt"
         minSdk cfg.android.minSdk
         targetSdk cfg.android.targetSdk
         versionCode 1
         versionName "1.0"
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary true
         }
@@ -25,20 +26,18 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    buildFeatures {
-        viewBinding = true
-        compose true
-    }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = '1.8'
+    }
+    buildFeatures {
+        compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion '1.1.1'
+        kotlinCompilerExtensionVersion cfg.libVersion.compose
     }
     packagingOptions {
         resources {
@@ -49,4 +48,6 @@ android {
 
 dependencies {
     implementation project(path: ':base:commonUI')
+    implementation cfg.libs.injectLib.core
+    kapt cfg.libs.injectLib.compiler
 }

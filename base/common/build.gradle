@@ -1,5 +1,5 @@
 plugins {
-    id 'com.android.application'
+    id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
@@ -9,28 +9,15 @@ android {
     compileSdk cfg.android.compileSdk
 
     defaultConfig {
-        applicationId "com.example.demo"
         minSdk cfg.android.minSdk
         targetSdk cfg.android.targetSdk
-        versionCode 1
-        versionName "1.0"
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    signingConfigs {
-        Desaysv_new {
-            storeFile file('keystore\\Desaysv\\desaysv-new.keystore')
-            storePassword 'android'
-            keyAlias = 'desaysv'
-            keyPassword 'android'
-        }
+        consumerProguardFiles "consumer-rules.pro"
     }
 
     buildTypes {
         release {
             minifyEnabled false
-            signingConfig signingConfigs.Desaysv_new
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -39,16 +26,19 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = '1.8'
     }
-    buildFeatures {
-        viewBinding = true
-    }
-
 }
 
 dependencies {
-    implementation project(path: ':base:commonUI')
+    api cfg.libs.publicLibs
+    api cfg.libs.jsonLibs
+    api cfg.libs.httpLibs
+    api cfg.libs.otherLibs
+
+    api cfg.libs.dataBaseLibs.core
+    kapt cfg.libs.dataBaseLibs.compiler
+
     implementation cfg.libs.injectLib.core
     kapt cfg.libs.injectLib.compiler
 }
