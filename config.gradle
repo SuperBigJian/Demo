@@ -61,7 +61,8 @@ ext {
             httpLibs    : [
                     "com.squareup.retrofit2:retrofit:2.9.0",
                     "com.squareup.okhttp3:okhttp:${libVersion.okhttp}",
-                    "com.squareup.okhttp3:logging-interceptor:${libVersion.okhttp}"
+                    "com.squareup.okhttp3:logging-interceptor:${libVersion.okhttp}",
+                    "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.8.0"
             ],
             routerLib   : [
                     core    : "com.alibaba:arouter-api:${libVersion.arouter}",

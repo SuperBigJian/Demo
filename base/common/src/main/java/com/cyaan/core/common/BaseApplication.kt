@@ -3,6 +3,8 @@ package com.cyaan.core.common
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
+import android.util.Log
+import com.blankj.utilcode.BuildConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -16,17 +18,11 @@ open class BaseApplication : Application() {
             private set
     }
 
-    var mIsDebug = false
-
     override fun onCreate() {
         super.onCreate()
         set(this)
-        initTimber()
+        Timber.plant(CustomDebugTree())
         scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-    }
-
-    private fun initTimber() {
-        if (mIsDebug) Timber.plant(Timber.DebugTree())
     }
 
     private fun set(baseApplication: BaseApplication) {
@@ -55,5 +51,17 @@ open class BaseApplication : Application() {
                 ActivityController.addActivity(activity)
             }
         })
+    }
+
+    class CustomDebugTree : Timber.DebugTree() {
+        override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
+            if (BuildConfig.DEBUG || Log.isLoggable("Level", Log.DEBUG)) {
+                super.log(priority, tag, message, t)
+            }
+        }
+
+        override fun createStackElementTag(element: StackTraceElement): String {
+            return "${element.fileName}:${element.lineNumber}"
+        }
     }
 }

@@ -14,7 +14,7 @@ class HomeActivity : BaseActivity() {
     }
 
     override fun setListener() {
-        mBinding.wifi.text = R.string.app_name.stringCompat
+//        mBinding.wifi.text = R.string.app_name.stringCompat
         mBinding.back.OnClick { finish() }
         mBinding.wifi.OnClick {
 
