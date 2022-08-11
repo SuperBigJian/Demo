@@ -1,21 +1,24 @@
 package com.cyaan.core.common.di
 
-import com.cyaan.core.common.retrofit.*
+import com.cyaan.core.common.network.*
+import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import retrofit2.Retrofit
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
-    private const val WRITE_TIMEOUT = 10000L
-    private const val READ_TIMEOUT = 10000L
-    private const val CONNECT_TIMEOUT = 10000L
+    const val WRITE_TIMEOUT = 10000L
+    const val READ_TIMEOUT = 10000L
+    const val CONNECT_TIMEOUT = 10000L
 
     @Provides
     @Singleton
@@ -30,39 +33,48 @@ object NetworkModule {
         allowSpecialFloatingPointValues = true //特殊浮点值：允许Double为NaN或无穷大
     }
 
-    @DefaultOkHttpClient
     @Provides
-    @Singleton
-    fun provideDefaultOkHttpClient(): OkHttpClient {
+    fun provideOkHttpClient(): OkHttpClient {
         return OkHttpClient.Builder().apply {
             retryOnConnectionFailure(true)
             writeTimeout(WRITE_TIMEOUT, TimeUnit.MILLISECONDS)
             readTimeout(READ_TIMEOUT, TimeUnit.MILLISECONDS)
             connectTimeout(CONNECT_TIMEOUT, TimeUnit.MILLISECONDS)
             addInterceptor(logInterceptor())
-            addInterceptor(RequestInterceptor())
-            addInterceptor(CommonParamsInterceptor)
             addInterceptor(ResponseInterceptor)
             addInterceptor(OkHttpExceptionInterceptor)
             addInterceptor(NetworkConnectionInterceptor)
         }.build()
     }
 
-    @NoTokenOkHttpClient
     @Provides
     @Singleton
-    fun provideNoTokenOkHttpClient(): OkHttpClient {
-        return OkHttpClient.Builder().apply {
-            retryOnConnectionFailure(true)
-            writeTimeout(WRITE_TIMEOUT, TimeUnit.MILLISECONDS)
-            readTimeout(READ_TIMEOUT, TimeUnit.MILLISECONDS)
-            connectTimeout(CONNECT_TIMEOUT, TimeUnit.MILLISECONDS)
-            addInterceptor(logInterceptor())
-            addInterceptor(RequestInterceptor(false))
-            addInterceptor(CommonParamsInterceptor)
-            addInterceptor(ResponseInterceptor)
-            addInterceptor(OkHttpExceptionInterceptor)
-            addInterceptor(NetworkConnectionInterceptor)
-        }.build()
+    @DefaultRetrofit
+    fun provideRetrofit(jsonParse: Json, okHttpClient: OkHttpClient): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl("")
+            .client(
+                okHttpClient.newBuilder()
+                    .addInterceptor(TokenInterceptor)
+                    .addInterceptor(CommonParamsInterceptor)
+                    .build()
+            )
+            .addConverterFactory(jsonParse.asConverterFactory("application/json".toMediaType()))
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    @NoTokenRetrofit
+    fun provideNoTokenRetrofit(jsonParse: Json, okHttpClient: OkHttpClient): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl("")
+            .client(
+                okHttpClient.newBuilder()
+                    .addInterceptor(CommonParamsInterceptor)
+                    .build()
+            )
+            .addConverterFactory(jsonParse.asConverterFactory("application/json".toMediaType()))
+            .build()
     }
 }

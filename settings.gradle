@@ -29,6 +29,7 @@ dependencyResolutionManagement {
 rootProject.name = "Demo"
 include ':base:common'
 include ':base:commonUI'
-include ':demo_compose'
-include ':demo_hilt'
+include ':module:stock'
+include ':demo:demo_compose'
+include ':demo:demo_hilt'
 include ':app'

@@ -1,4 +1,4 @@
-package com.cyaan.core.common.retrofit
+package com.cyaan.core.common.network
 
 import com.blankj.utilcode.util.NetworkUtils
 import okhttp3.Interceptor
@@ -7,21 +7,18 @@ import okhttp3.logging.HttpLoggingInterceptor
 import timber.log.Timber
 import java.io.IOException
 
-/**
- * Created by N1njaC on 2020/11/13-10:42.
- * Copyright (c) 2020 IFLYTEK CO.,LTD. All rights reserved.
- * Mail:leihuang7@iflytek.com
- */
+fun logInterceptor(): HttpLoggingInterceptor {
+    return HttpLoggingInterceptor { message -> Timber.i("HTTP: $message") }.apply {
+        level = HttpLoggingInterceptor.Level.BODY
+    }
+}
 
-
-class RequestInterceptor(private val mIsNeedToken: Boolean = true) : Interceptor {
+object TokenInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val builder = chain.request().newBuilder()
-        if (mIsNeedToken) {
-            val token = "654654654"
-            builder.addHeader("Authorization", "Bearer $token")
-            Timber.i("RequestInterceptor=====> $token")
-        }
+        val token = "temp"
+        builder.addHeader("Authorization", "Bearer $token")
+        Timber.i("RequestInterceptor=====> $token")
         return chain.proceed(builder.build())
     }
 }
@@ -40,16 +37,10 @@ object CommonParamsInterceptor : Interceptor {
         val currentRequest = chain.request()
         val newUrl = currentRequest.url
             .newBuilder()
-            .addQueryParameter("id", "12")
+//            .addQueryParameter("id", "12")
             .build()
 
         return chain.proceed(currentRequest.newBuilder().url(newUrl).build())
-    }
-}
-
-fun logInterceptor(): HttpLoggingInterceptor {
-    return HttpLoggingInterceptor { message -> Timber.i("HTTP Log:$message") }.apply {
-        level = HttpLoggingInterceptor.Level.BODY
     }
 }
 

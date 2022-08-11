@@ -55,6 +55,7 @@ ext {
             injectLib   : [
                     core    : [
                             "com.google.dagger:hilt-android:${libVersion.hilt}",
+                            "androidx.hilt:hilt-navigation-compose:1.0.0"
                     ],
                     compiler: "com.google.dagger:hilt-android-compiler:${libVersion.hilt}"
             ],

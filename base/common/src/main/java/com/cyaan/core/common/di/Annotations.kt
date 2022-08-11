@@ -4,8 +4,13 @@ import javax.inject.Qualifier
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-annotation class DefaultOkHttpClient
+annotation class DefaultRetrofit
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-annotation class NoTokenOkHttpClient
+annotation class NoTokenRetrofit
+
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class SimpleRetrofit

@@ -2,7 +2,7 @@ package com.cyaan.core.ui.app
 
 import androidx.lifecycle.*
 
-class BaseViewModel : ViewModel() {
+open class BaseViewModel : ViewModel() {
     private val _loadTrigger = MediatorLiveData<Unit>()
     val loadTrigger: LiveData<Unit> get() = _loadTrigger
 

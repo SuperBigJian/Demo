@@ -9,7 +9,7 @@ abstract class BaseActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Timber.i(this.javaClass.simpleName)
+        Timber.i("onCreate: ${this.javaClass.simpleName}")
         initParam(intent)
         initView()
     }
@@ -26,12 +26,12 @@ abstract class BaseActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        Timber.i(this.javaClass.simpleName)
+        Timber.i("onResume: ${this.javaClass.simpleName}")
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        Timber.i(this.javaClass.simpleName)
+        Timber.i("onDestroy: ${this.javaClass.simpleName}")
     }
 
     open fun initParam(intent: Intent?) {}
