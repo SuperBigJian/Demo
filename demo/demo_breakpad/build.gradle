@@ -1,0 +1,36 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
+def cfg = rootProject.ext
+android {
+
+    compileSdk cfg.android.compileSdk
+
+    defaultConfig {
+        applicationId "com.cyaan.demo.breakpad"
+        minSdk cfg.android.minSdk
+        targetSdk cfg.android.targetSdk
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+    implementation project(path: ':base:commonUI')
+    implementation project(path: ':libraries:breakpad')
+}
