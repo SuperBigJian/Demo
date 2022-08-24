@@ -15,8 +15,9 @@ file(GLOB BREAKPAD_SOURCES_COMMON
         ${BREAKPAD_ROOT}/src/client/linux/minidump_writer/linux_dumper.cc
         ${BREAKPAD_ROOT}/src/client/linux/minidump_writer/linux_ptrace_dumper.cc
         ${BREAKPAD_ROOT}/src/client/linux/minidump_writer/minidump_writer.cc
+        ${BREAKPAD_ROOT}/src/client/linux/minidump_writer/pe_file.cc
         ${BREAKPAD_ROOT}/src/client/minidump_file_writer.cc
-        ${BREAKPAD_ROOT}/src/common/convert_UTF.c
+        ${BREAKPAD_ROOT}/src/common/convert_UTF.cc
         ${BREAKPAD_ROOT}/src/common/md5.cc
         ${BREAKPAD_ROOT}/src/common/string_conversion.cc
         ${BREAKPAD_ROOT}/src/common/linux/elfutils.cc
@@ -26,7 +27,7 @@ file(GLOB BREAKPAD_SOURCES_COMMON
         ${BREAKPAD_ROOT}/src/common/linux/memory_mapped_file.cc
         ${BREAKPAD_ROOT}/src/common/linux/safe_readlink.cc)
 
-file(GLOB BREAKPAD_ASM_SOURCE ${BREAKPAD_ROOT}/src/common/android/breakpad_getcontext.S)
+file(GLOB BREAKPAD_ASM_SOURCE ${BREAKPAD_ROOT}/src/common/linux/breakpad_getcontext.S)
 
 set_source_files_properties(${BREAKPAD_ASM_SOURCE} PROPERTIES LANGUAGE C)
 
