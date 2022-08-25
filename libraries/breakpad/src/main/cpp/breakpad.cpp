@@ -23,8 +23,7 @@ bool DumpCallback(const google_breakpad::MinidumpDescriptor &descriptor,
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_cyaan_lib_breakpad_BreakpadDumper_initBreakpadNative(JNIEnv *env, jclass type,
-                                                                jstring path_) {
+Java_com_cyaan_lib_breakpad_BreakpadDumper_initBreakpadNative(JNIEnv *env, jobject type, jstring path_) {
     const char *path = env->GetStringUTFChars(path_, 0);
 
     google_breakpad::MinidumpDescriptor descriptor(path);

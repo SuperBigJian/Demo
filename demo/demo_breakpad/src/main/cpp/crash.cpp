@@ -3,14 +3,14 @@
 
 void crash();
 
-extern "C" JNIEXPORT void JNICALL
-Java_com_wufanguitar_breakpad_MainActivity_crashDump(
-        JNIEnv *env,
-jobject /* this */) {
-crash();
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_cyaan_demo_breakpad_CrashLib_crashDump(JNIEnv *env, jobject thiz) {
+    crash();
 }
 
 void crash() {
     volatile int *a = (int *) NULL;
     *a = 1;
 }
+
