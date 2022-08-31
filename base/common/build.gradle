@@ -2,6 +2,7 @@ plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-kapt'
+    id 'kotlin-parcelize'
     id 'kotlinx-serialization'
     id 'dagger.hilt.android.plugin'
 }
@@ -36,6 +37,8 @@ dependencies {
     api cfg.libs.jsonLibs
     api cfg.libs.httpLibs
     api cfg.libs.otherLibs
+
+    api project(path: ':libraries:breakpad')
 
     api cfg.libs.dataBaseLibs.core
     kapt cfg.libs.dataBaseLibs.compiler

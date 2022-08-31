@@ -1,0 +1,23 @@
+package com.cyaan.javakt
+
+fun main(args: Array<String>) {
+    println("Hello Kotlin")
+
+    val p = test<String, Int>({
+        this.toCharArray().first().code
+    }, "a")
+    println(p)
+
+    getResult<String, Int>({
+        this.toCharArray().first().code
+    }, "a", ::test)
+
+}
+
+fun <A, B> getResult(block: suspend A.() -> B, r: A, m: (block: suspend A.() -> B, r: A) -> Unit) {
+    m.invoke(block, r)
+}
+
+fun <R, T> test(block: suspend R.() -> T, r: R): Unit {
+
+}

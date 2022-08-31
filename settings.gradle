@@ -27,14 +27,18 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "Demo"
-include ':JavaKT'
 
 include ':base:common'
 include ':base:commonUI'
 include ':module:stock'
+include ':libraries:breakpad'
+include ':app'
+
 include ':demo:demo_compose'
 include ':demo:demo_hilt'
 include ':demo:demo_breakpad'
-include ':app'
-include ':libraries:breakpad'
+include ':demo:binder:remote'
+include ':demo:binder:client'
+
+//include ':JavaKT'
 
