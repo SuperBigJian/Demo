@@ -3,6 +3,7 @@ package com.cyaan.demo.binder.remote
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
+import android.util.Log
 import android.util.SparseArray
 import com.cyaan.demo.binder.ITestAidlInterface
 import timber.log.Timber

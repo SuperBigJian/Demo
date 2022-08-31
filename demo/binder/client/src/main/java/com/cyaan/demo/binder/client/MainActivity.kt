@@ -5,7 +5,6 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
@@ -42,7 +41,7 @@ class MainActivity : ComponentActivity() {
 
         override fun onServiceDisconnected(name: ComponentName?) {
             mRemote = null
-            content = "remote disconnect"
+            content = "remote interrupt"
             Timber.d("onServiceDisconnected $name")
         }
     }
@@ -59,11 +58,19 @@ class MainActivity : ComponentActivity() {
                         disconnectRemoteService()
                     }, {
                         val info = UserInfo()
-                        Timber.d(info.toString())
+                        Timber.d("UserManager 1 $info")
                         mRemote?.getInfoById(2, info)
-                        Timber.d(info.toString())
-                        Log.d("chenjian", "onCreate: $info")
-                    })
+                        Timber.d("UserManager 2 $info")
+                        info.id = 1
+                        Timber.d("UserManager 3 $info")
+                        Timber.d("UserManager 4 ${mRemote?.getUserInfo(info)}")
+                        Timber.d("UserManager 5 $info")
+                        info.id = 3
+                        Timber.d("UserManager 6 $info")
+                        Timber.d("UserManager 7 ${mRemote?.getUserInfo2(info)}")
+                        Timber.d("UserManager 8 $info")
+                    }
+                    )
                 }
             }
         }
@@ -81,6 +88,8 @@ class MainActivity : ComponentActivity() {
     private fun disconnectRemoteService() {
         try {
             unbindService(serviceConn)
+            content = "remote disconnect"
+            mRemote = null
         } catch (e: Exception) {
 
         }
@@ -98,7 +107,7 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun DefaultPreview() {
         AppTheme {
-            Greeting({}, {}, {})
+            Greeting()
         }
     }
 }
