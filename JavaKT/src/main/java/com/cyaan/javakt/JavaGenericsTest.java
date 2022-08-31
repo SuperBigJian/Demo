@@ -1,13 +1,13 @@
-package com.cyaan.demo.breakpad;
+package com.cyaan.javakt;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Test {
+public class JavaGenericsTest {
 
     public static void main(String[] args) {
-        Test test = new Test();
+        JavaGenericsTest test = new JavaGenericsTest();
         List<Apple> apples = new ArrayList<>();
         List<Banana> bananas = new ArrayList<>();
         ArrayList<Fruit> fruits = new ArrayList<>();
