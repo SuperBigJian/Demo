@@ -2,7 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.cyaan.demo.binder.client">
 
+    <queries>
+        <package android:name="com.cyaan.demo.binder.remote" />
+    </queries>
+
     <application
+        android:name="com.cyaan.core.common.BaseApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
