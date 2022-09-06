@@ -14,16 +14,17 @@
  *   limitations under the License.
  */
 
+import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
+import com.cyaan.common.configureAndroidCompose
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.getByType
 
-class FirebasePerfConventionPlugin : Plugin<Project> {
+class AndroidComposeConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            pluginManager.findPlugin("com.google.firebase.firebase-perf").apply {
-                version = "1.4.1"
-            }
+            val extension = extensions.getByType<BaseAppModuleExtension>()
+            configureAndroidCompose(extension)
         }
     }
-
 }

@@ -14,25 +14,34 @@
  *   limitations under the License.
  */
 
-import com.android.build.gradle.TestExtension
-import com.cyaan.demo.configureKotlinAndroid
+import com.android.build.gradle.LibraryExtension
+import com.android.builder.model.ViewBindingOptions
+import com.cyaan.common.configureFlavors
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.project
 
-class AndroidTestConventionPlugin : Plugin<Project> {
+class AndroidModuleConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             with(pluginManager) {
-                apply("com.android.test")
-                apply("org.jetbrains.kotlin.android")
+                apply("common.android.library")
+                apply("common.android.hilt")
             }
 
-            extensions.configure<TestExtension> {
-                configureKotlinAndroid(this)
-                defaultConfig.targetSdk = 31
+            ViewBindingOptions {
+                true
+            }
+
+            extensions.configure<LibraryExtension> {
+                configureFlavors(this)
+            }
+
+            dependencies {
+                add("implementation", project(":base:commonUI"))
             }
         }
     }
-
 }

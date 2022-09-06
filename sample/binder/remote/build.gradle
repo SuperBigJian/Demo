@@ -8,7 +8,7 @@ android {
     compileSdkVersion cfg.android.compileSdk
 
     defaultConfig {
-        applicationId "com.cyaan.demo.binder.client"
+        applicationId "com.cyaan.demo.binder.remote"
         minSdk cfg.android.minSdk
         targetSdk cfg.android.targetSdk
         versionCode 1
@@ -34,11 +34,17 @@ android {
         jvmTarget = JavaVersion.VERSION_1_8
     }
     composeOptions {
-        kotlinCompilerExtensionVersion '1.1.1'
+        kotlinCompilerExtensionVersion '1.2.0'
     }
     packagingOptions {
         resources {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
+        }
+    }
+
+    sourceSets {
+        main {
+            java.srcDirs = ['src/main/java', 'src/main/aidl']
         }
     }
 }

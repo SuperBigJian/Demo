@@ -14,19 +14,24 @@
  *   limitations under the License.
  */
 
-import com.android.build.gradle.LibraryExtension
-import com.cyaan.demo.configureAndroidCompose
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.artifacts.VersionCatalogsExtension
+import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByType
 
-class AndroidLibraryComposeConventionPlugin : Plugin<Project> {
+class AndroidHiltConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            pluginManager.apply("com.android.library")
-            val extension = extensions.getByType<LibraryExtension>()
-            configureAndroidCompose(extension)
+            with(pluginManager) {
+                apply("kotlin-kapt")
+                apply("dagger.hilt.android.plugin")
+            }
+            val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
+            dependencies {
+                add("implementation", libs.findLibrary("hilt.android").get())
+                add("kapt", libs.findLibrary("hilt.compiler").get())
+            }
         }
     }
-
 }

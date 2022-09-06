@@ -18,7 +18,7 @@ plugins {
     `kotlin-dsl`
 }
 
-group = "com.cyaan.demo.buildlogic"
+group = "com.cyaan.common.buildlogic"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -28,50 +28,29 @@ java {
 dependencies {
     implementation(libs.android.gradlePlugin)
     implementation(libs.kotlin.gradlePlugin)
-    implementation(libs.spotless.gradlePlugin)
 }
 
 gradlePlugin {
     plugins {
-        register("androidApplicationCompose") {
-            id = "nowinandroid.android.application.compose"
-            implementationClass = "AndroidApplicationComposeConventionPlugin"
-        }
         register("androidApplication") {
-            id = "nowinandroid.android.application"
+            id = "common.android.application"
             implementationClass = "AndroidApplicationConventionPlugin"
         }
-        register("androidApplicationJacoco") {
-            id = "nowinandroid.android.application.jacoco"
-            implementationClass = "AndroidApplicationJacocoConventionPlugin"
+        register("androidCompose") {
+            id = "common.android.compose"
+            implementationClass = "AndroidComposeConventionPlugin"
         }
-        register("androidLibraryCompose") {
-            id = "nowinandroid.android.library.compose"
-            implementationClass = "AndroidLibraryComposeConventionPlugin"
+        register("androidHilt") {
+            id = "common.android.hilt"
+            implementationClass = "AndroidHiltConventionPlugin"
         }
         register("androidLibrary") {
-            id = "nowinandroid.android.library"
+            id = "common.android.library"
             implementationClass = "AndroidLibraryConventionPlugin"
         }
-        register("androidFeature") {
-            id = "nowinandroid.android.feature"
-            implementationClass = "AndroidFeatureConventionPlugin"
-        }
-        register("androidLibraryJacoco") {
-            id = "nowinandroid.android.library.jacoco"
-            implementationClass = "AndroidLibraryJacocoConventionPlugin"
-        }
-        register("androidTest") {
-            id = "nowinandroid.android.test"
-            implementationClass = "AndroidTestConventionPlugin"
-        }
-        register("spotless") {
-            id = "nowinandroid.spotless"
-            implementationClass = "SpotlessConventionPlugin"
-        }
-        register("firebase-perf") {
-            id = "nowinandroid.firebase-perf"
-            implementationClass = "FirebasePerfConventionPlugin"
+        register("androidModule") {
+            id = "common.android.module"
+            implementationClass = "AndroidModuleConventionPlugin"
         }
     }
 }

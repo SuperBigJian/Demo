@@ -33,12 +33,11 @@ include (":module:stock")
 include (":libraries:breakpad")
 include (":app")
 
-include (":app")
-include (":demo:demo_compose")
-include (":demo:demo_hilt")
-include (":demo:demo_breakpad")
-include (":demo:binder:remote")
-include (":demo:binder:client")
+include (":sample:compose")
+include (":sample:hilt")
+include (":sample:breakpad")
+include (":sample:binder:remote")
+include (":sample:binder:client")
 
 //include (":JavaKT")
 
