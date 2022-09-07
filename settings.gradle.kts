@@ -39,5 +39,5 @@ include (":sample:breakpad")
 include (":sample:binder:remote")
 include (":sample:binder:client")
 
-//include (":JavaKT")
+include (":JavaKT")
 

@@ -14,16 +14,18 @@
  *   limitations under the License.
  */
 
+import com.android.build.api.dsl.LibraryExtension
 import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
 import com.cyaan.common.configureAndroidCompose
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.getByType
 
 class AndroidComposeConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            val extension = extensions.getByType<BaseAppModuleExtension>()
+            val extension = extensions.findByType<BaseAppModuleExtension>() ?: extensions.getByType<LibraryExtension>()
             configureAndroidCompose(extension)
         }
     }

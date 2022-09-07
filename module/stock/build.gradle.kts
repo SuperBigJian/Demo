@@ -4,7 +4,7 @@ plugins {
 
 android {
     defaultConfig {
-        applicationId = "com.example.demo"
+        applicationId = "com.cyaan.module.stock"
     }
 
     buildTypes {
@@ -17,4 +17,3 @@ android {
         }
     }
 }
-

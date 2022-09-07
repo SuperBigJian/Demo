@@ -1,16 +1,10 @@
 plugins {
-    id("common.android.application")
+    id("common.android.library")
+    id("common.android.hilt")
+    id("common.android.compose")
 }
-
 android {
-    defaultConfig {
-        applicationId = "com.example.demo"
-    }
-
     buildTypes {
-        val debug by getting {
-            applicationIdSuffix = ".debug"
-        }
         val release by getting {
             isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
@@ -18,3 +12,6 @@ android {
     }
 }
 
+dependencies {
+    api(project(":base:common"))
+}

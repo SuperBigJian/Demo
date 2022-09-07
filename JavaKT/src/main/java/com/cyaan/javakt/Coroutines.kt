@@ -1,5 +1,9 @@
 package com.cyaan.javakt
 
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
+
 fun main(args: Array<String>) {
     println("Hello Kotlin")
 
@@ -12,6 +16,9 @@ fun main(args: Array<String>) {
         this.toCharArray().first().code
     }, "a", ::test)
 
+    GlobalScope.launch {
+
+    }
 }
 
 fun <A, B> getResult(block: suspend A.() -> B, r: A, m: (block: suspend A.() -> B, r: A) -> Unit) {
