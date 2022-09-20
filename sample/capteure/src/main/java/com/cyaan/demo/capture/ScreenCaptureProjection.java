@@ -6,6 +6,7 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.media.projection.MediaProjection;
 import android.util.DisplayMetrics;
+import android.view.Surface;
 import android.view.SurfaceView;
 
 import androidx.annotation.Nullable;
@@ -18,10 +19,7 @@ public class ScreenCaptureProjection {
     private static volatile ScreenCaptureProjection mInstance;
     private MediaProjection mMediaProjection;
     private VirtualDisplay mVirtualDisplay;
-    private SurfaceView mSurfaceView;
     private WeakReference<Activity> mActivity;
-
-
 
     public void startScreenCapture(MediaProjection mediaProjection) {
         mMediaProjection = mediaProjection;
@@ -32,8 +30,8 @@ public class ScreenCaptureProjection {
         mActivity = new WeakReference<>(activity);
     }
 
-    public void initDisplay(SurfaceView surfaceView) {
-        mSurfaceView = surfaceView;
+    public void initDisplay(Surface surface) {
+        mVirtualDisplay.setSurface(surface);
     }
 
     private void createVirtualDisplay() {
@@ -45,7 +43,7 @@ public class ScreenCaptureProjection {
         activity.getWindowManager().getDefaultDisplay().getRealSize(size);
         int screenWidth = size.x;
         int screenHeight = size.y;
-        mVirtualDisplay = mMediaProjection.createVirtualDisplay(ScreenCaptureProjection.class.getSimpleName(), screenWidth, screenHeight, density, DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR, mSurfaceView.getHolder().getSurface(), null, null);
+        mVirtualDisplay = mMediaProjection.createVirtualDisplay(ScreenCaptureProjection.class.getSimpleName(), screenWidth, screenHeight, density, DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR, null, null, null);
         mMediaProjection.registerCallback(mMediaProjectionCallback, null);
     }
 

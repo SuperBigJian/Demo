@@ -1,14 +1,11 @@
 package com.cyaan.demo.capture
 
-import android.content.Intent
 import android.graphics.Color
 import android.media.projection.MediaProjectionManager
-import android.os.Build
 import android.os.Bundle
 import android.view.SurfaceHolder
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import com.cyaan.demo.capture.ScreenCaptureService.Companion.MEDIA_PROJECTION_INTENT
 import com.cyaan.demo.capture.databinding.ActivityMainBinding
 import timber.log.Timber
 import java.util.*
@@ -27,18 +24,8 @@ class MainActivity : AppCompatActivity() {
             ActivityResultContracts.StartActivityForResult()
         ) {
             if (it.resultCode == RESULT_OK) {
-                it.data?.let { projection ->
-                    ScreenCaptureProjection.getInstance().initContext(this)
-                    ScreenCaptureProjection.getInstance().initDisplay(mBinding.display)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        val intent = Intent(this, ScreenCaptureService::class.java)
-                        intent.putExtra(MEDIA_PROJECTION_INTENT, projection)
-                        startForegroundService(intent)
-                    } else {
-                        val mediaProjectionManager = getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
-                        val mediaProjection = mediaProjectionManager.getMediaProjection(RESULT_OK, projection)
-                        ScreenCaptureProjection.getInstance().startScreenCapture(mediaProjection)
-                    }
+                it.data?.let { intent ->
+                    ScreenCaptureManager.startCapture(this, intent)
                 }
             } else if (it.resultCode == RESULT_CANCELED) {
                 Timber.d("screen recorder cancel")
