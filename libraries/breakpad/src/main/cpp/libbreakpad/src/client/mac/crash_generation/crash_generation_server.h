@@ -38,112 +38,114 @@
 
 namespace google_breakpad {
 
-class ClientInfo;
+    class ClientInfo;
 
 // Messages the server can read via its mach port
-enum {
-  kDumpRequestMessage     = 1,
-  kAcknowledgementMessage = 2,
-  kQuitMessage            = 3
-};
+    enum {
+        kDumpRequestMessage = 1,
+        kAcknowledgementMessage = 2,
+        kQuitMessage = 3
+    };
 
 // Exception details sent by the client when requesting a dump.
-struct ExceptionInfo {
-  int32_t exception_type;
-  int32_t exception_code;
-  int32_t exception_subcode;
-};
+    struct ExceptionInfo {
+        int32_t exception_type;
+        int32_t exception_code;
+        int32_t exception_subcode;
+    };
 
-class CrashGenerationServer {
- public:
-  // WARNING: callbacks may be invoked on a different thread
-  // than that which creates the CrashGenerationServer.  They must
-  // be thread safe.
-  typedef void (*OnClientDumpRequestCallback)(void* context,
-                                              const ClientInfo& client_info,
-                                              const std::string& file_path);
+    class CrashGenerationServer {
+    public:
+        // WARNING: callbacks may be invoked on a different thread
+        // than that which creates the CrashGenerationServer.  They must
+        // be thread safe.
+        typedef void (*OnClientDumpRequestCallback)(void *context,
+                                                    const ClientInfo &client_info,
+                                                    const std::string &file_path);
 
-  typedef void (*OnClientExitingCallback)(void* context,
-                                          const ClientInfo& client_info);
-  // If a FilterCallback returns false, the dump will not be written.
-  typedef bool (*FilterCallback)(void* context);
+        typedef void (*OnClientExitingCallback)(void *context,
+                                                const ClientInfo &client_info);
 
-  // Create an instance with the given parameters.
-  //
-  // mach_port_name: Named server port to listen on.
-  // filter: Callback for a client to cancel writing a dump.
-  // filter_context: Context for the filter callback.
-  // dump_callback: Callback for a client crash dump request.
-  // dump_context: Context for client crash dump request callback.
-  // exit_callback: Callback for client process exit.
-  // exit_context: Context for client exit callback.
-  // generate_dumps: Whether to automatically generate dumps.
-  //     Client code of this class might want to generate dumps explicitly
-  //     in the crash dump request callback. In that case, false can be
-  //     passed for this parameter.
-  // dump_path: Path for generating dumps; required only if true is
-  //     passed for generateDumps parameter; NULL can be passed otherwise.
-  CrashGenerationServer(const char* mach_port_name,
-                        FilterCallback filter,
-                        void* filter_context,
-                        OnClientDumpRequestCallback dump_callback,
-                        void* dump_context,
-                        OnClientExitingCallback exit_callback,
-                        void* exit_context,
-                        bool generate_dumps,
-                        const std::string& dump_path);
+        // If a FilterCallback returns false, the dump will not be written.
+        typedef bool (*FilterCallback)(void *context);
 
-  ~CrashGenerationServer();
+        // Create an instance with the given parameters.
+        //
+        // mach_port_name: Named server port to listen on.
+        // filter: Callback for a client to cancel writing a dump.
+        // filter_context: Context for the filter callback.
+        // dump_callback: Callback for a client crash dump request.
+        // dump_context: Context for client crash dump request callback.
+        // exit_callback: Callback for client process exit.
+        // exit_context: Context for client exit callback.
+        // generate_dumps: Whether to automatically generate dumps.
+        //     Client code of this class might want to generate dumps explicitly
+        //     in the crash dump request callback. In that case, false can be
+        //     passed for this parameter.
+        // dump_path: Path for generating dumps; required only if true is
+        //     passed for generateDumps parameter; NULL can be passed otherwise.
+        CrashGenerationServer(const char *mach_port_name,
+                              FilterCallback filter,
+                              void *filter_context,
+                              OnClientDumpRequestCallback dump_callback,
+                              void *dump_context,
+                              OnClientExitingCallback exit_callback,
+                              void *exit_context,
+                              bool generate_dumps,
+                              const std::string &dump_path);
 
-  // Perform initialization steps needed to start listening to clients.
-  //
-  // Return true if initialization is successful; false otherwise.
-  bool Start();
+        ~CrashGenerationServer();
 
-  // Stop the server.
-  bool Stop();
+        // Perform initialization steps needed to start listening to clients.
+        //
+        // Return true if initialization is successful; false otherwise.
+        bool Start();
 
- private:
-  // Return a unique filename at which a minidump can be written.
-  bool MakeMinidumpFilename(std::string& outFilename);
+        // Stop the server.
+        bool Stop();
 
-  // Loop reading client messages and responding to them until
-  // a quit message is received.
-  static void* WaitForMessages(void* server);
+    private:
+        // Return a unique filename at which a minidump can be written.
+        bool MakeMinidumpFilename(std::string &outFilename);
 
-  // Wait for a single client message and respond to it. Returns false
-  // if a quit message was received or if an error occurred.
-  bool WaitForOneMessage();
+        // Loop reading client messages and responding to them until
+        // a quit message is received.
+        static void *WaitForMessages(void *server);
 
-  FilterCallback filter_;
-  void* filter_context_;
+        // Wait for a single client message and respond to it. Returns false
+        // if a quit message was received or if an error occurred.
+        bool WaitForOneMessage();
 
-  OnClientDumpRequestCallback dump_callback_;
-  void* dump_context_;
+        FilterCallback filter_;
+        void *filter_context_;
 
-  OnClientExitingCallback exit_callback_;
-  void* exit_context_;
+        OnClientDumpRequestCallback dump_callback_;
+        void *dump_context_;
 
-  bool generate_dumps_;
+        OnClientExitingCallback exit_callback_;
+        void *exit_context_;
 
-  std::string dump_dir_;
+        bool generate_dumps_;
 
-  bool started_;
+        std::string dump_dir_;
 
-  // The mach port that receives requests to dump from child processes.
-  ReceivePort receive_port_;
+        bool started_;
 
-  // The name of the mach port. Stored so the Stop method can message
-  // the background thread to shut it down.
-  std::string mach_port_name_;
+        // The mach port that receives requests to dump from child processes.
+        ReceivePort receive_port_;
 
-  // The thread that waits on the receive port.
-  pthread_t server_thread_;
+        // The name of the mach port. Stored so the Stop method can message
+        // the background thread to shut it down.
+        std::string mach_port_name_;
 
-  // Disable copy constructor and operator=.
-  CrashGenerationServer(const CrashGenerationServer&);
-  CrashGenerationServer& operator=(const CrashGenerationServer&);
-};
+        // The thread that waits on the receive port.
+        pthread_t server_thread_;
+
+        // Disable copy constructor and operator=.
+        CrashGenerationServer(const CrashGenerationServer &);
+
+        CrashGenerationServer &operator=(const CrashGenerationServer &);
+    };
 
 }  // namespace google_breakpad
 

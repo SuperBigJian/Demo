@@ -34,7 +34,7 @@
 
 namespace google_breakpad {
 
-const int MESSAGE_MAX = 1000;
+    const int MESSAGE_MAX = 1000;
 
 // Message output macros.
 // snprintf doesn't operate heap on Solaris, while printf and fprintf do.

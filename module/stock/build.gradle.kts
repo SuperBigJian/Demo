@@ -1,15 +1,13 @@
 plugins {
-    id("common.android.application")
+    id("common.android.module")
 }
 
 android {
-    defaultConfig {
-        applicationId = "com.cyaan.module.stock"
-    }
+
 
     buildTypes {
         val debug by getting {
-            applicationIdSuffix = ".debug"
+
         }
         val release by getting {
             isMinifyEnabled = true

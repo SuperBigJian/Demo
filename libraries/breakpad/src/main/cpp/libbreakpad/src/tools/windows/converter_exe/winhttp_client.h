@@ -33,7 +33,7 @@
 
 namespace crash {
 
-HttpClient* CreateWinHttpClient(const TCHAR* url);
+    HttpClient *CreateWinHttpClient(const TCHAR *url);
 
 }  // namespace crash
 

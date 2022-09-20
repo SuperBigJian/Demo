@@ -43,7 +43,7 @@ extern "C" {
 #endif  // __cplusplus
 
 // Provided by src/common/linux/breakpad_getcontext.S
-int breakpad_getcontext(ucontext_t* ucp);
+int breakpad_getcontext(ucontext_t *ucp);
 
 #define getcontext(x)   breakpad_getcontext(x)
 

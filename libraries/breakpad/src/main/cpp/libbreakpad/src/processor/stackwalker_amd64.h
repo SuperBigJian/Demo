@@ -48,63 +48,64 @@
 
 namespace google_breakpad {
 
-class CodeModules;
+    class CodeModules;
 
-class StackwalkerAMD64 : public Stackwalker {
- public:
-  // context is a amd64 context object that gives access to amd64-specific
-  // register state corresponding to the innermost called frame to be
-  // included in the stack.  The other arguments are passed directly through
-  // to the base Stackwalker constructor.
-  StackwalkerAMD64(const SystemInfo* system_info,
-                   const MDRawContextAMD64* context,
-                   MemoryRegion* memory,
-                   const CodeModules* modules,
-                   StackFrameSymbolizer* frame_symbolizer);
+    class StackwalkerAMD64 : public Stackwalker {
+    public:
+        // context is a amd64 context object that gives access to amd64-specific
+        // register state corresponding to the innermost called frame to be
+        // included in the stack.  The other arguments are passed directly through
+        // to the base Stackwalker constructor.
+        StackwalkerAMD64(const SystemInfo *system_info,
+                         const MDRawContextAMD64 *context,
+                         MemoryRegion *memory,
+                         const CodeModules *modules,
+                         StackFrameSymbolizer *frame_symbolizer);
 
- private:
-  // A STACK CFI-driven frame walker for the AMD64
-  typedef SimpleCFIWalker<uint64_t, MDRawContextAMD64> CFIWalker;
+    private:
+        // A STACK CFI-driven frame walker for the AMD64
+        typedef SimpleCFIWalker <uint64_t, MDRawContextAMD64> CFIWalker;
 
-  // Implementation of Stackwalker, using amd64 context (stack pointer in %rsp,
-  // stack base in %rbp) and stack conventions (saved stack pointer at 0(%rbp))
-  virtual StackFrame* GetContextFrame();
-  virtual StackFrame* GetCallerFrame(const CallStack* stack,
-                                     bool stack_scan_allowed);
+        // Implementation of Stackwalker, using amd64 context (stack pointer in %rsp,
+        // stack base in %rbp) and stack conventions (saved stack pointer at 0(%rbp))
+        virtual StackFrame *GetContextFrame();
 
-  // Use cfi_frame_info (derived from STACK CFI records) to construct
-  // the frame that called frames.back(). The caller takes ownership
-  // of the returned frame. Return NULL on failure.
-  StackFrameAMD64* GetCallerByCFIFrameInfo(const vector<StackFrame*>& frames,
-                                           CFIFrameInfo* cfi_frame_info);
+        virtual StackFrame *GetCallerFrame(const CallStack *stack,
+                                           bool stack_scan_allowed);
 
-  // Assumes a traditional frame layout where the frame pointer has not been
-  // omitted. The expectation is that caller's %rbp is pushed to the stack
-  // after the return address of the callee, and that the callee's %rsp can
-  // be used to find the pushed %rbp.
-  // Caller owns the returned frame object. Returns NULL on failure.
-  StackFrameAMD64* GetCallerByFramePointerRecovery(
-      const vector<StackFrame*>& frames);
+        // Use cfi_frame_info (derived from STACK CFI records) to construct
+        // the frame that called frames.back(). The caller takes ownership
+        // of the returned frame. Return NULL on failure.
+        StackFrameAMD64 *GetCallerByCFIFrameInfo(const vector<StackFrame *> &frames,
+                                                 CFIFrameInfo *cfi_frame_info);
 
-  // Scan the stack for plausible return addresses. The caller takes ownership
-  // of the returned frame. Return NULL on failure.
-  StackFrameAMD64* GetCallerByStackScan(const vector<StackFrame*>& frames);
+        // Assumes a traditional frame layout where the frame pointer has not been
+        // omitted. The expectation is that caller's %rbp is pushed to the stack
+        // after the return address of the callee, and that the callee's %rsp can
+        // be used to find the pushed %rbp.
+        // Caller owns the returned frame object. Returns NULL on failure.
+        StackFrameAMD64 *GetCallerByFramePointerRecovery(
+                const vector<StackFrame *> &frames);
 
-  // Trying to simulate a return. The caller takes ownership of the returned
-  // frame. Return NULL on failure.
-  StackFrameAMD64* GetCallerBySimulatingReturn(
-      const vector<StackFrame*>& frames);
+        // Scan the stack for plausible return addresses. The caller takes ownership
+        // of the returned frame. Return NULL on failure.
+        StackFrameAMD64 *GetCallerByStackScan(const vector<StackFrame *> &frames);
 
-  // Stores the CPU context corresponding to the innermost stack frame to
-  // be returned by GetContextFrame.
-  const MDRawContextAMD64* context_;
+        // Trying to simulate a return. The caller takes ownership of the returned
+        // frame. Return NULL on failure.
+        StackFrameAMD64 *GetCallerBySimulatingReturn(
+                const vector<StackFrame *> &frames);
 
-  // Our register map, for cfi_walker_.
-  static const CFIWalker::RegisterSet cfi_register_map_[];
+        // Stores the CPU context corresponding to the innermost stack frame to
+        // be returned by GetContextFrame.
+        const MDRawContextAMD64 *context_;
 
-  // Our CFI frame walker.
-  const CFIWalker cfi_walker_;
-};
+        // Our register map, for cfi_walker_.
+        static const CFIWalker::RegisterSet cfi_register_map_[];
+
+        // Our CFI frame walker.
+        const CFIWalker cfi_walker_;
+    };
 
 
 }  // namespace google_breakpad

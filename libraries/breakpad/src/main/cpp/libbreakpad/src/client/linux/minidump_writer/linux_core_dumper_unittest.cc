@@ -39,154 +39,282 @@
 
 using namespace google_breakpad;
 
-TEST(LinuxCoreDumperTest, GetMappingAbsolutePath) {
-  const LinuxCoreDumper dumper(getpid(), "core", "/tmp", "/mnt/root");
-  const MappingInfo mapping = {0, 0, {0, 0}, 0, false, "/usr/lib/libc.so"};
+TEST(LinuxCoreDumperTest, GetMappingAbsolutePath
+) {
+const LinuxCoreDumper dumper(getpid(), "core", "/tmp", "/mnt/root");
+const MappingInfo mapping = {0, 0, {0, 0}, 0, false, "/usr/lib/libc.so"};
 
-  char path[PATH_MAX];
-  dumper.GetMappingAbsolutePath(mapping, path);
+char path[PATH_MAX];
+dumper.
+GetMappingAbsolutePath(mapping, path
+);
 
-  EXPECT_STREQ("/mnt/root/usr/lib/libc.so", path);
+EXPECT_STREQ("/mnt/root/usr/lib/libc.so", path);
 }
 
-TEST(LinuxCoreDumperTest, BuildProcPath) {
-  const pid_t pid = getpid();
-  const char procfs_path[] = "/procfs_copy";
-  LinuxCoreDumper dumper(getpid(), "core_file", procfs_path);
+TEST(LinuxCoreDumperTest, BuildProcPath
+) {
+const pid_t pid = getpid();
+const char procfs_path[] = "/procfs_copy";
+LinuxCoreDumper dumper(getpid(), "core_file", procfs_path);
 
-  char maps_path[NAME_MAX] = "";
-  char maps_path_expected[NAME_MAX];
-  snprintf(maps_path_expected, sizeof(maps_path_expected),
-           "%s/maps", procfs_path);
-  EXPECT_TRUE(dumper.BuildProcPath(maps_path, pid, "maps"));
-  EXPECT_STREQ(maps_path_expected, maps_path);
+char maps_path[NAME_MAX] = "";
+char maps_path_expected[NAME_MAX];
+snprintf(maps_path_expected,
+sizeof(maps_path_expected),
+"%s/maps", procfs_path);
+EXPECT_TRUE(dumper
+.
+BuildProcPath(maps_path, pid,
+"maps"));
+EXPECT_STREQ(maps_path_expected, maps_path
+);
 
-  EXPECT_FALSE(dumper.BuildProcPath(NULL, pid, "maps"));
-  EXPECT_FALSE(dumper.BuildProcPath(maps_path, pid, ""));
-  EXPECT_FALSE(dumper.BuildProcPath(maps_path, pid, NULL));
+EXPECT_FALSE(dumper
+.
+BuildProcPath(NULL, pid,
+"maps"));
+EXPECT_FALSE(dumper
+.
+BuildProcPath(maps_path, pid,
+""));
+EXPECT_FALSE(dumper
+.
+BuildProcPath(maps_path, pid, NULL
+));
 
-  char long_node[NAME_MAX];
-  size_t long_node_len = NAME_MAX - strlen(procfs_path) - 1;
-  memset(long_node, 'a', long_node_len);
-  long_node[long_node_len] = '\0';
-  EXPECT_FALSE(dumper.BuildProcPath(maps_path, pid, long_node));
+char long_node[NAME_MAX];
+size_t long_node_len = NAME_MAX - strlen(procfs_path) - 1;
+memset(long_node,
+'a', long_node_len);
+long_node[long_node_len] = '\0';
+EXPECT_FALSE(dumper
+.
+BuildProcPath(maps_path, pid, long_node
+));
 }
 
-TEST(LinuxCoreDumperTest, VerifyDumpWithMultipleThreads) {
-  CrashGenerator crash_generator;
-  if (!crash_generator.HasDefaultCorePattern()) {
-    fprintf(stderr, "LinuxCoreDumperTest.VerifyDumpWithMultipleThreads test "
-            "is skipped due to non-default core pattern\n");
-    return;
-  }
+TEST(LinuxCoreDumperTest, VerifyDumpWithMultipleThreads
+) {
+CrashGenerator crash_generator;
+if (!crash_generator.
 
-  const unsigned kNumOfThreads = 3;
-  const unsigned kCrashThread = 1;
-  const int kCrashSignal = SIGABRT;
-  pid_t child_pid;
-  ASSERT_TRUE(crash_generator.CreateChildCrash(kNumOfThreads, kCrashThread,
-                                               kCrashSignal, &child_pid));
+HasDefaultCorePattern()
 
-  const string core_file = crash_generator.GetCoreFilePath();
-  const string procfs_path = crash_generator.GetDirectoryOfProcFilesCopy();
+) {
+fprintf(stderr,
+"LinuxCoreDumperTest.VerifyDumpWithMultipleThreads test "
+"is skipped due to non-default core pattern\n");
+return;
+}
+
+const unsigned kNumOfThreads = 3;
+const unsigned kCrashThread = 1;
+const int kCrashSignal = SIGABRT;
+pid_t child_pid;
+ASSERT_TRUE(crash_generator
+.
+CreateChildCrash(kNumOfThreads, kCrashThread,
+        kCrashSignal, &child_pid
+));
+
+const string core_file = crash_generator.GetCoreFilePath();
+const string procfs_path = crash_generator.GetDirectoryOfProcFilesCopy();
 
 #if defined(__ANDROID__)
-  struct stat st;
-  if (stat(core_file.c_str(), &st) != 0) {
-    fprintf(stderr, "LinuxCoreDumperTest.VerifyDumpWithMultipleThreads test is "
-            "skipped due to no core file being generated\n");
-    return;
-  }
+struct stat st;
+if (stat(core_file.c_str(), &st) != 0) {
+  fprintf(stderr, "LinuxCoreDumperTest.VerifyDumpWithMultipleThreads test is "
+          "skipped due to no core file being generated\n");
+  return;
+}
 #endif
 
-  LinuxCoreDumper dumper(child_pid, core_file.c_str(), procfs_path.c_str());
+LinuxCoreDumper dumper(child_pid, core_file.c_str(), procfs_path.c_str());
 
-  EXPECT_TRUE(dumper.Init());
+EXPECT_TRUE(dumper
+.
 
-  EXPECT_TRUE(dumper.IsPostMortem());
+Init()
 
-  // These are no-ops and should always return true.
-  EXPECT_TRUE(dumper.ThreadsSuspend());
-  EXPECT_TRUE(dumper.ThreadsResume());
+);
 
-  // Linux does not set the crash address with SIGABRT, so make sure it always
-  // sets the crash address to 0.
-  EXPECT_EQ(0U, dumper.crash_address());
-  EXPECT_EQ(kCrashSignal, dumper.crash_signal());
-  EXPECT_EQ(crash_generator.GetThreadId(kCrashThread),
-            dumper.crash_thread());
+EXPECT_TRUE(dumper
+.
+
+IsPostMortem()
+
+);
+
+// These are no-ops and should always return true.
+EXPECT_TRUE(dumper
+.
+
+ThreadsSuspend()
+
+);
+EXPECT_TRUE(dumper
+.
+
+ThreadsResume()
+
+);
+
+// Linux does not set the crash address with SIGABRT, so make sure it always
+// sets the crash address to 0.
+EXPECT_EQ(0U, dumper.
+
+crash_address()
+
+);
+EXPECT_EQ(kCrashSignal, dumper
+.
+
+crash_signal()
+
+);
+EXPECT_EQ(crash_generator
+.
+GetThreadId(kCrashThread),
+        dumper
+.
+
+crash_thread()
+
+);
 
 #if defined(THREAD_SANITIZER)
-  EXPECT_GE(dumper.threads().size(), kNumOfThreads);
+EXPECT_GE(dumper.threads().size(), kNumOfThreads);
 #else
-  EXPECT_EQ(dumper.threads().size(), kNumOfThreads);
+EXPECT_EQ(dumper
+.
+
+threads()
+
+.
+
+size(), kNumOfThreads
+
+);
 #endif
-  for (unsigned i = 0; i < kNumOfThreads; ++i) {
-    ThreadInfo info;
-    EXPECT_TRUE(dumper.GetThreadInfoByIndex(i, &info));
-    const void* stack;
-    size_t stack_len;
-    EXPECT_TRUE(dumper.GetStackInfo(&stack, &stack_len, info.stack_pointer));
-    EXPECT_EQ(getpid(), info.ppid);
-  }
+for (
+unsigned i = 0;
+i<kNumOfThreads;
+++i) {
+ThreadInfo info;
+EXPECT_TRUE(dumper
+.
+GetThreadInfoByIndex(i, &info
+));
+const void *stack;
+size_t stack_len;
+EXPECT_TRUE(dumper
+.
+GetStackInfo(&stack, &stack_len, info
+.stack_pointer));
+
+EXPECT_EQ(getpid(), info
+
+.ppid);
+}
 }
 
-TEST(LinuxCoreDumperTest, VerifyExceptionDetails) {
-  CrashGenerator crash_generator;
-  if (!crash_generator.HasDefaultCorePattern()) {
-    fprintf(stderr, "LinuxCoreDumperTest.VerifyDumpWithMultipleThreads test "
-            "is skipped due to non-default core pattern\n");
-    return;
-  }
+TEST(LinuxCoreDumperTest, VerifyExceptionDetails
+) {
+CrashGenerator crash_generator;
+if (!crash_generator.
+
+HasDefaultCorePattern()
+
+) {
+fprintf(stderr,
+"LinuxCoreDumperTest.VerifyDumpWithMultipleThreads test "
+"is skipped due to non-default core pattern\n");
+return;
+}
 
 #ifndef si_syscall
-  fprintf(stderr, "LinuxCoreDumperTest.VerifyDumpWithMultipleThreads test is "
-          "skipped due to old kernel/C library headers\n");
+fprintf(stderr,
+"LinuxCoreDumperTest.VerifyDumpWithMultipleThreads test is "
+"skipped due to old kernel/C library headers\n");
+return;
+#endif
+
+const unsigned kNumOfThreads = 2;
+const unsigned kCrashThread = 1;
+const int kCrashSignal = SIGSYS;
+pid_t child_pid;
+ASSERT_TRUE(crash_generator
+.
+CreateChildCrash(kNumOfThreads, kCrashThread,
+        kCrashSignal, &child_pid
+));
+
+const string core_file = crash_generator.GetCoreFilePath();
+const string procfs_path = crash_generator.GetDirectoryOfProcFilesCopy();
+
+#if defined(__ANDROID__)
+struct stat st;
+if (stat(core_file.c_str(), &st) != 0) {
+  fprintf(stderr, "LinuxCoreDumperTest.VerifyExceptionDetails test is "
+          "skipped due to no core file being generated\n");
   return;
+}
 #endif
 
-  const unsigned kNumOfThreads = 2;
-  const unsigned kCrashThread = 1;
-  const int kCrashSignal = SIGSYS;
-  pid_t child_pid;
-  ASSERT_TRUE(crash_generator.CreateChildCrash(kNumOfThreads, kCrashThread,
-                                               kCrashSignal, &child_pid));
+LinuxCoreDumper dumper(child_pid, core_file.c_str(), procfs_path.c_str());
 
-  const string core_file = crash_generator.GetCoreFilePath();
-  const string procfs_path = crash_generator.GetDirectoryOfProcFilesCopy();
+EXPECT_TRUE(dumper
+.
+
+Init()
+
+);
+
+EXPECT_TRUE(dumper
+.
+
+IsPostMortem()
+
+);
 
 #if defined(__ANDROID__)
-  struct stat st;
-  if (stat(core_file.c_str(), &st) != 0) {
-    fprintf(stderr, "LinuxCoreDumperTest.VerifyExceptionDetails test is "
-            "skipped due to no core file being generated\n");
-    return;
-  }
+// TODO: For some reason, Android doesn't seem to pass this.
+if (!dumper.crash_address()) {
+  fprintf(stderr, "LinuxCoreDumperTest.VerifyExceptionDetails test is "
+          "skipped due to missing signal details on Android\n");
+  return;
+}
 #endif
 
-  LinuxCoreDumper dumper(child_pid, core_file.c_str(), procfs_path.c_str());
+// Check the exception details.
+EXPECT_NE(0U, dumper.
 
-  EXPECT_TRUE(dumper.Init());
+crash_address()
 
-  EXPECT_TRUE(dumper.IsPostMortem());
+);
+EXPECT_EQ(kCrashSignal, dumper
+.
 
-#if defined(__ANDROID__)
-  // TODO: For some reason, Android doesn't seem to pass this.
-  if (!dumper.crash_address()) {
-    fprintf(stderr, "LinuxCoreDumperTest.VerifyExceptionDetails test is "
-            "skipped due to missing signal details on Android\n");
-    return;
-  }
-#endif
+crash_signal()
 
-  // Check the exception details.
-  EXPECT_NE(0U, dumper.crash_address());
-  EXPECT_EQ(kCrashSignal, dumper.crash_signal());
-  EXPECT_EQ(crash_generator.GetThreadId(kCrashThread),
-            dumper.crash_thread());
+);
+EXPECT_EQ(crash_generator
+.
+GetThreadId(kCrashThread),
+        dumper
+.
 
-  // We check the length, but not the actual fields.  We sent SIGSYS ourselves
-  // instead of the kernel, so the extended fields are garbage.
-  const std::vector<uint64_t> info(dumper.crash_exception_info());
-  EXPECT_EQ(2U, info.size());
+crash_thread()
+
+);
+
+// We check the length, but not the actual fields.  We sent SIGSYS ourselves
+// instead of the kernel, so the extended fields are garbage.
+const std::vector <uint64_t> info(dumper.crash_exception_info());
+EXPECT_EQ(2U, info.
+
+size()
+
+);
 }

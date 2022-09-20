@@ -33,138 +33,143 @@
 #import "encoding_util.h"
 
 @interface HTTPMultipartUpload (PrivateMethods)
-- (NSString*)multipartBoundary;
+- (NSString *)multipartBoundary;
+
 // Each of the following methods will append the starting multipart boundary,
 // but not the ending one.
-- (NSData*)formDataForKey:(NSString*)key value:(NSString*)value;
-- (NSData*)formDataForFileContents:(NSData*)contents name:(NSString*)name;
-- (NSData*)formDataForFile:(NSString*)file name:(NSString*)name;
+- (NSData *)formDataForKey:(NSString *)key value:(NSString *)value;
+
+- (NSData *)formDataForFileContents:(NSData *)contents name:(NSString *)name;
+
+- (NSData *)formDataForFile:(NSString *)file name:(NSString *)name;
 @end
 
 @implementation HTTPMultipartUpload
 //=============================================================================
 #pragma mark -
 #pragma mark || Private ||
+
 //=============================================================================
-- (NSString*)multipartBoundary {
-  // The boundary has 27 '-' characters followed by 16 hex digits
-  return [NSString
-      stringWithFormat:@"---------------------------%08X%08X", rand(), rand()];
+- (NSString *)multipartBoundary {
+    // The boundary has 27 '-' characters followed by 16 hex digits
+    return [NSString
+            stringWithFormat:@"---------------------------%08X%08X", rand(), rand()];
 }
 
 //=============================================================================
-- (NSData*)formDataForKey:(NSString*)key value:(NSString*)value {
-  NSMutableData* data = [NSMutableData data];
-  [self appendBoundaryData:data];
+- (NSData *)formDataForKey:(NSString *)key value:(NSString *)value {
+    NSMutableData *data = [NSMutableData data];
+    [self appendBoundaryData:data];
 
-  NSString* escaped = PercentEncodeNSString(key);
-  NSString* fmt = @"Content-Disposition: form-data; name=\"%@\"\r\n\r\n%@\r\n";
-  NSString *form = [NSString stringWithFormat:fmt, escaped, value];
+    NSString *escaped = PercentEncodeNSString(key);
+    NSString *fmt = @"Content-Disposition: form-data; name=\"%@\"\r\n\r\n%@\r\n";
+    NSString *form = [NSString stringWithFormat:fmt, escaped, value];
 
-  [data appendData:[form dataUsingEncoding:NSUTF8StringEncoding]];
-  return data;
+    [data appendData:[form dataUsingEncoding:NSUTF8StringEncoding]];
+    return data;
 }
 
 //=============================================================================
-- (void)appendBoundaryData:(NSMutableData*)data {
-  NSString* fmt = @"--%@\r\n";
-  NSString* pre = [NSString stringWithFormat:fmt, boundary_];
+- (void)appendBoundaryData:(NSMutableData *)data {
+    NSString *fmt = @"--%@\r\n";
+    NSString *pre = [NSString stringWithFormat:fmt, boundary_];
 
-  [data appendData:[pre dataUsingEncoding:NSUTF8StringEncoding]];
+    [data appendData:[pre dataUsingEncoding:NSUTF8StringEncoding]];
 }
 
 //=============================================================================
 #pragma mark -
 #pragma mark || Public ||
-//=============================================================================
-- (id)initWithURL:(NSURL*)url {
-  if ((self = [super initWithURL:url])) {
-    boundary_ = [[self multipartBoundary] retain];
-    files_ = [[NSMutableDictionary alloc] init];
-  }
 
-  return self;
+//=============================================================================
+- (id)initWithURL:(NSURL *)url {
+    if ((self = [super initWithURL:url])) {
+        boundary_ = [[self multipartBoundary] retain];
+        files_ = [[NSMutableDictionary alloc] init];
+    }
+
+    return self;
 }
 
 //=============================================================================
 - (void)dealloc {
-  [parameters_ release];
-  [files_ release];
-  [boundary_ release];
-
-  [super dealloc];
-}
-
-//=============================================================================
-- (void)setParameters:(NSDictionary*)parameters {
-  if (parameters != parameters_) {
     [parameters_ release];
-    parameters_ = [parameters copy];
-  }
+    [files_ release];
+    [boundary_ release];
+
+    [super dealloc];
 }
 
 //=============================================================================
-- (NSDictionary*)parameters {
-  return parameters_;
+- (void)setParameters:(NSDictionary *)parameters {
+    if (parameters != parameters_) {
+        [parameters_ release];
+        parameters_ = [parameters copy];
+    }
 }
 
 //=============================================================================
-- (void)addFileAtPath:(NSString*)path name:(NSString*)name {
-  [files_ setObject:path forKey:name];
+- (NSDictionary *)parameters {
+    return parameters_;
 }
 
 //=============================================================================
-- (void)addFileContents:(NSData*)data name:(NSString*)name {
-  [files_ setObject:data forKey:name];
+- (void)addFileAtPath:(NSString *)path name:(NSString *)name {
+    [files_ setObject:path forKey:name];
 }
 
 //=============================================================================
-- (NSDictionary*)files {
-  return files_;
+- (void)addFileContents:(NSData *)data name:(NSString *)name {
+    [files_ setObject:data forKey:name];
 }
 
 //=============================================================================
-- (NSString*)HTTPMethod {
-  return @"POST";
+- (NSDictionary *)files {
+    return files_;
 }
 
 //=============================================================================
-- (NSString*)contentType {
-  return [NSString
-      stringWithFormat:@"multipart/form-data; boundary=%@", boundary_];
+- (NSString *)HTTPMethod {
+    return @"POST";
 }
 
 //=============================================================================
-- (NSData*)bodyData {
-  NSMutableData* postBody = [NSMutableData data];
+- (NSString *)contentType {
+    return [NSString
+            stringWithFormat:@"multipart/form-data; boundary=%@", boundary_];
+}
 
-  // Add any parameters to the message
-  NSArray* parameterKeys = [parameters_ allKeys];
-  NSString* key;
+//=============================================================================
+- (NSData *)bodyData {
+    NSMutableData *postBody = [NSMutableData data];
 
-  NSInteger count = [parameterKeys count];
-  for (NSInteger i = 0; i < count; ++i) {
-    key = [parameterKeys objectAtIndex:i];
-    [postBody appendData:[self formDataForKey:key
-                                        value:[parameters_ objectForKey:key]]];
-  }
+    // Add any parameters to the message
+    NSArray *parameterKeys = [parameters_ allKeys];
+    NSString *key;
 
-  // Add any files to the message
-  NSArray* fileNames = [files_ allKeys];
-  for (NSString* name in fileNames) {
-    // First append boundary
-    [self appendBoundaryData:postBody];
-    // Then the formdata
-    id fileOrData = [files_ objectForKey:name];
-    [HTTPRequest appendFileToBodyData:postBody
-                             withName:name
-                       withFileOrData:fileOrData];
-  }
+    NSInteger count = [parameterKeys count];
+    for (NSInteger i = 0; i < count; ++i) {
+        key = [parameterKeys objectAtIndex:i];
+        [postBody appendData:[self formDataForKey:key
+                                            value:[parameters_ objectForKey:key]]];
+    }
 
-  NSString* epilogue = [NSString stringWithFormat:@"\r\n--%@--\r\n", boundary_];
-  [postBody appendData:[epilogue dataUsingEncoding:NSUTF8StringEncoding]];
+    // Add any files to the message
+    NSArray *fileNames = [files_ allKeys];
+    for (NSString *name in fileNames) {
+        // First append boundary
+        [self appendBoundaryData:postBody];
+        // Then the formdata
+        id fileOrData = [files_ objectForKey:name];
+        [HTTPRequest appendFileToBodyData:postBody
+                                 withName:name
+                           withFileOrData:fileOrData];
+    }
 
-  return postBody;
+    NSString *epilogue = [NSString stringWithFormat:@"\r\n--%@--\r\n", boundary_];
+    [postBody appendData:[epilogue dataUsingEncoding:NSUTF8StringEncoding]];
+
+    return postBody;
 }
 
 @end

@@ -46,59 +46,60 @@
 
 namespace google_breakpad {
 
-class CodeModules;
+    class CodeModules;
 
-class StackwalkerARM : public Stackwalker {
- public:
-  // context is an arm context object that gives access to arm-specific
-  // register state corresponding to the innermost called frame to be
-  // included in the stack.  The other arguments are passed directly through
-  // to the base Stackwalker constructor.
-  StackwalkerARM(const SystemInfo* system_info,
-                 const MDRawContextARM* context,
-                 int fp_register,
-                 MemoryRegion* memory,
-                 const CodeModules* modules,
-                 StackFrameSymbolizer* frame_symbolizer);
+    class StackwalkerARM : public Stackwalker {
+    public:
+        // context is an arm context object that gives access to arm-specific
+        // register state corresponding to the innermost called frame to be
+        // included in the stack.  The other arguments are passed directly through
+        // to the base Stackwalker constructor.
+        StackwalkerARM(const SystemInfo *system_info,
+                       const MDRawContextARM *context,
+                       int fp_register,
+                       MemoryRegion *memory,
+                       const CodeModules *modules,
+                       StackFrameSymbolizer *frame_symbolizer);
 
-  // Change the context validity mask of the frame returned by
-  // GetContextFrame to VALID. This is only for use by unit tests; the
-  // default behavior is correct for all application code.
-  void SetContextFrameValidity(int valid) { context_frame_validity_ = valid; }
+        // Change the context validity mask of the frame returned by
+        // GetContextFrame to VALID. This is only for use by unit tests; the
+        // default behavior is correct for all application code.
+        void SetContextFrameValidity(int valid) { context_frame_validity_ = valid; }
 
- private:
-  // Implementation of Stackwalker, using arm context and stack conventions.
-  virtual StackFrame* GetContextFrame();
-  virtual StackFrame* GetCallerFrame(const CallStack* stack,
-                                     bool stack_scan_allowed);
+    private:
+        // Implementation of Stackwalker, using arm context and stack conventions.
+        virtual StackFrame *GetContextFrame();
 
-  // Use cfi_frame_info (derived from STACK CFI records) to construct
-  // the frame that called frames.back(). The caller takes ownership
-  // of the returned frame. Return NULL on failure.
-  StackFrameARM* GetCallerByCFIFrameInfo(const vector<StackFrame*>& frames,
-                                         CFIFrameInfo* cfi_frame_info);
+        virtual StackFrame *GetCallerFrame(const CallStack *stack,
+                                           bool stack_scan_allowed);
 
-  // Use the frame pointer. The caller takes ownership of the returned frame.
-  // Return NULL on failure.
-  StackFrameARM* GetCallerByFramePointer(const vector<StackFrame*>& frames);
+        // Use cfi_frame_info (derived from STACK CFI records) to construct
+        // the frame that called frames.back(). The caller takes ownership
+        // of the returned frame. Return NULL on failure.
+        StackFrameARM *GetCallerByCFIFrameInfo(const vector<StackFrame *> &frames,
+                                               CFIFrameInfo *cfi_frame_info);
 
-  // Scan the stack for plausible return addresses. The caller takes ownership
-  // of the returned frame. Return NULL on failure.
-  StackFrameARM* GetCallerByStackScan(const vector<StackFrame*>& frames);
+        // Use the frame pointer. The caller takes ownership of the returned frame.
+        // Return NULL on failure.
+        StackFrameARM *GetCallerByFramePointer(const vector<StackFrame *> &frames);
 
-  // Stores the CPU context corresponding to the youngest stack frame, to
-  // be returned by GetContextFrame.
-  const MDRawContextARM* context_;
+        // Scan the stack for plausible return addresses. The caller takes ownership
+        // of the returned frame. Return NULL on failure.
+        StackFrameARM *GetCallerByStackScan(const vector<StackFrame *> &frames);
 
-  // The register to use a as frame pointer. The value is -1 if frame pointer
-  // cannot be used.
-  int fp_register_;
+        // Stores the CPU context corresponding to the youngest stack frame, to
+        // be returned by GetContextFrame.
+        const MDRawContextARM *context_;
 
-  // Validity mask for youngest stack frame. This is always
-  // CONTEXT_VALID_ALL in real use; it is only changeable for the sake of
-  // unit tests.
-  int context_frame_validity_;
-};
+        // The register to use a as frame pointer. The value is -1 if frame pointer
+        // cannot be used.
+        int fp_register_;
+
+        // Validity mask for youngest stack frame. This is always
+        // CONTEXT_VALID_ALL in real use; it is only changeable for the sake of
+        // unit tests.
+        int context_frame_validity_;
+    };
 
 
 }  // namespace google_breakpad

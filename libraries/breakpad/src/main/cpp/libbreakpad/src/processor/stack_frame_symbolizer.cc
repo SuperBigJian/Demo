@@ -48,99 +48,99 @@
 
 namespace google_breakpad {
 
-StackFrameSymbolizer::StackFrameSymbolizer(
-    SymbolSupplier* supplier,
-    SourceLineResolverInterface* resolver) : supplier_(supplier),
-                                             resolver_(resolver) { }
+    StackFrameSymbolizer::StackFrameSymbolizer(
+            SymbolSupplier *supplier,
+            SourceLineResolverInterface *resolver) : supplier_(supplier),
+                                                     resolver_(resolver) {}
 
-StackFrameSymbolizer::SymbolizerResult StackFrameSymbolizer::FillSourceLineInfo(
-    const CodeModules* modules,
-    const CodeModules* unloaded_modules,
-    const SystemInfo* system_info,
-    StackFrame* frame,
-    std::deque<std::unique_ptr<StackFrame>>* inlined_frames) {
-  assert(frame);
+    StackFrameSymbolizer::SymbolizerResult StackFrameSymbolizer::FillSourceLineInfo(
+            const CodeModules *modules,
+            const CodeModules *unloaded_modules,
+            const SystemInfo *system_info,
+            StackFrame *frame,
+            std::deque <std::unique_ptr<StackFrame>> *inlined_frames) {
+        assert(frame);
 
-  const CodeModule* module = NULL;
-  if (modules) {
-    module = modules->GetModuleForAddress(frame->instruction);
-  }
-  if (!module && unloaded_modules) {
-    module = unloaded_modules->GetModuleForAddress(frame->instruction);
-  }
+        const CodeModule *module = NULL;
+        if (modules) {
+            module = modules->GetModuleForAddress(frame->instruction);
+        }
+        if (!module && unloaded_modules) {
+            module = unloaded_modules->GetModuleForAddress(frame->instruction);
+        }
 
-  if (!module) return kError;
-  frame->module = module;
+        if (!module) return kError;
+        frame->module = module;
 
-  if (!resolver_) return kError;  // no resolver.
-  // If module is known to have missing symbol file, return.
-  if (no_symbol_modules_.find(module->code_file()) !=
-      no_symbol_modules_.end()) {
-    return kError;
-  }
+        if (!resolver_) return kError;  // no resolver.
+        // If module is known to have missing symbol file, return.
+        if (no_symbol_modules_.find(module->code_file()) !=
+            no_symbol_modules_.end()) {
+            return kError;
+        }
 
-  // If module is already loaded, go ahead to fill source line info and return.
-  if (resolver_->HasModule(frame->module)) {
-    resolver_->FillSourceLineInfo(frame, inlined_frames);
-    return resolver_->IsModuleCorrupt(frame->module) ?
-        kWarningCorruptSymbols : kNoError;
-  }
+        // If module is already loaded, go ahead to fill source line info and return.
+        if (resolver_->HasModule(frame->module)) {
+            resolver_->FillSourceLineInfo(frame, inlined_frames);
+            return resolver_->IsModuleCorrupt(frame->module) ?
+                   kWarningCorruptSymbols : kNoError;
+        }
 
-  // Module needs to fetch symbol file. First check to see if supplier exists.
-  if (!supplier_) {
-    return kError;
-  }
+        // Module needs to fetch symbol file. First check to see if supplier exists.
+        if (!supplier_) {
+            return kError;
+        }
 
-  // Start fetching symbol from supplier.
-  string symbol_file;
-  char* symbol_data = NULL;
-  size_t symbol_data_size;
-  SymbolSupplier::SymbolResult symbol_result = supplier_->GetCStringSymbolData(
-      module, system_info, &symbol_file, &symbol_data, &symbol_data_size);
+        // Start fetching symbol from supplier.
+        string symbol_file;
+        char *symbol_data = NULL;
+        size_t symbol_data_size;
+        SymbolSupplier::SymbolResult symbol_result = supplier_->GetCStringSymbolData(
+                module, system_info, &symbol_file, &symbol_data, &symbol_data_size);
 
-  switch (symbol_result) {
-    case SymbolSupplier::FOUND: {
-      bool load_success = resolver_->LoadModuleUsingMemoryBuffer(
-          frame->module,
-          symbol_data,
-          symbol_data_size);
-      if (resolver_->ShouldDeleteMemoryBufferAfterLoadModule()) {
-        supplier_->FreeSymbolData(module);
-      }
+        switch (symbol_result) {
+            case SymbolSupplier::FOUND: {
+                bool load_success = resolver_->LoadModuleUsingMemoryBuffer(
+                        frame->module,
+                        symbol_data,
+                        symbol_data_size);
+                if (resolver_->ShouldDeleteMemoryBufferAfterLoadModule()) {
+                    supplier_->FreeSymbolData(module);
+                }
 
-      if (load_success) {
-        resolver_->FillSourceLineInfo(frame, inlined_frames);
-        return resolver_->IsModuleCorrupt(frame->module) ?
-            kWarningCorruptSymbols : kNoError;
-      } else {
-        BPLOG(ERROR) << "Failed to load symbol file in resolver.";
-        no_symbol_modules_.insert(module->code_file());
+                if (load_success) {
+                    resolver_->FillSourceLineInfo(frame, inlined_frames);
+                    return resolver_->IsModuleCorrupt(frame->module) ?
+                           kWarningCorruptSymbols : kNoError;
+                } else {
+                    BPLOG(ERROR) << "Failed to load symbol file in resolver.";
+                    no_symbol_modules_.insert(module->code_file());
+                    return kError;
+                }
+            }
+
+            case SymbolSupplier::NOT_FOUND:
+                no_symbol_modules_.insert(module->code_file());
+                return kError;
+
+            case SymbolSupplier::INTERRUPT:
+                return kInterrupt;
+
+            default:
+                BPLOG(ERROR) << "Unknown SymbolResult enum: " << symbol_result;
+                return kError;
+        }
         return kError;
-      }
     }
 
-    case SymbolSupplier::NOT_FOUND:
-      no_symbol_modules_.insert(module->code_file());
-      return kError;
+    WindowsFrameInfo *StackFrameSymbolizer::FindWindowsFrameInfo(
+            const StackFrame *frame) {
+        return resolver_ ? resolver_->FindWindowsFrameInfo(frame) : NULL;
+    }
 
-    case SymbolSupplier::INTERRUPT:
-      return kInterrupt;
-
-    default:
-      BPLOG(ERROR) << "Unknown SymbolResult enum: " << symbol_result;
-      return kError;
-  }
-  return kError;
-}
-
-WindowsFrameInfo* StackFrameSymbolizer::FindWindowsFrameInfo(
-    const StackFrame* frame) {
-  return resolver_ ? resolver_->FindWindowsFrameInfo(frame) : NULL;
-}
-
-CFIFrameInfo* StackFrameSymbolizer::FindCFIFrameInfo(
-    const StackFrame* frame) {
-  return resolver_ ? resolver_->FindCFIFrameInfo(frame) : NULL;
-}
+    CFIFrameInfo *StackFrameSymbolizer::FindCFIFrameInfo(
+            const StackFrame *frame) {
+        return resolver_ ? resolver_->FindCFIFrameInfo(frame) : NULL;
+    }
 
 }  // namespace google_breakpad

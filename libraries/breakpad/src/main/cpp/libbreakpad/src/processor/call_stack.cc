@@ -38,17 +38,17 @@
 
 namespace google_breakpad {
 
-CallStack::~CallStack() {
-  Clear();
-}
+    CallStack::~CallStack() {
+        Clear();
+    }
 
-void CallStack::Clear() {
-  for (vector<StackFrame*>::const_iterator iterator = frames_.begin();
-       iterator != frames_.end();
-       ++iterator) {
-    delete *iterator;
-  }
-  tid_ = 0;
-}
+    void CallStack::Clear() {
+        for (vector<StackFrame *>::const_iterator iterator = frames_.begin();
+             iterator != frames_.end();
+             ++iterator) {
+            delete *iterator;
+        }
+        tid_ = 0;
+    }
 
 }  // namespace google_breakpad

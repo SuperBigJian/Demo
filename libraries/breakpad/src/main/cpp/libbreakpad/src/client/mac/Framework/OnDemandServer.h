@@ -79,67 +79,67 @@
 //                          MACH_PORT_NULL);
 
 class OnDemandServer {
- public:
-  // must call Initialize() to be useful
-  OnDemandServer()
-    : server_port_(MACH_PORT_NULL),
-      service_port_(MACH_PORT_NULL),
-      unregister_on_cleanup_(true) {
-  }
+public:
+    // must call Initialize() to be useful
+    OnDemandServer()
+            : server_port_(MACH_PORT_NULL),
+              service_port_(MACH_PORT_NULL),
+              unregister_on_cleanup_(true) {
+    }
 
-  // Creates the bootstrap server and service
-  kern_return_t Initialize(const char* server_command,
-                           const char* service_name,
-                           bool unregister_on_cleanup);
+    // Creates the bootstrap server and service
+    kern_return_t Initialize(const char *server_command,
+                             const char *service_name,
+                             bool unregister_on_cleanup);
 
-  // Returns an OnDemandServer object if successful, or NULL if there's
-  // an error.  The error result will be returned in out_result.
-  //
-  //    server_command : the full path name including optional command-line
-  //      arguments to the executable representing the server
-  //
-  //    service_name : represents service name
-  //      something like "com.company.ServiceName"
-  //
-  //    unregister_on_cleanup : if true, unregisters the service name
-  //      when the OnDemandServer is deleted -- unregistering will
-  //      ONLY be possible if LaunchOnDemand() has NOT been called.
-  //      If false, then the service will continue to be registered
-  //      even after the current process quits.
-  //
-  //    out_result : if non-NULL, returns the result
-  //      this value will be KERN_SUCCESS if Create() returns non-NULL
-  //
-  static OnDemandServer* Create(const char *server_command,
-                                const char* service_name,
-                                bool unregister_on_cleanup,
-                                kern_return_t* out_result);
+    // Returns an OnDemandServer object if successful, or NULL if there's
+    // an error.  The error result will be returned in out_result.
+    //
+    //    server_command : the full path name including optional command-line
+    //      arguments to the executable representing the server
+    //
+    //    service_name : represents service name
+    //      something like "com.company.ServiceName"
+    //
+    //    unregister_on_cleanup : if true, unregisters the service name
+    //      when the OnDemandServer is deleted -- unregistering will
+    //      ONLY be possible if LaunchOnDemand() has NOT been called.
+    //      If false, then the service will continue to be registered
+    //      even after the current process quits.
+    //
+    //    out_result : if non-NULL, returns the result
+    //      this value will be KERN_SUCCESS if Create() returns non-NULL
+    //
+    static OnDemandServer *Create(const char *server_command,
+                                  const char *service_name,
+                                  bool unregister_on_cleanup,
+                                  kern_return_t *out_result);
 
-  // Cleans up and if LaunchOnDemand() has not yet been called then
-  // the bootstrap service will be unregistered.
-  ~OnDemandServer();
+    // Cleans up and if LaunchOnDemand() has not yet been called then
+    // the bootstrap service will be unregistered.
+    ~OnDemandServer();
 
-  // This must be called if we intend to commit to launching the server
-  // by sending a mach message to our service port.  Do not call it otherwise
-  // or it will be difficult (impossible?) to unregister the service name.
-  void LaunchOnDemand();
+    // This must be called if we intend to commit to launching the server
+    // by sending a mach message to our service port.  Do not call it otherwise
+    // or it will be difficult (impossible?) to unregister the service name.
+    void LaunchOnDemand();
 
-  // This is the port we need to send a mach message to after calling
-  // LaunchOnDemand().  Sending a message causing an immediate launch
-  // of the server
-  mach_port_t GetServicePort() { return service_port_; }
+    // This is the port we need to send a mach message to after calling
+    // LaunchOnDemand().  Sending a message causing an immediate launch
+    // of the server
+    mach_port_t GetServicePort() { return service_port_; }
 
- private:
-  // Disallow copy constructor
-  OnDemandServer(const OnDemandServer&);
+private:
+    // Disallow copy constructor
+    OnDemandServer(const OnDemandServer &);
 
-  // Cleans up and if LaunchOnDemand() has not yet been called then
-  // the bootstrap service will be unregistered.
-  void Unregister();
+    // Cleans up and if LaunchOnDemand() has not yet been called then
+    // the bootstrap service will be unregistered.
+    void Unregister();
 
-  name_t      service_name_;
+    name_t service_name_;
 
-  mach_port_t server_port_;
-  mach_port_t service_port_;
-  bool        unregister_on_cleanup_;
+    mach_port_t server_port_;
+    mach_port_t service_port_;
+    bool unregister_on_cleanup_;
 };

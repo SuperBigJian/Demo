@@ -86,8 +86,8 @@ extern "C" {
   _STAB_CODE_DEF(LENG,0xfe)
 
 enum __stab_debug_code {
-#define _STAB_CODE_DEF(x,y)  N_##x = y,
-_STAB_CODE_LIST
+#define _STAB_CODE_DEF(x, y)  N_##x = y,
+    _STAB_CODE_LIST
 #undef _STAB_CODE_DEF
 };
 

@@ -23,9 +23,6 @@ import org.gradle.kotlin.dsl.getByType
 class AndroidRoomConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            with(pluginManager) {
-                apply("kotlin-kapt")
-            }
             val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
             dependencies {
                 add("implementation", libs.findBundle("roomLibs").get())

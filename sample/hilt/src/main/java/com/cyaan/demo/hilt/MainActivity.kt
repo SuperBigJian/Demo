@@ -18,6 +18,7 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
     @Inject
     lateinit var logger: LoggerLocalDataSource
+
     @Inject
     lateinit var dataFormatter: DateFormatter
 

@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         consumerProguardFile("consumer-rules.pro")
-        
+
         ndk {
             abiFilters.apply {
                 add("armeabi-v7a")

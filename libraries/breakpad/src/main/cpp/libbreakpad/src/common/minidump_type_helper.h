@@ -36,20 +36,20 @@
 
 namespace google_breakpad {
 
-template <size_t>
-struct MDTypeHelper;
+    template<size_t>
+    struct MDTypeHelper;
 
-template <>
-struct MDTypeHelper<sizeof(uint32_t)> {
-  typedef MDRawDebug32 MDRawDebug;
-  typedef MDRawLinkMap32 MDRawLinkMap;
-};
+    template<>
+    struct MDTypeHelper<sizeof(uint32_t)> {
+        typedef MDRawDebug32 MDRawDebug;
+        typedef MDRawLinkMap32 MDRawLinkMap;
+    };
 
-template <>
-struct MDTypeHelper<sizeof(uint64_t)> {
-  typedef MDRawDebug64 MDRawDebug;
-  typedef MDRawLinkMap64 MDRawLinkMap;
-};
+    template<>
+    struct MDTypeHelper<sizeof(uint64_t)> {
+        typedef MDRawDebug64 MDRawDebug;
+        typedef MDRawLinkMap64 MDRawLinkMap;
+    };
 
 }  // namespace google_breakpad
 

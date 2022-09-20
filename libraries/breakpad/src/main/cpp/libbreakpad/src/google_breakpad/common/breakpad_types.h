@@ -49,11 +49,12 @@
 #ifndef __STDC_FORMAT_MACROS
 #define __STDC_FORMAT_MACROS
 #endif  /* __STDC_FORMAT_MACROS */
+
 #include <inttypes.h>
 
 typedef struct {
-  uint64_t high;
-  uint64_t low;
+    uint64_t high;
+    uint64_t low;
 } uint128_struct;
 
 typedef uint64_t breakpad_time_t;

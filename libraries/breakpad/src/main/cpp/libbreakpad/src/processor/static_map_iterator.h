@@ -44,68 +44,72 @@
 namespace google_breakpad {
 
 // Forward declaration.
-template<typename Key, typename Value, typename Compare> class StaticMap;
+    template<typename Key, typename Value, typename Compare>
+    class StaticMap;
 
 // StaticMapIterator does not support operator*() or operator->(),
 // User should use GetKey(), GetKeyPtr(), GetValuePtr() instead;
-template<typename Key, typename Value, typename Compare>
-class StaticMapIterator {
- public:
-  // Constructors.
-  StaticMapIterator(): index_(-1), base_(NULL) { }
+    template<typename Key, typename Value, typename Compare>
+    class StaticMapIterator {
+    public:
+        // Constructors.
+        StaticMapIterator() : index_(-1), base_(NULL) {}
 
-  // Increment & Decrement operators:
-  StaticMapIterator& operator++();
-  StaticMapIterator operator++(int post_fix_operator);
+        // Increment & Decrement operators:
+        StaticMapIterator &operator++();
 
-  StaticMapIterator& operator--();
-  StaticMapIterator operator--(int post_fix_operator);
+        StaticMapIterator operator++(int post_fix_operator);
 
-  // Interface for retrieving data / pointer to data.
-  const Key* GetKeyPtr() const;
+        StaticMapIterator &operator--();
 
-  // Run time error will occur if GetKey() is called on an invalid iterator.
-  inline const Key GetKey() const { return *GetKeyPtr(); }
+        StaticMapIterator operator--(int post_fix_operator);
 
-  // return a raw memory pointer that points to the start address of value.
-  const char* GetValueRawPtr() const;
+        // Interface for retrieving data / pointer to data.
+        const Key *GetKeyPtr() const;
 
-  // return a reinterpret-casted pointer to the value.
-  inline const Value* GetValuePtr() const {
-    return reinterpret_cast<const Value*>(GetValueRawPtr());
-  }
+        // Run time error will occur if GetKey() is called on an invalid iterator.
+        inline const Key GetKey() const { return *GetKeyPtr(); }
 
-  bool operator==(const StaticMapIterator& x) const;
-  bool operator!=(const StaticMapIterator& x) const;
+        // return a raw memory pointer that points to the start address of value.
+        const char *GetValueRawPtr() const;
 
-  // Check if this iterator is valid.
-  // If iterator is invalid, user is forbidden to use ++/-- operator
-  // or interfaces for retrieving data / pointer to data.
-  bool IsValid() const;
+        // return a reinterpret-casted pointer to the value.
+        inline const Value *GetValuePtr() const {
+            return reinterpret_cast<const Value *>(GetValueRawPtr());
+        }
 
- private:
-  friend class StaticMap<Key, Value, Compare>;
+        bool operator==(const StaticMapIterator &x) const;
 
-  // Only StaticMap can call this constructor.
-  explicit StaticMapIterator(const char* base, const int32_t& index);
+        bool operator!=(const StaticMapIterator &x) const;
 
-  // Index of node that the iterator is pointing to.
-  int32_t index_;
+        // Check if this iterator is valid.
+        // If iterator is invalid, user is forbidden to use ++/-- operator
+        // or interfaces for retrieving data / pointer to data.
+        bool IsValid() const;
 
-  // Beginning address of the serialized map data.
-  const char* base_;
+    private:
+        friend class StaticMap<Key, Value, Compare>;
 
-  // Number of nodes in the map.  Use it to identify end() iterator.
-  int32_t num_nodes_;
+        // Only StaticMap can call this constructor.
+        explicit StaticMapIterator(const char *base, const int32_t &index);
 
-  // offsets_ is an array of offset addresses of mapped values.
-  // For example:
-  // address_of_i-th_node_value = base_ + offsets_[i]
-  const uint32_t* offsets_;
+        // Index of node that the iterator is pointing to.
+        int32_t index_;
 
-  // keys_[i] = key of i_th node.
-  const Key* keys_;
-};
+        // Beginning address of the serialized map data.
+        const char *base_;
+
+        // Number of nodes in the map.  Use it to identify end() iterator.
+        int32_t num_nodes_;
+
+        // offsets_ is an array of offset addresses of mapped values.
+        // For example:
+        // address_of_i-th_node_value = base_ + offsets_[i]
+        const uint32_t *offsets_;
+
+        // keys_[i] = key of i_th node.
+        const Key *keys_;
+    };
 
 }  // namespace google_breakpad
 

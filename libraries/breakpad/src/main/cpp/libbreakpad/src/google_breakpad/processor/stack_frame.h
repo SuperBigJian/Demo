@@ -37,122 +37,123 @@
 
 namespace google_breakpad {
 
-class CodeModule;
+    class CodeModule;
 
-struct StackFrame {
-  // Indicates how well the instruction pointer derived during
-  // stack walking is trusted. Since the stack walker can resort to
-  // stack scanning, it can wind up with dubious frames.
-  // In rough order of "trust metric".
-  enum FrameTrust {
-    FRAME_TRUST_NONE,      // Unknown
-    FRAME_TRUST_SCAN,      // Scanned the stack, found this
-    FRAME_TRUST_CFI_SCAN,  // Found while scanning stack using call frame info
-    FRAME_TRUST_FP,        // Derived from frame pointer
-    FRAME_TRUST_CFI,       // Derived from call frame info
-    // Explicitly provided by some external stack walker.
-    FRAME_TRUST_PREWALKED,
-    FRAME_TRUST_CONTEXT,   // Given as instruction pointer in a context
-    FRAME_TRUST_INLINE,    // Found by inline records in symbol files.
-    // Derived from leaf function by simulating a return.
-    FRAME_TRUST_LEAF,
-  };
+    struct StackFrame {
+        // Indicates how well the instruction pointer derived during
+        // stack walking is trusted. Since the stack walker can resort to
+        // stack scanning, it can wind up with dubious frames.
+        // In rough order of "trust metric".
+        enum FrameTrust {
+            FRAME_TRUST_NONE,      // Unknown
+            FRAME_TRUST_SCAN,      // Scanned the stack, found this
+            FRAME_TRUST_CFI_SCAN,  // Found while scanning stack using call frame info
+            FRAME_TRUST_FP,        // Derived from frame pointer
+            FRAME_TRUST_CFI,       // Derived from call frame info
+            // Explicitly provided by some external stack walker.
+            FRAME_TRUST_PREWALKED,
+            FRAME_TRUST_CONTEXT,   // Given as instruction pointer in a context
+            FRAME_TRUST_INLINE,    // Found by inline records in symbol files.
+            // Derived from leaf function by simulating a return.
+            FRAME_TRUST_LEAF,
+        };
 
-  StackFrame()
-      : instruction(),
-        module(NULL),
-        function_name(),
-        function_base(),
-        source_file_name(),
-        source_line(0),
-        source_line_base(),
-        trust(FRAME_TRUST_NONE),
-        is_multiple(false) {}
-  virtual ~StackFrame() {}
+        StackFrame()
+                : instruction(),
+                  module(NULL),
+                  function_name(),
+                  function_base(),
+                  source_file_name(),
+                  source_line(0),
+                  source_line_base(),
+                  trust(FRAME_TRUST_NONE),
+                  is_multiple(false) {}
 
-  // Return a string describing how this stack frame was found
-  // by the stackwalker.
-  string trust_description() const {
-    switch (trust) {
-      case StackFrame::FRAME_TRUST_CONTEXT:
-        return "given as instruction pointer in context";
-      case StackFrame::FRAME_TRUST_PREWALKED:
-        return "recovered by external stack walker";
-      case StackFrame::FRAME_TRUST_CFI:
-        return "call frame info";
-      case StackFrame::FRAME_TRUST_CFI_SCAN:
-        return "call frame info with scanning";
-      case StackFrame::FRAME_TRUST_FP:
-        return "previous frame's frame pointer";
-      case StackFrame::FRAME_TRUST_SCAN:
-        return "stack scanning";
-      case StackFrame::FRAME_TRUST_INLINE:
-        return "inline record";
-      case StackFrame::FRAME_TRUST_LEAF:
-        return "simulating a return from leaf function";
-    default:
-        return "unknown";
-    }
-  }
+        virtual ~StackFrame() {}
 
-  // Return the actual return address, as saved on the stack or in a
-  // register. See the comments for 'instruction', below, for details.
-  virtual uint64_t ReturnAddress() const { return instruction; }
+        // Return a string describing how this stack frame was found
+        // by the stackwalker.
+        string trust_description() const {
+            switch (trust) {
+                case StackFrame::FRAME_TRUST_CONTEXT:
+                    return "given as instruction pointer in context";
+                case StackFrame::FRAME_TRUST_PREWALKED:
+                    return "recovered by external stack walker";
+                case StackFrame::FRAME_TRUST_CFI:
+                    return "call frame info";
+                case StackFrame::FRAME_TRUST_CFI_SCAN:
+                    return "call frame info with scanning";
+                case StackFrame::FRAME_TRUST_FP:
+                    return "previous frame's frame pointer";
+                case StackFrame::FRAME_TRUST_SCAN:
+                    return "stack scanning";
+                case StackFrame::FRAME_TRUST_INLINE:
+                    return "inline record";
+                case StackFrame::FRAME_TRUST_LEAF:
+                    return "simulating a return from leaf function";
+                default:
+                    return "unknown";
+            }
+        }
 
-  // The program counter location as an absolute virtual address.
-  //
-  // - For the innermost called frame in a stack, this will be an exact
-  //   program counter or instruction pointer value.
-  //
-  // - For all other frames, this address is within the instruction that
-  //   caused execution to branch to this frame's callee (although it may
-  //   not point to the exact beginning of that instruction). This ensures
-  //   that, when we look up the source code location for this frame, we
-  //   get the source location of the call, not of the point at which
-  //   control will resume when the call returns, which may be on the next
-  //   line. (If the compiler knows the callee never returns, it may even
-  //   place the call instruction at the very end of the caller's machine
-  //   code, such that the "return address" (which will never be used)
-  //   immediately after the call instruction is in an entirely different
-  //   function, perhaps even from a different source file.)
-  //
-  // On some architectures, the return address as saved on the stack or in
-  // a register is fine for looking up the point of the call. On others, it
-  // requires adjustment. ReturnAddress returns the address as saved by the
-  // machine.
-  uint64_t instruction;
+        // Return the actual return address, as saved on the stack or in a
+        // register. See the comments for 'instruction', below, for details.
+        virtual uint64_t ReturnAddress() const { return instruction; }
 
-  // The module in which the instruction resides.
-  const CodeModule *module;
+        // The program counter location as an absolute virtual address.
+        //
+        // - For the innermost called frame in a stack, this will be an exact
+        //   program counter or instruction pointer value.
+        //
+        // - For all other frames, this address is within the instruction that
+        //   caused execution to branch to this frame's callee (although it may
+        //   not point to the exact beginning of that instruction). This ensures
+        //   that, when we look up the source code location for this frame, we
+        //   get the source location of the call, not of the point at which
+        //   control will resume when the call returns, which may be on the next
+        //   line. (If the compiler knows the callee never returns, it may even
+        //   place the call instruction at the very end of the caller's machine
+        //   code, such that the "return address" (which will never be used)
+        //   immediately after the call instruction is in an entirely different
+        //   function, perhaps even from a different source file.)
+        //
+        // On some architectures, the return address as saved on the stack or in
+        // a register is fine for looking up the point of the call. On others, it
+        // requires adjustment. ReturnAddress returns the address as saved by the
+        // machine.
+        uint64_t instruction;
 
-  // The function name, may be omitted if debug symbols are not available.
-  string function_name;
+        // The module in which the instruction resides.
+        const CodeModule *module;
 
-  // The start address of the function, may be omitted if debug symbols
-  // are not available.
-  uint64_t function_base;
+        // The function name, may be omitted if debug symbols are not available.
+        string function_name;
 
-  // The source file name, may be omitted if debug symbols are not available.
-  string source_file_name;
+        // The start address of the function, may be omitted if debug symbols
+        // are not available.
+        uint64_t function_base;
 
-  // The (1-based) source line number, may be omitted if debug symbols are
-  // not available.
-  int source_line;
+        // The source file name, may be omitted if debug symbols are not available.
+        string source_file_name;
 
-  // The start address of the source line, may be omitted if debug symbols
-  // are not available.
-  uint64_t source_line_base;
+        // The (1-based) source line number, may be omitted if debug symbols are
+        // not available.
+        int source_line;
 
-  // Amount of trust the stack walker has in the instruction pointer
-  // of this frame.
-  FrameTrust trust;
+        // The start address of the source line, may be omitted if debug symbols
+        // are not available.
+        uint64_t source_line_base;
 
-  // True if the frame corresponds to multiple functions, for example as the
-  // result of identical code folding by the linker. In that case the function
-  // name, filename, etc. information above represents the state of an arbitrary
-  // one of these functions.
-  bool is_multiple;
-};
+        // Amount of trust the stack walker has in the instruction pointer
+        // of this frame.
+        FrameTrust trust;
+
+        // True if the frame corresponds to multiple functions, for example as the
+        // result of identical code folding by the linker. In that case the function
+        // name, filename, etc. information above represents the state of an arbitrary
+        // one of these functions.
+        bool is_multiple;
+    };
 
 }  // namespace google_breakpad
 

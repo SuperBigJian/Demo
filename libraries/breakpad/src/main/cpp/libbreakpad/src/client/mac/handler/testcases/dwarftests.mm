@@ -38,23 +38,23 @@
 #import "dump_syms.h"
 
 @implementation dwarftests
-- (void) testDWARFSymbolFileGeneration {
-  NSString *inputBreakpadSymbolFile = @"testcases/testdata/dump_syms_i386_breakpad.sym";
-  NSString *outputBreakpadSymbolFile = @"/tmp/dump_syms_i386.breakpad";
+- (void)testDWARFSymbolFileGeneration {
+    NSString *inputBreakpadSymbolFile = @"testcases/testdata/dump_syms_i386_breakpad.sym";
+    NSString *outputBreakpadSymbolFile = @"/tmp/dump_syms_i386.breakpad";
 
-  DumpSymbols *dump = [[DumpSymbols alloc] initWithContentsOfFile:@"testcases/testdata/dump_syms_dwarf_data"];
+    DumpSymbols *dump = [[DumpSymbols alloc] initWithContentsOfFile:@"testcases/testdata/dump_syms_dwarf_data"];
 
-  STAssertNotNil(dump, @"DumpSymbols is nil");
-  [dump setArchitecture:@"i386"];
-  [dump writeSymbolFile:outputBreakpadSymbolFile];
-  
-  NSData *d = [[NSData alloc] initWithContentsOfFile:inputBreakpadSymbolFile];
-  STAssertNotNil(d, @"Input breakpad symbol file not found");
-  
-  NSData *d1 = [[NSData alloc] initWithContentsOfFile:outputBreakpadSymbolFile]; 
-  STAssertNotNil(d1, @"Output breakpad symbol file not found");
+    STAssertNotNil(dump, @"DumpSymbols is nil");
+    [dump setArchitecture:@"i386"];
+    [dump writeSymbolFile:outputBreakpadSymbolFile];
 
-  STAssertTrue([d isEqualToData:d1],
-  @"Symbol files were not equal!",nil);
+    NSData *d = [[NSData alloc] initWithContentsOfFile:inputBreakpadSymbolFile];
+    STAssertNotNil(d, @"Input breakpad symbol file not found");
+
+    NSData *d1 = [[NSData alloc] initWithContentsOfFile:outputBreakpadSymbolFile];
+    STAssertNotNil(d1, @"Output breakpad symbol file not found");
+
+    STAssertTrue([d isEqualToData:d1],
+                 @"Symbol files were not equal!", nil);
 }
 @end

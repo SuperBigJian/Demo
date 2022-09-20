@@ -54,11 +54,11 @@ const cpu_subtype_t kCPU_SUBTYPE_ARM64_ALL = CPU_SUBTYPE_ARM64_ALL;
 const cpu_subtype_t kCPU_SUBTYPE_ARM64_E = CPU_SUBTYPE_ARM64_E;
 const cpu_subtype_t kCPU_SUBTYPE_ARM_V7S = CPU_SUBTYPE_ARM_V7S;
 
-const char* GetNXArchInfoName(cpu_type_t cpu_type, cpu_subtype_t cpu_subtype) {
-  const NXArchInfo* arch_info = NXGetArchInfoFromCpuType(cpu_type, cpu_subtype);
-  if (!arch_info)
-    return 0;
-  return arch_info->name;
+const char *GetNXArchInfoName(cpu_type_t cpu_type, cpu_subtype_t cpu_subtype) {
+    const NXArchInfo *arch_info = NXGetArchInfoFromCpuType(cpu_type, cpu_subtype);
+    if (!arch_info)
+        return 0;
+    return arch_info->name;
 }
 
 const uint32_t kMachHeaderFtypeDylib = MH_DYLIB;

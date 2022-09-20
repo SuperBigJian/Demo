@@ -42,127 +42,127 @@
 namespace google_breakpad {
 
 //=============================================================================
-BOOL EnsureDirectoryPathExists(NSString* dirPath) {
-  NSFileManager* mgr = [NSFileManager defaultManager];
+    BOOL EnsureDirectoryPathExists(NSString *dirPath) {
+        NSFileManager *mgr = [NSFileManager defaultManager];
 
-  NSDictionary* attrs =
-    [NSDictionary dictionaryWithObject:[NSNumber numberWithUnsignedLong:0750]
-                                forKey:NSFilePosixPermissions];
+        NSDictionary *attrs =
+                [NSDictionary dictionaryWithObject:[NSNumber numberWithUnsignedLong:0750]
+                                            forKey:NSFilePosixPermissions];
 
-  return [mgr createDirectoryAtPath:dirPath
-        withIntermediateDirectories:YES
-                         attributes:attrs
-                              error:nil];
-}
-
-//=============================================================================
-BOOL ConfigFile::WriteData(const void* data, size_t length) {
-  size_t result = write(config_file_, data, length);
-
-  return result == length;
-}
+        return [mgr createDirectoryAtPath:dirPath
+              withIntermediateDirectories:YES
+                               attributes:attrs
+                                    error:nil];
+    }
 
 //=============================================================================
-BOOL ConfigFile::AppendConfigData(const char* key,
-                                  const void* data, size_t length) {
-  assert(config_file_ != -1);
+    BOOL ConfigFile::WriteData(const void *data, size_t length) {
+        size_t result = write(config_file_, data, length);
 
-  if (!key) {
-    return NO;
-  }
-
-  if (!data) {
-    return NO;
-  }
-
-  // Write the key, \n, length of data (ascii integer), \n, data
-  char buffer[16];
-  char nl = '\n';
-  BOOL result = WriteData(key, strlen(key));
-
-  snprintf(buffer, sizeof(buffer) - 1, "\n%lu\n", length);
-  result &= WriteData(buffer, strlen(buffer));
-  result &= WriteData(data, length);
-  result &= WriteData(&nl, 1);
-  return result;
-}
+        return result == length;
+    }
 
 //=============================================================================
-BOOL ConfigFile::AppendConfigString(const char* key,
-                                    const char* value) {
-  return AppendConfigData(key, value, strlen(value));
-}
+    BOOL ConfigFile::AppendConfigData(const char *key,
+                                      const void *data, size_t length) {
+        assert(config_file_ != -1);
+
+        if (!key) {
+            return NO;
+        }
+
+        if (!data) {
+            return NO;
+        }
+
+        // Write the key, \n, length of data (ascii integer), \n, data
+        char buffer[16];
+        char nl = '\n';
+        BOOL result = WriteData(key, strlen(key));
+
+        snprintf(buffer, sizeof(buffer) - 1, "\n%lu\n", length);
+        result &= WriteData(buffer, strlen(buffer));
+        result &= WriteData(data, length);
+        result &= WriteData(&nl, 1);
+        return result;
+    }
 
 //=============================================================================
-BOOL ConfigFile::AppendCrashTimeParameters(const char* processStartTimeString) {
-  // Set process uptime parameter
-  struct timeval tv;
-  gettimeofday(&tv, NULL);
-
-  char processUptimeString[32], processCrashtimeString[32];
-  // Set up time if we've received the start time.
-  if (processStartTimeString) {
-    time_t processStartTime = strtol(processStartTimeString, NULL, 10);
-    time_t processUptime = tv.tv_sec - processStartTime;
-    // Store the uptime in milliseconds.
-    snprintf(processUptimeString, sizeof(processUptimeString), "%llu",
-             static_cast<unsigned long long int>(processUptime) * 1000);
-    if (!AppendConfigString(BREAKPAD_PROCESS_UP_TIME, processUptimeString))
-      return false;
-  }
-
-  snprintf(processCrashtimeString, sizeof(processCrashtimeString), "%llu",
-           static_cast<unsigned long long int>(tv.tv_sec));
-  return AppendConfigString(BREAKPAD_PROCESS_CRASH_TIME,
-                            processCrashtimeString);
-}
+    BOOL ConfigFile::AppendConfigString(const char *key,
+                                        const char *value) {
+        return AppendConfigData(key, value, strlen(value));
+    }
 
 //=============================================================================
-void ConfigFile::WriteFile(const char* directory,
-                           const SimpleStringDictionary* configurationParameters,
-                           const char* dump_dir,
-                           const char* minidump_id) {
+    BOOL ConfigFile::AppendCrashTimeParameters(const char *processStartTimeString) {
+        // Set process uptime parameter
+        struct timeval tv;
+        gettimeofday(&tv, NULL);
 
-  assert(config_file_ == -1);
+        char processUptimeString[32], processCrashtimeString[32];
+        // Set up time if we've received the start time.
+        if (processStartTimeString) {
+            time_t processStartTime = strtol(processStartTimeString, NULL, 10);
+            time_t processUptime = tv.tv_sec - processStartTime;
+            // Store the uptime in milliseconds.
+            snprintf(processUptimeString, sizeof(processUptimeString), "%llu",
+                     static_cast<unsigned long long int>(processUptime) * 1000);
+            if (!AppendConfigString(BREAKPAD_PROCESS_UP_TIME, processUptimeString))
+                return false;
+        }
 
-  // Open and write out configuration file preamble
-  if (directory) {
-    snprintf(config_file_path_, sizeof(config_file_path_), "%s/Config-XXXXXX",
-             directory);
-  } else {
-    strlcpy(config_file_path_, "/tmp/Config-XXXXXX",
-            sizeof(config_file_path_));
-  }
-  config_file_ = mkstemp(config_file_path_);
+        snprintf(processCrashtimeString, sizeof(processCrashtimeString), "%llu",
+                 static_cast<unsigned long long int>(tv.tv_sec));
+        return AppendConfigString(BREAKPAD_PROCESS_CRASH_TIME,
+                                  processCrashtimeString);
+    }
 
-  if (config_file_ == -1) {
-    return;
-  }
+//=============================================================================
+    void ConfigFile::WriteFile(const char *directory,
+                               const SimpleStringDictionary *configurationParameters,
+                               const char *dump_dir,
+                               const char *minidump_id) {
 
-  has_created_file_ = true;
+        assert(config_file_ == -1);
 
-  // Add the minidump dir
-  AppendConfigString(kReporterMinidumpDirectoryKey, dump_dir);
-  AppendConfigString(kReporterMinidumpIDKey, minidump_id);
+        // Open and write out configuration file preamble
+        if (directory) {
+            snprintf(config_file_path_, sizeof(config_file_path_), "%s/Config-XXXXXX",
+                     directory);
+        } else {
+            strlcpy(config_file_path_, "/tmp/Config-XXXXXX",
+                    sizeof(config_file_path_));
+        }
+        config_file_ = mkstemp(config_file_path_);
 
-  // Write out the configuration parameters
-  BOOL result = YES;
-  const SimpleStringDictionary& dictionary = *configurationParameters;
+        if (config_file_ == -1) {
+            return;
+        }
 
-  const SimpleStringDictionary::Entry* entry = NULL;
-  SimpleStringDictionary::Iterator iter(dictionary);
+        has_created_file_ = true;
 
-  while ((entry = iter.Next())) {
-    result = AppendConfigString(entry->key, entry->value);
+        // Add the minidump dir
+        AppendConfigString(kReporterMinidumpDirectoryKey, dump_dir);
+        AppendConfigString(kReporterMinidumpIDKey, minidump_id);
 
-    if (!result)
-      break;
-  }
-  AppendCrashTimeParameters(
-      configurationParameters->GetValueForKey(BREAKPAD_PROCESS_START_TIME));
+        // Write out the configuration parameters
+        BOOL result = YES;
+        const SimpleStringDictionary &dictionary = *configurationParameters;
 
-  close(config_file_);
-  config_file_ = -1;
-}
+        const SimpleStringDictionary::Entry *entry = NULL;
+        SimpleStringDictionary::Iterator iter(dictionary);
+
+        while ((entry = iter.Next())) {
+            result = AppendConfigString(entry->key, entry->value);
+
+            if (!result)
+                break;
+        }
+        AppendCrashTimeParameters(
+                configurationParameters->GetValueForKey(BREAKPAD_PROCESS_START_TIME));
+
+        close(config_file_);
+        config_file_ = -1;
+    }
 
 } // namespace google_breakpad

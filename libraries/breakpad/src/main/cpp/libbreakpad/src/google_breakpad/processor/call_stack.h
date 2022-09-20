@@ -50,37 +50,40 @@
 
 namespace google_breakpad {
 
-using std::vector;
+    using std::vector;
 
-struct StackFrame;
-template<typename T> class linked_ptr;
+    struct StackFrame;
 
-class CallStack {
- public:
-  CallStack() { Clear(); }
-  ~CallStack();
+    template<typename T>
+    class linked_ptr;
 
-  // Resets the CallStack to its initial empty state
-  void Clear();
+    class CallStack {
+    public:
+        CallStack() { Clear(); }
 
-  const vector<StackFrame*>* frames() const { return &frames_; }
+        ~CallStack();
 
-  // Set the TID associated with this call stack.
-  void set_tid(uint32_t tid) { tid_ = tid; }
+        // Resets the CallStack to its initial empty state
+        void Clear();
 
-  uint32_t tid() const { return tid_; }
+        const vector<StackFrame *> *frames() const { return &frames_; }
 
- private:
-  // Stackwalker is responsible for building the frames_ vector.
-  friend class Stackwalker;
+        // Set the TID associated with this call stack.
+        void set_tid(uint32_t tid) { tid_ = tid; }
 
-  // Storage for pushed frames.
-  vector<StackFrame*> frames_;
+        uint32_t tid() const { return tid_; }
 
-  // The TID associated with this call stack. Default to 0 if it's not
-  // available.
-  uint32_t tid_;
-};
+    private:
+        // Stackwalker is responsible for building the frames_ vector.
+        friend class Stackwalker;
+
+        // Storage for pushed frames.
+        vector<StackFrame *> frames_;
+
+        // The TID associated with this call stack. Default to 0 if it's not
+        // available.
+        uint32_t tid_;
+    };
 
 }  // namespace google_breakpad
 

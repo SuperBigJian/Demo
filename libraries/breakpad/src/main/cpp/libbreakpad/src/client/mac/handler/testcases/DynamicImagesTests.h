@@ -41,12 +41,14 @@
 #include <CPlusTest/CPlusTest.h>
 
 class DynamicImagesTests : public TestCase {
- public:
-  explicit DynamicImagesTests(TestInvocation* invocation);
-  virtual ~DynamicImagesTests();
+public:
+    explicit DynamicImagesTests(TestInvocation *invocation);
 
-  void ReadTaskMemoryTest();
-  void ReadLibrariesFromLocalTaskTest();
+    virtual ~DynamicImagesTests();
+
+    void ReadTaskMemoryTest();
+
+    void ReadLibrariesFromLocalTaskTest();
 };
 
 #endif /* _CLIENT_MAC_HANDLER_TESTCASES_DYNAMICIMAGESTESTS_H__ */

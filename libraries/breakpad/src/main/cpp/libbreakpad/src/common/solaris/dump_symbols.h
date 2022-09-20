@@ -38,11 +38,11 @@
 
 namespace google_breakpad {
 
-class DumpSymbols {
- public:
-  bool WriteSymbolFile(const std::string& obj_file,
-                       int sym_fd);
-};
+    class DumpSymbols {
+    public:
+        bool WriteSymbolFile(const std::string &obj_file,
+                             int sym_fd);
+    };
 
 }  // namespace google_breakpad
 

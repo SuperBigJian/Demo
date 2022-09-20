@@ -39,34 +39,34 @@
 
 namespace google_breakpad {
 
-ProcessState::~ProcessState() {
-  Clear();
-}
+    ProcessState::~ProcessState() {
+        Clear();
+    }
 
-void ProcessState::Clear() {
-  time_date_stamp_ = 0;
-  process_create_time_ = 0;
-  crashed_ = false;
-  crash_reason_.clear();
-  crash_address_ = 0;
-  assertion_.clear();
-  requesting_thread_ = -1;
-  for (vector<CallStack*>::const_iterator iterator = threads_.begin();
-       iterator != threads_.end();
-       ++iterator) {
-    delete *iterator;
-  }
-  threads_.clear();
-  system_info_.Clear();
-  thread_names_.clear();
-  // modules_without_symbols_ and modules_with_corrupt_symbols_ DO NOT own
-  // the underlying CodeModule pointers.  Just clear the vectors.
-  modules_without_symbols_.clear();
-  modules_with_corrupt_symbols_.clear();
-  delete modules_;
-  modules_ = NULL;
-  delete unloaded_modules_;
-  unloaded_modules_ = NULL;
-}
+    void ProcessState::Clear() {
+        time_date_stamp_ = 0;
+        process_create_time_ = 0;
+        crashed_ = false;
+        crash_reason_.clear();
+        crash_address_ = 0;
+        assertion_.clear();
+        requesting_thread_ = -1;
+        for (vector<CallStack *>::const_iterator iterator = threads_.begin();
+             iterator != threads_.end();
+             ++iterator) {
+            delete *iterator;
+        }
+        threads_.clear();
+        system_info_.Clear();
+        thread_names_.clear();
+        // modules_without_symbols_ and modules_with_corrupt_symbols_ DO NOT own
+        // the underlying CodeModule pointers.  Just clear the vectors.
+        modules_without_symbols_.clear();
+        modules_with_corrupt_symbols_.clear();
+        delete modules_;
+        modules_ = NULL;
+        delete unloaded_modules_;
+        unloaded_modules_ = NULL;
+    }
 
 }  // namespace google_breakpad

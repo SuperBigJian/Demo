@@ -111,80 +111,82 @@ namespace google_breakpad {
 //   at address zero.)
 //
 // - If a line starts immediately after an omitted line, omit it too.
-class DwarfLineToModule: public LineInfoHandler {
- public:
-  // As the DWARF line info parser passes us line records, add source
-  // files to MODULE, and add all lines to the end of LINES. LINES
-  // need not be empty. If the parser hands us a zero-length line, we
-  // omit it. If the parser hands us a line that extends beyond the
-  // end of the address space, we clip it. It's up to our client to
-  // sort out which lines belong to which functions; we don't add them
-  // to any particular function in MODULE ourselves.
-  DwarfLineToModule(Module* module,
-                    const string& compilation_dir,
-                    vector<Module::Line>* lines,
-                    std::map<uint32_t, Module::File*>* files)
-      : module_(module),
-        compilation_dir_(compilation_dir),
-        lines_(lines),
-        files_(files),
-        highest_file_number_(-1),
-        omitted_line_end_(0),
-        warned_bad_file_number_(false),
-        warned_bad_directory_number_(false) { }
+    class DwarfLineToModule : public LineInfoHandler {
+    public:
+        // As the DWARF line info parser passes us line records, add source
+        // files to MODULE, and add all lines to the end of LINES. LINES
+        // need not be empty. If the parser hands us a zero-length line, we
+        // omit it. If the parser hands us a line that extends beyond the
+        // end of the address space, we clip it. It's up to our client to
+        // sort out which lines belong to which functions; we don't add them
+        // to any particular function in MODULE ourselves.
+        DwarfLineToModule(Module *module,
+                          const string &compilation_dir,
+                          vector <Module::Line> *lines,
+                          std::map<uint32_t, Module::File *> *files)
+                : module_(module),
+                  compilation_dir_(compilation_dir),
+                  lines_(lines),
+                  files_(files),
+                  highest_file_number_(-1),
+                  omitted_line_end_(0),
+                  warned_bad_file_number_(false),
+                  warned_bad_directory_number_(false) {}
 
-  ~DwarfLineToModule() { }
+        ~DwarfLineToModule() {}
 
-  void DefineDir(const string& name, uint32_t dir_num);
-  void DefineFile(const string& name, int32_t file_num,
-                  uint32_t dir_num, uint64_t mod_time,
-                  uint64_t length);
-  void AddLine(uint64_t address, uint64_t length,
-               uint32_t file_num, uint32_t line_num, uint32_t column_num);
+        void DefineDir(const string &name, uint32_t dir_num);
 
- private:
+        void DefineFile(const string &name, int32_t file_num,
+                        uint32_t dir_num, uint64_t mod_time,
+                        uint64_t length);
 
-  typedef std::map<uint32_t, string> DirectoryTable;
-  typedef std::map<uint32_t, Module::File*> FileTable;
+        void AddLine(uint64_t address, uint64_t length,
+                     uint32_t file_num, uint32_t line_num, uint32_t column_num);
 
-  // The module we're contributing debugging info to. Owned by our
-  // client.
-  Module *module_;
+    private:
 
-  // The compilation directory for the current compilation unit whose
-  // lines are being accumulated.
-  string compilation_dir_;
+        typedef std::map <uint32_t, string> DirectoryTable;
+        typedef std::map<uint32_t, Module::File *> FileTable;
 
-  // The vector of lines we're accumulating. Owned by our client.
-  //
-  // In a Module, as in a breakpad symbol file, lines belong to
-  // specific functions, but DWARF simply assigns lines to addresses;
-  // one must infer the line/function relationship using the
-  // functions' beginning and ending addresses. So we can't add these
-  // to the appropriate function from module_ until we've read the
-  // function info as well. Instead, we accumulate lines here, and let
-  // whoever constructed this sort it all out.
-  vector<Module::Line>* lines_;
+        // The module we're contributing debugging info to. Owned by our
+        // client.
+        Module *module_;
 
-  // A table mapping directory numbers to paths.
-  DirectoryTable directories_;
+        // The compilation directory for the current compilation unit whose
+        // lines are being accumulated.
+        string compilation_dir_;
 
-  // A table mapping file numbers to Module::File pointers.
-  FileTable* files_;
+        // The vector of lines we're accumulating. Owned by our client.
+        //
+        // In a Module, as in a breakpad symbol file, lines belong to
+        // specific functions, but DWARF simply assigns lines to addresses;
+        // one must infer the line/function relationship using the
+        // functions' beginning and ending addresses. So we can't add these
+        // to the appropriate function from module_ until we've read the
+        // function info as well. Instead, we accumulate lines here, and let
+        // whoever constructed this sort it all out.
+        vector <Module::Line> *lines_;
 
-  // The highest file number we've seen so far, or -1 if we've seen
-  // none.  Used for dynamically defined file numbers.
-  int32_t highest_file_number_;
+        // A table mapping directory numbers to paths.
+        DirectoryTable directories_;
 
-  // This is the ending address of the last line we omitted, or zero if we
-  // didn't omit the previous line. It is zero before we have received any
-  // AddLine calls.
-  uint64_t omitted_line_end_;
+        // A table mapping file numbers to Module::File pointers.
+        FileTable *files_;
 
-  // True if we've warned about:
-  bool warned_bad_file_number_; // bad file numbers
-  bool warned_bad_directory_number_; // bad directory numbers
-};
+        // The highest file number we've seen so far, or -1 if we've seen
+        // none.  Used for dynamically defined file numbers.
+        int32_t highest_file_number_;
+
+        // This is the ending address of the last line we omitted, or zero if we
+        // didn't omit the previous line. It is zero before we have received any
+        // AddLine calls.
+        uint64_t omitted_line_end_;
+
+        // True if we've warned about:
+        bool warned_bad_file_number_; // bad file numbers
+        bool warned_bad_directory_number_; // bad directory numbers
+    };
 
 } // namespace google_breakpad
 

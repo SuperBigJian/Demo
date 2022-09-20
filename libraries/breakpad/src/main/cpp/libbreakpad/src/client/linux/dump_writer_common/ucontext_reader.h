@@ -41,24 +41,26 @@
 namespace google_breakpad {
 
 // Wraps platform-dependent implementations of accessors to ucontext_t structs.
-struct UContextReader {
-  static uintptr_t GetStackPointer(const ucontext_t* uc);
+    struct UContextReader {
+        static uintptr_t GetStackPointer(const ucontext_t *uc);
 
-  static uintptr_t GetInstructionPointer(const ucontext_t* uc);
+        static uintptr_t GetInstructionPointer(const ucontext_t *uc);
 
-  // Juggle a arch-specific ucontext_t into a minidump format
-  //   out: the minidump structure
-  //   info: the collection of register structures.
+        // Juggle a arch-specific ucontext_t into a minidump format
+        //   out: the minidump structure
+        //   info: the collection of register structures.
 #if defined(__i386__) || defined(__x86_64)
-  static void FillCPUContext(RawContextCPU* out, const ucontext_t* uc,
-                             const fpstate_t* fp);
+        static void FillCPUContext(RawContextCPU* out, const ucontext_t* uc,
+                                   const fpstate_t* fp);
 #elif defined(__aarch64__)
-  static void FillCPUContext(RawContextCPU* out, const ucontext_t* uc,
-                             const struct fpsimd_context* fpregs);
+
+        static void FillCPUContext(RawContextCPU *out, const ucontext_t *uc,
+                                   const struct fpsimd_context *fpregs);
+
 #else
-  static void FillCPUContext(RawContextCPU* out, const ucontext_t* uc);
+        static void FillCPUContext(RawContextCPU* out, const ucontext_t* uc);
 #endif
-};
+    };
 
 }  // namespace google_breakpad
 

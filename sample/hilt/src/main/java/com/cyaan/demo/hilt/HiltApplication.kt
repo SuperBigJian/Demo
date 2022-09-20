@@ -4,5 +4,5 @@ import com.cyaan.core.common.BaseApplication
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
-class HiltApplication: BaseApplication() {
+class HiltApplication : BaseApplication() {
 }

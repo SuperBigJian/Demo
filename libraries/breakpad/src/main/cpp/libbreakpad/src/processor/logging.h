@@ -78,56 +78,60 @@ namespace google_breakpad {
 #undef ERROR
 #endif
 
-class LogStream {
- public:
-  enum Severity {
-    SEVERITY_INFO,
-    SEVERITY_ERROR,
-    SEVERITY_CRITICAL
-  };
+    class LogStream {
+    public:
+        enum Severity {
+            SEVERITY_INFO,
+            SEVERITY_ERROR,
+            SEVERITY_CRITICAL
+        };
 
-  // Begin logging a message to the stream identified by |stream|, at the
-  // indicated severity.  The file and line parameters should be set so as to
-  // identify the line of source code that is producing a message.
-  LogStream(std::ostream& stream, Severity severity,
-            const char* file, int line);
+        // Begin logging a message to the stream identified by |stream|, at the
+        // indicated severity.  The file and line parameters should be set so as to
+        // identify the line of source code that is producing a message.
+        LogStream(std::ostream &stream, Severity severity,
+                  const char *file, int line);
 
-  // Finish logging by printing a newline and flushing the output stream.
-  ~LogStream();
+        // Finish logging by printing a newline and flushing the output stream.
+        ~LogStream();
 
-  template<typename T> std::ostream& operator<<(const T& t) {
-    return stream_ << t;
-  }
+        template<typename T>
+        std::ostream &operator<<(const T &t) {
+            return stream_ << t;
+        }
 
- private:
-  std::ostream& stream_;
+    private:
+        std::ostream &stream_;
 
-  // Disallow copy constructor and assignment operator
-  explicit LogStream(const LogStream& that);
-  void operator=(const LogStream& that);
-};
+        // Disallow copy constructor and assignment operator
+        explicit LogStream(const LogStream &that);
+
+        void operator=(const LogStream &that);
+    };
 
 // This class is used to explicitly ignore values in the conditional logging
 // macros.  This avoids compiler warnings like "value computed is not used"
 // and "statement has no effect".
-class LogMessageVoidify {
- public:
-  LogMessageVoidify() {}
+    class LogMessageVoidify {
+    public:
+        LogMessageVoidify() {}
 
-  // This has to be an operator with a precedence lower than << but higher
-  // than ?:
-  void operator&(std::ostream&) {}
-};
+        // This has to be an operator with a precedence lower than << but higher
+        // than ?:
+        void operator&(std::ostream &) {}
+    };
 
 // Returns number formatted as a hexadecimal string, such as "0x7b".
-string HexString(uint32_t number);
-string HexString(uint64_t number);
-string HexString(int number);
+    string HexString(uint32_t number);
+
+    string HexString(uint64_t number);
+
+    string HexString(int number);
 
 // Returns the error code as set in the global errno variable, and sets
 // error_string, a required argument, to a string describing that error
 // code.
-int ErrnoString(string* error_string);
+    int ErrnoString(string *error_string);
 
 }  // namespace google_breakpad
 

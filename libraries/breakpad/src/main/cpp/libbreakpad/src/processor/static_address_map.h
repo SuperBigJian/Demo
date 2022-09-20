@@ -48,29 +48,31 @@ namespace google_breakpad {
 
 // AddressType MUST be a basic type, e.g.: integer types etc
 // EntryType could be a complex type, so we retrieve its pointer instead.
-template<typename AddressType, typename EntryType>
-class StaticAddressMap {
- public:
-  StaticAddressMap(): map_() { }
-  explicit StaticAddressMap(const char* map_data): map_(map_data) { }
+    template<typename AddressType, typename EntryType>
+    class StaticAddressMap {
+    public:
+        StaticAddressMap() : map_() {}
 
-  // Locates the entry stored at the highest address less than or equal to
-  // the address argument.  If there is no such range, returns false.  The
-  // entry is returned in entry, which is a required argument.  If
-  // entry_address is not NULL, it will be set to the address that the entry
-  // was stored at.
-  bool Retrieve(const AddressType& address,
-                const EntryType*& entry, AddressType* entry_address) const;
+        explicit StaticAddressMap(const char *map_data) : map_(map_data) {}
 
- private:
-  friend class ModuleComparer;
-  // Convenience types.
-  typedef StaticAddressMap* SelfPtr;
-  typedef StaticMap<AddressType, EntryType> AddressToEntryMap;
-  typedef typename AddressToEntryMap::const_iterator MapConstIterator;
+        // Locates the entry stored at the highest address less than or equal to
+        // the address argument.  If there is no such range, returns false.  The
+        // entry is returned in entry, which is a required argument.  If
+        // entry_address is not NULL, it will be set to the address that the entry
+        // was stored at.
+        bool Retrieve(const AddressType &address,
+                      const EntryType *&entry, AddressType *entry_address) const;
 
-  AddressToEntryMap map_;
-};
+    private:
+        friend class ModuleComparer;
+
+        // Convenience types.
+        typedef StaticAddressMap *SelfPtr;
+        typedef StaticMap <AddressType, EntryType> AddressToEntryMap;
+        typedef typename AddressToEntryMap::const_iterator MapConstIterator;
+
+        AddressToEntryMap map_;
+    };
 
 }  // namespace google_breakpad
 

@@ -50,48 +50,53 @@
 
 namespace google_breakpad {
 
-class ModuleComparer {
- public:
-  ModuleComparer(): fast_resolver_(new FastSourceLineResolver),
-                   basic_resolver_(new BasicSourceLineResolver) { }
-  ~ModuleComparer() {
-    delete fast_resolver_;
-    delete basic_resolver_;
-  }
+    class ModuleComparer {
+    public:
+        ModuleComparer() : fast_resolver_(new FastSourceLineResolver),
+                           basic_resolver_(new BasicSourceLineResolver) {}
 
-  // BasicSourceLineResolver loads its module using the symbol data,
-  // ModuleSerializer serialize the loaded module into a memory chunk,
-  // FastSourceLineResolver loads its module using the serialized memory chunk,
-  // Then, traverse both modules together and compare underlying data
-  // return true if both modules contain exactly same data.
-  bool Compare(const string& symbol_data);
+        ~ModuleComparer() {
+            delete fast_resolver_;
+            delete basic_resolver_;
+        }
 
- private:
-  typedef BasicSourceLineResolver::Module BasicModule;
-  typedef FastSourceLineResolver::Module FastModule;
-  typedef BasicSourceLineResolver::Function BasicFunc;
-  typedef FastSourceLineResolver::Function FastFunc;
-  typedef BasicSourceLineResolver::Line BasicLine;
-  typedef FastSourceLineResolver::Line FastLine;
-  typedef BasicSourceLineResolver::PublicSymbol BasicPubSymbol;
-  typedef FastSourceLineResolver::PublicSymbol FastPubSymbol;
-  typedef WindowsFrameInfo WFI;
+        // BasicSourceLineResolver loads its module using the symbol data,
+        // ModuleSerializer serialize the loaded module into a memory chunk,
+        // FastSourceLineResolver loads its module using the serialized memory chunk,
+        // Then, traverse both modules together and compare underlying data
+        // return true if both modules contain exactly same data.
+        bool Compare(const string &symbol_data);
 
-  bool CompareModule(const BasicModule *oldmodule,
-                     const FastModule *newmodule) const;
-  bool CompareFunction(const BasicFunc *oldfunc, const FastFunc *newfunc) const;
-  bool CompareLine(const BasicLine *oldline, const FastLine *newline) const;
-  bool ComparePubSymbol(const BasicPubSymbol*, const FastPubSymbol*) const;
-  bool CompareWFI(const WindowsFrameInfo&, const WindowsFrameInfo&) const;
+    private:
+        typedef BasicSourceLineResolver::Module BasicModule;
+        typedef FastSourceLineResolver::Module FastModule;
+        typedef BasicSourceLineResolver::Function BasicFunc;
+        typedef FastSourceLineResolver::Function FastFunc;
+        typedef BasicSourceLineResolver::Line BasicLine;
+        typedef FastSourceLineResolver::Line FastLine;
+        typedef BasicSourceLineResolver::PublicSymbol BasicPubSymbol;
+        typedef FastSourceLineResolver::PublicSymbol FastPubSymbol;
+        typedef WindowsFrameInfo WFI;
 
-  // Compare ContainedRangeMap
-  bool CompareCRM(const ContainedRangeMap<MemAddr, linked_ptr<WFI> >*,
-                  const StaticContainedRangeMap<MemAddr, char>*) const;
+        bool CompareModule(const BasicModule *oldmodule,
+                           const FastModule *newmodule) const;
 
-  FastSourceLineResolver *fast_resolver_;
-  BasicSourceLineResolver *basic_resolver_;
-  ModuleSerializer serializer_;
-};
+        bool CompareFunction(const BasicFunc *oldfunc, const FastFunc *newfunc) const;
+
+        bool CompareLine(const BasicLine *oldline, const FastLine *newline) const;
+
+        bool ComparePubSymbol(const BasicPubSymbol *, const FastPubSymbol *) const;
+
+        bool CompareWFI(const WindowsFrameInfo &, const WindowsFrameInfo &) const;
+
+        // Compare ContainedRangeMap
+        bool CompareCRM(const ContainedRangeMap <MemAddr, linked_ptr<WFI>> *,
+                        const StaticContainedRangeMap<MemAddr, char> *) const;
+
+        FastSourceLineResolver *fast_resolver_;
+        BasicSourceLineResolver *basic_resolver_;
+        ModuleSerializer serializer_;
+    };
 
 }  // namespace google_breakpad
 

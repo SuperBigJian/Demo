@@ -47,140 +47,141 @@ namespace google_breakpad {
 #define strtok_r strtok_s
 #endif
 
-template<typename V>
-bool CFIFrameInfo::FindCallerRegs(const RegisterValueMap<V>& registers,
-                                  const MemoryRegion& memory,
-                                  RegisterValueMap<V>* caller_registers) const {
-  // If there are not rules for both .ra and .cfa in effect at this address,
-  // don't use this CFI data for stack walking.
-  if (cfa_rule_.empty() || ra_rule_.empty())
-    return false;
+    template<typename V>
+    bool CFIFrameInfo::FindCallerRegs(const RegisterValueMap <V> &registers,
+                                      const MemoryRegion &memory,
+                                      RegisterValueMap <V> *caller_registers) const {
+        // If there are not rules for both .ra and .cfa in effect at this address,
+        // don't use this CFI data for stack walking.
+        if (cfa_rule_.empty() || ra_rule_.empty())
+            return false;
 
-  RegisterValueMap<V> working;
-  PostfixEvaluator<V> evaluator(&working, &memory);
+        RegisterValueMap <V> working;
+        PostfixEvaluator <V> evaluator(&working, &memory);
 
-  caller_registers->clear();
+        caller_registers->clear();
 
-  // First, compute the CFA.
-  V cfa;
-  working = registers;
-  if (!evaluator.EvaluateForValue(cfa_rule_, &cfa))
-    return false;
+        // First, compute the CFA.
+        V cfa;
+        working = registers;
+        if (!evaluator.EvaluateForValue(cfa_rule_, &cfa))
+            return false;
 
-  // Then, compute the return address.
-  V ra;
-  working = registers;
-  working[".cfa"] = cfa;
-  if (!evaluator.EvaluateForValue(ra_rule_, &ra))
-    return false;
+        // Then, compute the return address.
+        V ra;
+        working = registers;
+        working[".cfa"] = cfa;
+        if (!evaluator.EvaluateForValue(ra_rule_, &ra))
+            return false;
 
-  // Now, compute values for all the registers register_rules_ mentions.
-  for (RuleMap::const_iterator it = register_rules_.begin();
-       it != register_rules_.end(); it++) {
-    V value;
-    working = registers;
-    working[".cfa"] = cfa;
-    if (!evaluator.EvaluateForValue(it->second, &value))
-      continue;
-    (*caller_registers)[it->first] = value;
-  }
+        // Now, compute values for all the registers register_rules_ mentions.
+        for (RuleMap::const_iterator it = register_rules_.begin();
+             it != register_rules_.end(); it++) {
+            V value;
+            working = registers;
+            working[".cfa"] = cfa;
+            if (!evaluator.EvaluateForValue(it->second, &value))
+                continue;
+            (*caller_registers)[it->first] = value;
+        }
 
-  (*caller_registers)[".ra"] = ra;
-  (*caller_registers)[".cfa"] = cfa;
+        (*caller_registers)[".ra"] = ra;
+        (*caller_registers)[".cfa"] = cfa;
 
-  return true;
-}
+        return true;
+    }
 
 // Explicit instantiations for 32-bit and 64-bit architectures.
-template bool CFIFrameInfo::FindCallerRegs<uint32_t>(
-    const RegisterValueMap<uint32_t>& registers,
-    const MemoryRegion& memory,
-    RegisterValueMap<uint32_t>* caller_registers) const;
-template bool CFIFrameInfo::FindCallerRegs<uint64_t>(
-    const RegisterValueMap<uint64_t>& registers,
-    const MemoryRegion& memory,
-    RegisterValueMap<uint64_t>* caller_registers) const;
+    template bool CFIFrameInfo::FindCallerRegs<uint32_t>(
+            const RegisterValueMap <uint32_t> &registers,
+            const MemoryRegion &memory,
+            RegisterValueMap <uint32_t> *caller_registers) const;
 
-string CFIFrameInfo::Serialize() const {
-  std::ostringstream stream;
+    template bool CFIFrameInfo::FindCallerRegs<uint64_t>(
+            const RegisterValueMap <uint64_t> &registers,
+            const MemoryRegion &memory,
+            RegisterValueMap <uint64_t> *caller_registers) const;
 
-  if (!cfa_rule_.empty()) {
-    stream << ".cfa: " << cfa_rule_;
-  }
-  if (!ra_rule_.empty()) {
-    if (static_cast<std::streamoff>(stream.tellp()) != 0)
-      stream << " ";
-    stream << ".ra: " << ra_rule_;
-  }
-  for (RuleMap::const_iterator iter = register_rules_.begin();
-       iter != register_rules_.end();
-       ++iter) {
-    if (static_cast<std::streamoff>(stream.tellp()) != 0)
-      stream << " ";
-    stream << iter->first << ": " << iter->second;
-  }
+    string CFIFrameInfo::Serialize() const {
+        std::ostringstream stream;
 
-  return stream.str();
-}
+        if (!cfa_rule_.empty()) {
+            stream << ".cfa: " << cfa_rule_;
+        }
+        if (!ra_rule_.empty()) {
+            if (static_cast<std::streamoff>(stream.tellp()) != 0)
+                stream << " ";
+            stream << ".ra: " << ra_rule_;
+        }
+        for (RuleMap::const_iterator iter = register_rules_.begin();
+             iter != register_rules_.end();
+             ++iter) {
+            if (static_cast<std::streamoff>(stream.tellp()) != 0)
+                stream << " ";
+            stream << iter->first << ": " << iter->second;
+        }
 
-bool CFIRuleParser::Parse(const string& rule_set) {
-  size_t rule_set_len = rule_set.size();
-  scoped_array<char> working_copy(new char[rule_set_len + 1]);
-  memcpy(working_copy.get(), rule_set.data(), rule_set_len);
-  working_copy[rule_set_len] = '\0';
-
-  name_.clear();
-  expression_.clear();
-
-  char* cursor;
-  static const char token_breaks[] = " \t\r\n";
-  char* token = strtok_r(working_copy.get(), token_breaks, &cursor);
-
-  for (;;) {
-    // End of rule set?
-    if (!token) return Report();
-
-    // Register/pseudoregister name?
-    size_t token_len = strlen(token);
-    if (token_len >= 1 && token[token_len - 1] == ':') {
-      // Names can't be empty.
-      if (token_len < 2) return false;
-      // If there is any pending content, report it.
-      if (!name_.empty() || !expression_.empty()) {
-        if (!Report()) return false;
-      }
-      name_.assign(token, token_len - 1);
-      expression_.clear();
-    } else {
-      // Another expression component.
-      assert(token_len > 0); // strtok_r guarantees this, I think.
-      if (!expression_.empty())
-        expression_ += ' ';
-      expression_ += token;
+        return stream.str();
     }
-    token = strtok_r(NULL, token_breaks, &cursor);
-  }
-}
 
-bool CFIRuleParser::Report() {
-  if (name_.empty() || expression_.empty()) return false;
-  if (name_ == ".cfa") handler_->CFARule(expression_);
-  else if (name_ == ".ra") handler_->RARule(expression_);
-  else handler_->RegisterRule(name_, expression_);
-  return true;
-}
+    bool CFIRuleParser::Parse(const string &rule_set) {
+        size_t rule_set_len = rule_set.size();
+        scoped_array<char> working_copy(new char[rule_set_len + 1]);
+        memcpy(working_copy.get(), rule_set.data(), rule_set_len);
+        working_copy[rule_set_len] = '\0';
 
-void CFIFrameInfoParseHandler::CFARule(const string& expression) {
-  frame_info_->SetCFARule(expression);
-}
+        name_.clear();
+        expression_.clear();
 
-void CFIFrameInfoParseHandler::RARule(const string& expression) {
-  frame_info_->SetRARule(expression);
-}
+        char *cursor;
+        static const char token_breaks[] = " \t\r\n";
+        char *token = strtok_r(working_copy.get(), token_breaks, &cursor);
 
-void CFIFrameInfoParseHandler::RegisterRule(const string& name,
-                                            const string& expression) {
-  frame_info_->SetRegisterRule(name, expression);
-}
+        for (;;) {
+            // End of rule set?
+            if (!token) return Report();
+
+            // Register/pseudoregister name?
+            size_t token_len = strlen(token);
+            if (token_len >= 1 && token[token_len - 1] == ':') {
+                // Names can't be empty.
+                if (token_len < 2) return false;
+                // If there is any pending content, report it.
+                if (!name_.empty() || !expression_.empty()) {
+                    if (!Report()) return false;
+                }
+                name_.assign(token, token_len - 1);
+                expression_.clear();
+            } else {
+                // Another expression component.
+                assert(token_len > 0); // strtok_r guarantees this, I think.
+                if (!expression_.empty())
+                    expression_ += ' ';
+                expression_ += token;
+            }
+            token = strtok_r(NULL, token_breaks, &cursor);
+        }
+    }
+
+    bool CFIRuleParser::Report() {
+        if (name_.empty() || expression_.empty()) return false;
+        if (name_ == ".cfa") handler_->CFARule(expression_);
+        else if (name_ == ".ra") handler_->RARule(expression_);
+        else handler_->RegisterRule(name_, expression_);
+        return true;
+    }
+
+    void CFIFrameInfoParseHandler::CFARule(const string &expression) {
+        frame_info_->SetCFARule(expression);
+    }
+
+    void CFIFrameInfoParseHandler::RARule(const string &expression) {
+        frame_info_->SetRARule(expression);
+    }
+
+    void CFIFrameInfoParseHandler::RegisterRule(const string &name,
+                                                const string &expression) {
+        frame_info_->SetRegisterRule(name, expression);
+    }
 
 } // namespace google_breakpad

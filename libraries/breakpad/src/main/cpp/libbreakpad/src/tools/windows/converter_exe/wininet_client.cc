@@ -35,244 +35,256 @@
 
 namespace crash {
 
-namespace internal {
+    namespace internal {
 
 // This class implements HttpClient based on WinInet APIs.
-class WinInetClient : public HttpClient {
- public:
-  virtual ~WinInetClient() {}
-  virtual bool CrackUrl(const TCHAR* url,
-                        DWORD flags,
-                        TCHAR* scheme,
-                        size_t scheme_buffer_length,
-                        TCHAR* host,
-                        size_t host_buffer_length,
-                        TCHAR* uri,
-                        size_t uri_buffer_length,
-                        int* port) const;
-  virtual bool Open(const TCHAR* user_agent,
-                    DWORD access_type,
-                    const TCHAR* proxy_name,
-                    const TCHAR* proxy_bypass,
-                    HttpHandle* session_handle) const;
-  virtual bool Connect(HttpHandle session_handle,
-                       const TCHAR* server,
-                       int port,
-                       HttpHandle* connection_handle) const;
-  virtual bool OpenRequest(HttpHandle connection_handle,
-                           const TCHAR* verb,
-                           const TCHAR* uri,
-                           const TCHAR* version,
-                           const TCHAR* referrer,
-                           bool is_secure,
-                           HttpHandle* request_handle) const;
-  virtual bool SendRequest(HttpHandle request_handle,
-                           const TCHAR* headers,
-                           DWORD headers_length) const;
-  virtual bool ReceiveResponse(HttpHandle request_handle) const;
-  virtual bool GetHttpStatusCode(HttpHandle request_handle,
-                                 int* status_code) const;
-  virtual bool GetContentLength(HttpHandle request_handle,
-                                DWORD* content_length) const;
-  virtual bool ReadData(HttpHandle request_handle,
-                        void* buffer,
-                        DWORD buffer_length,
-                        DWORD* bytes_read) const;
-  virtual bool Close(HttpHandle handle) const;
+        class WinInetClient : public HttpClient {
+        public:
+            virtual ~WinInetClient() {}
 
- private:
-  static DWORD MapAccessType(DWORD access_type);
-  static HINTERNET ToHINTERNET(HttpHandle handle);
-  static HttpHandle FromHINTERNET(HINTERNET handle);
-};
+            virtual bool CrackUrl(const TCHAR *url,
+                                  DWORD flags,
+                                  TCHAR *scheme,
+                                  size_t scheme_buffer_length,
+                                  TCHAR *host,
+                                  size_t host_buffer_length,
+                                  TCHAR *uri,
+                                  size_t uri_buffer_length,
+                                  int *port) const;
 
-bool WinInetClient::CrackUrl(const TCHAR* url,
-                             DWORD flags,
-                             TCHAR* scheme,
-                             size_t scheme_buffer_length,
-                             TCHAR* host,
-                             size_t host_buffer_length,
-                             TCHAR* uri,
-                             size_t uri_buffer_length,
-                             int* port) const {
-  assert(url);
-  assert(scheme);
-  assert(host);
-  assert(uri);
-  assert(port);
+            virtual bool Open(const TCHAR *user_agent,
+                              DWORD access_type,
+                              const TCHAR *proxy_name,
+                              const TCHAR *proxy_bypass,
+                              HttpHandle *session_handle) const;
 
-  URL_COMPONENTS url_comp = {0};
-  url_comp.dwStructSize = sizeof(url_comp);
-  url_comp.lpszScheme = scheme;
-  url_comp.dwSchemeLength = static_cast<DWORD>(scheme_buffer_length);
-  url_comp.lpszHostName = host;
-  url_comp.dwHostNameLength = static_cast<DWORD>(host_buffer_length);
-  url_comp.lpszUrlPath = uri;
-  url_comp.dwUrlPathLength = static_cast<DWORD>(uri_buffer_length);
+            virtual bool Connect(HttpHandle session_handle,
+                                 const TCHAR *server,
+                                 int port,
+                                 HttpHandle *connection_handle) const;
 
-  bool result = !!::InternetCrackUrl(url, 0, flags, &url_comp);
-  if (result) {
-    *port = static_cast<int>(url_comp.nPort);
-  }
-  return result;
-}
+            virtual bool OpenRequest(HttpHandle connection_handle,
+                                     const TCHAR *verb,
+                                     const TCHAR *uri,
+                                     const TCHAR *version,
+                                     const TCHAR *referrer,
+                                     bool is_secure,
+                                     HttpHandle *request_handle) const;
 
-bool WinInetClient::Open(const TCHAR* user_agent,
-                         DWORD access_type,
-                         const TCHAR* proxy_name,
-                         const TCHAR* proxy_bypass,
-                         HttpHandle* session_handle)  const {
-  *session_handle = FromHINTERNET(::InternetOpen(user_agent,
-                                                 MapAccessType(access_type),
-                                                 proxy_name,
-                                                 proxy_bypass,
-                                                 0));
-  return !!(*session_handle);
-}
+            virtual bool SendRequest(HttpHandle request_handle,
+                                     const TCHAR *headers,
+                                     DWORD headers_length) const;
 
-bool WinInetClient::Connect(HttpHandle session_handle,
-                            const TCHAR* server,
-                            int port,
-                            HttpHandle* connection_handle) const {
-  assert(server);
+            virtual bool ReceiveResponse(HttpHandle request_handle) const;
 
-  // Uses NULL user name and password to connect. Always uses http service.
-  *connection_handle = FromHINTERNET(::InternetConnect(
-                                         ToHINTERNET(session_handle),
-                                         server,
-                                         static_cast<INTERNET_PORT>(port),
-                                         NULL,
-                                         NULL,
-                                         INTERNET_SERVICE_HTTP,
-                                         0,
-                                         0));
-  return !!(*connection_handle);
-}
+            virtual bool GetHttpStatusCode(HttpHandle request_handle,
+                                           int *status_code) const;
 
-bool WinInetClient::OpenRequest(HttpHandle connection_handle,
-                                const TCHAR* verb,
-                                const TCHAR* uri,
-                                const TCHAR* version,
-                                const TCHAR* referrer,
-                                bool is_secure,
-                                HttpHandle* request_handle) const {
-  assert(connection_handle);
-  assert(verb);
-  assert(uri);
+            virtual bool GetContentLength(HttpHandle request_handle,
+                                          DWORD *content_length) const;
 
-  *request_handle = FromHINTERNET(::HttpOpenRequest(
-                                      ToHINTERNET(connection_handle),
-                                      verb,
-                                      uri,
-                                      version,
-                                      referrer,
-                                      NULL,
-                                      is_secure ? INTERNET_FLAG_SECURE : 0,
-                                      NULL));
-  return !!(*request_handle);
-}
+            virtual bool ReadData(HttpHandle request_handle,
+                                  void *buffer,
+                                  DWORD buffer_length,
+                                  DWORD *bytes_read) const;
 
-bool WinInetClient::SendRequest(HttpHandle request_handle,
-                                const TCHAR* headers,
-                                DWORD headers_length) const {
-  assert(request_handle);
+            virtual bool Close(HttpHandle handle) const;
 
-  return !!::HttpSendRequest(ToHINTERNET(request_handle),
-                             headers,
-                             headers_length,
-                             NULL,
-                             0);
-}
+        private:
+            static DWORD MapAccessType(DWORD access_type);
 
-bool WinInetClient::ReceiveResponse(HttpHandle) const {
-  return true;
-}
+            static HINTERNET ToHINTERNET(HttpHandle handle);
 
-bool WinInetClient::GetHttpStatusCode(HttpHandle request_handle,
-                                      int* status_code) const {
-  assert(request_handle);
+            static HttpHandle FromHINTERNET(HINTERNET handle);
+        };
 
-  TCHAR http_status_string[4] = {0};
-  DWORD http_status_string_size = sizeof(http_status_string);
-  if (!::HttpQueryInfo(ToHINTERNET(request_handle),
-                       HTTP_QUERY_STATUS_CODE,
-                       static_cast<void*>(&http_status_string),
-                       &http_status_string_size,
-                       0)) {
-    return false;
-  }
+        bool WinInetClient::CrackUrl(const TCHAR *url,
+                                     DWORD flags,
+                                     TCHAR *scheme,
+                                     size_t scheme_buffer_length,
+                                     TCHAR *host,
+                                     size_t host_buffer_length,
+                                     TCHAR *uri,
+                                     size_t uri_buffer_length,
+                                     int *port) const {
+            assert(url);
+            assert(scheme);
+            assert(host);
+            assert(uri);
+            assert(port);
 
-  *status_code = _tcstol(http_status_string, NULL, 10);
-  return true;
-}
+            URL_COMPONENTS url_comp = {0};
+            url_comp.dwStructSize = sizeof(url_comp);
+            url_comp.lpszScheme = scheme;
+            url_comp.dwSchemeLength = static_cast<DWORD>(scheme_buffer_length);
+            url_comp.lpszHostName = host;
+            url_comp.dwHostNameLength = static_cast<DWORD>(host_buffer_length);
+            url_comp.lpszUrlPath = uri;
+            url_comp.dwUrlPathLength = static_cast<DWORD>(uri_buffer_length);
 
-bool WinInetClient::GetContentLength(HttpHandle request_handle,
-                                     DWORD* content_length) const {
-  assert(request_handle);
-  assert(content_length);
+            bool result = !!::InternetCrackUrl(url, 0, flags, &url_comp);
+            if (result) {
+                *port = static_cast<int>(url_comp.nPort);
+            }
+            return result;
+        }
 
-  TCHAR content_length_string[11];
-  DWORD content_length_string_size = sizeof(content_length_string);
-  if (!::HttpQueryInfo(ToHINTERNET(request_handle),
-                       HTTP_QUERY_CONTENT_LENGTH,
-                       static_cast<void*>(&content_length_string),
-                       &content_length_string_size,
-                       0)) {
-    *content_length = kUnknownContentLength;
-  } else {
-    *content_length = wcstol(content_length_string, NULL, 10);
-  }
-  return true;
-}
+        bool WinInetClient::Open(const TCHAR *user_agent,
+                                 DWORD access_type,
+                                 const TCHAR *proxy_name,
+                                 const TCHAR *proxy_bypass,
+                                 HttpHandle *session_handle) const {
+            *session_handle = FromHINTERNET(::InternetOpen(user_agent,
+                                                           MapAccessType(access_type),
+                                                           proxy_name,
+                                                           proxy_bypass,
+                                                           0));
+            return !!(*session_handle);
+        }
 
-bool WinInetClient::ReadData(HttpHandle request_handle,
-                             void* buffer,
-                             DWORD buffer_length,
-                             DWORD* bytes_read) const {
-  assert(request_handle);
-  assert(buffer);
-  assert(bytes_read);
+        bool WinInetClient::Connect(HttpHandle session_handle,
+                                    const TCHAR *server,
+                                    int port,
+                                    HttpHandle *connection_handle) const {
+            assert(server);
 
-  DWORD bytes_read_local = 0;
-  if (!::InternetReadFile(ToHINTERNET(request_handle),
-                          buffer,
-                          buffer_length,
-                          &bytes_read_local)) {
-    return false;
-  }
-  *bytes_read = bytes_read_local;
-  return true;
-}
+            // Uses NULL user name and password to connect. Always uses http service.
+            *connection_handle = FromHINTERNET(::InternetConnect(
+                    ToHINTERNET(session_handle),
+                    server,
+                    static_cast<INTERNET_PORT>(port),
+                    NULL,
+                    NULL,
+                    INTERNET_SERVICE_HTTP,
+                    0,
+                    0));
+            return !!(*connection_handle);
+        }
 
-bool WinInetClient::Close(HttpHandle handle) const {
-  assert(handle);
-  return !!::InternetCloseHandle(ToHINTERNET(handle));
-}
+        bool WinInetClient::OpenRequest(HttpHandle connection_handle,
+                                        const TCHAR *verb,
+                                        const TCHAR *uri,
+                                        const TCHAR *version,
+                                        const TCHAR *referrer,
+                                        bool is_secure,
+                                        HttpHandle *request_handle) const {
+            assert(connection_handle);
+            assert(verb);
+            assert(uri);
 
-DWORD WinInetClient::MapAccessType(DWORD access_type) {
-  switch (static_cast<AccessType>(access_type)) {
-    case ACCESS_TYPE_PRECONFIG:
-    default:
-      return INTERNET_OPEN_TYPE_PRECONFIG;
-    case ACCESS_TYPE_DIRECT:
-      return INTERNET_OPEN_TYPE_DIRECT;
-    case ACCESS_TYPE_PROXY:
-      return INTERNET_OPEN_TYPE_PROXY;
-  }
-}
+            *request_handle = FromHINTERNET(::HttpOpenRequest(
+                    ToHINTERNET(connection_handle),
+                    verb,
+                    uri,
+                    version,
+                    referrer,
+                    NULL,
+                    is_secure ? INTERNET_FLAG_SECURE : 0,
+                    NULL));
+            return !!(*request_handle);
+        }
 
-HINTERNET WinInetClient::ToHINTERNET(HttpHandle handle) {
-  return static_cast<HINTERNET>(handle);
-}
+        bool WinInetClient::SendRequest(HttpHandle request_handle,
+                                        const TCHAR *headers,
+                                        DWORD headers_length) const {
+            assert(request_handle);
 
-HttpHandle WinInetClient::FromHINTERNET(HINTERNET handle) {
-  return static_cast<HttpHandle>(handle);
-}
+            return !!::HttpSendRequest(ToHINTERNET(request_handle),
+                                       headers,
+                                       headers_length,
+                                       NULL,
+                                       0);
+        }
 
-}  // namespace internal
+        bool WinInetClient::ReceiveResponse(HttpHandle) const {
+            return true;
+        }
 
-HttpClient* CreateWinInetClient(const TCHAR*) {
-  return new internal::WinInetClient();
-}
+        bool WinInetClient::GetHttpStatusCode(HttpHandle request_handle,
+                                              int *status_code) const {
+            assert(request_handle);
+
+            TCHAR http_status_string[4] = {0};
+            DWORD http_status_string_size = sizeof(http_status_string);
+            if (!::HttpQueryInfo(ToHINTERNET(request_handle),
+                                 HTTP_QUERY_STATUS_CODE,
+                                 static_cast<void *>(&http_status_string),
+                                 &http_status_string_size,
+                                 0)) {
+                return false;
+            }
+
+            *status_code = _tcstol(http_status_string, NULL, 10);
+            return true;
+        }
+
+        bool WinInetClient::GetContentLength(HttpHandle request_handle,
+                                             DWORD *content_length) const {
+            assert(request_handle);
+            assert(content_length);
+
+            TCHAR content_length_string[11];
+            DWORD content_length_string_size = sizeof(content_length_string);
+            if (!::HttpQueryInfo(ToHINTERNET(request_handle),
+                                 HTTP_QUERY_CONTENT_LENGTH,
+                                 static_cast<void *>(&content_length_string),
+                                 &content_length_string_size,
+                                 0)) {
+                *content_length = kUnknownContentLength;
+            } else {
+                *content_length = wcstol(content_length_string, NULL, 10);
+            }
+            return true;
+        }
+
+        bool WinInetClient::ReadData(HttpHandle request_handle,
+                                     void *buffer,
+                                     DWORD buffer_length,
+                                     DWORD *bytes_read) const {
+            assert(request_handle);
+            assert(buffer);
+            assert(bytes_read);
+
+            DWORD bytes_read_local = 0;
+            if (!::InternetReadFile(ToHINTERNET(request_handle),
+                                    buffer,
+                                    buffer_length,
+                                    &bytes_read_local)) {
+                return false;
+            }
+            *bytes_read = bytes_read_local;
+            return true;
+        }
+
+        bool WinInetClient::Close(HttpHandle handle) const {
+            assert(handle);
+            return !!::InternetCloseHandle(ToHINTERNET(handle));
+        }
+
+        DWORD WinInetClient::MapAccessType(DWORD access_type) {
+            switch (static_cast<AccessType>(access_type)) {
+                case ACCESS_TYPE_PRECONFIG:
+                default:
+                    return INTERNET_OPEN_TYPE_PRECONFIG;
+                case ACCESS_TYPE_DIRECT:
+                    return INTERNET_OPEN_TYPE_DIRECT;
+                case ACCESS_TYPE_PROXY:
+                    return INTERNET_OPEN_TYPE_PROXY;
+            }
+        }
+
+        HINTERNET WinInetClient::ToHINTERNET(HttpHandle handle) {
+            return static_cast<HINTERNET>(handle);
+        }
+
+        HttpHandle WinInetClient::FromHINTERNET(HINTERNET handle) {
+            return static_cast<HttpHandle>(handle);
+        }
+
+    }  // namespace internal
+
+    HttpClient *CreateWinInetClient(const TCHAR *) {
+        return new internal::WinInetClient();
+    }
 
 }  // namespace crash

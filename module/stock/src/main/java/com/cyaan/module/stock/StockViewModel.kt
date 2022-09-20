@@ -11,7 +11,6 @@ import com.cyaan.module.stock.network.StockDataRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
@@ -22,9 +21,9 @@ class StockViewModel @Inject constructor(private val stockDataRepository: StockD
 
 
     val stockState: LiveData<KResult<List<StockData>>> = stockListFlow.stateIn(
-         scope = viewModelScope,
-         started = SharingStarted.WhileSubscribed(5_000),
-         initialValue = KResult.Success(emptyList())
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = KResult.Success(emptyList())
     ).asLiveData()
 
 }

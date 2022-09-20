@@ -41,38 +41,77 @@
 using namespace google_breakpad;
 
 namespace {
-typedef testing::Test DirectoryReaderTest;
+    typedef testing::Test DirectoryReaderTest;
 }
 
-TEST(DirectoryReaderTest, CompareResults) {
-  std::set<string> dent_set;
+TEST(DirectoryReaderTest, CompareResults
+) {
+std::set <string> dent_set;
 
-  DIR* const dir = opendir("/proc/self");
-  ASSERT_TRUE(dir != NULL);
+DIR *const dir = opendir("/proc/self");
+ASSERT_TRUE(dir
+!= NULL);
 
-  struct dirent* dent;
-  while ((dent = readdir(dir)))
-    dent_set.insert(dent->d_name);
+struct dirent *dent;
+while ((
+dent = readdir(dir)
+))
+dent_set.
+insert(dent
+->d_name);
 
-  closedir(dir);
+closedir(dir);
 
-  const int fd = open("/proc/self", O_DIRECTORY | O_RDONLY);
-  ASSERT_GE(fd, 0);
+const int fd = open("/proc/self", O_DIRECTORY | O_RDONLY);
+ASSERT_GE(fd,
+0);
 
-  DirectoryReader dir_reader(fd);
-  unsigned seen = 0;
+DirectoryReader dir_reader(fd);
+unsigned seen = 0;
 
-  const char* name;
-  while (dir_reader.GetNextEntry(&name)) {
-    ASSERT_TRUE(dent_set.find(name) != dent_set.end());
-    seen++;
-    dir_reader.PopEntry();
-  }
+const char *name;
+while (dir_reader.
+GetNextEntry(&name)
+) {
+ASSERT_TRUE(dent_set
+.
+find(name)
+!= dent_set.
 
-  ASSERT_TRUE(dent_set.find("status") != dent_set.end());
-  ASSERT_TRUE(dent_set.find("stat") != dent_set.end());
-  ASSERT_TRUE(dent_set.find("cmdline") != dent_set.end());
+end()
 
-  ASSERT_EQ(dent_set.size(), seen);
-  close(fd);
+);
+seen++;
+dir_reader.
+
+PopEntry();
+
+}
+
+ASSERT_TRUE(dent_set
+.find("status") != dent_set.
+
+end()
+
+);
+ASSERT_TRUE(dent_set
+.find("stat") != dent_set.
+
+end()
+
+);
+ASSERT_TRUE(dent_set
+.find("cmdline") != dent_set.
+
+end()
+
+);
+
+ASSERT_EQ(dent_set
+.
+
+size(), seen
+
+);
+close(fd);
 }

@@ -46,70 +46,71 @@
 
 namespace google_breakpad {
 
-class CodeModules;
+    class CodeModules;
 
-class StackwalkerARM64 : public Stackwalker {
- public:
-  // context is an arm64 context object that gives access to arm64-specific
-  // register state corresponding to the innermost called frame to be
-  // included in the stack.  The other arguments are passed directly through
-  // to the base Stackwalker constructor.
-  StackwalkerARM64(const SystemInfo* system_info,
-                   const MDRawContextARM64* context,
-                   MemoryRegion* memory,
-                   const CodeModules* modules,
-                   StackFrameSymbolizer* frame_symbolizer);
+    class StackwalkerARM64 : public Stackwalker {
+    public:
+        // context is an arm64 context object that gives access to arm64-specific
+        // register state corresponding to the innermost called frame to be
+        // included in the stack.  The other arguments are passed directly through
+        // to the base Stackwalker constructor.
+        StackwalkerARM64(const SystemInfo *system_info,
+                         const MDRawContextARM64 *context,
+                         MemoryRegion *memory,
+                         const CodeModules *modules,
+                         StackFrameSymbolizer *frame_symbolizer);
 
-  // Change the context validity mask of the frame returned by
-  // GetContextFrame to VALID. This is only for use by unit tests; the
-  // default behavior is correct for all application code.
-  void SetContextFrameValidity(uint64_t valid) {
-    context_frame_validity_ = valid;
-  }
+        // Change the context validity mask of the frame returned by
+        // GetContextFrame to VALID. This is only for use by unit tests; the
+        // default behavior is correct for all application code.
+        void SetContextFrameValidity(uint64_t valid) {
+            context_frame_validity_ = valid;
+        }
 
- private:
-  // Strip pointer authentication codes from an address.
-  uint64_t PtrauthStrip(uint64_t ptr);
+    private:
+        // Strip pointer authentication codes from an address.
+        uint64_t PtrauthStrip(uint64_t ptr);
 
-  // Implementation of Stackwalker, using arm64 context and stack conventions.
-  virtual StackFrame* GetContextFrame();
-  virtual StackFrame* GetCallerFrame(const CallStack* stack,
-                                     bool stack_scan_allowed);
+        // Implementation of Stackwalker, using arm64 context and stack conventions.
+        virtual StackFrame *GetContextFrame();
 
-  // Use cfi_frame_info (derived from STACK CFI records) to construct
-  // the frame that called frames.back(). The caller takes ownership
-  // of the returned frame. Return NULL on failure.
-  StackFrameARM64* GetCallerByCFIFrameInfo(const vector<StackFrame*>& frames,
-                                           CFIFrameInfo* cfi_frame_info);
+        virtual StackFrame *GetCallerFrame(const CallStack *stack,
+                                           bool stack_scan_allowed);
 
-  // Use the frame pointer. The caller takes ownership of the returned frame.
-  // Return NULL on failure.
-  StackFrameARM64* GetCallerByFramePointer(const vector<StackFrame*>& frames);
+        // Use cfi_frame_info (derived from STACK CFI records) to construct
+        // the frame that called frames.back(). The caller takes ownership
+        // of the returned frame. Return NULL on failure.
+        StackFrameARM64 *GetCallerByCFIFrameInfo(const vector<StackFrame *> &frames,
+                                                 CFIFrameInfo *cfi_frame_info);
 
-  // Scan the stack for plausible return addresses. The caller takes ownership
-  // of the returned frame. Return NULL on failure.
-  StackFrameARM64* GetCallerByStackScan(const vector<StackFrame*>& frames);
+        // Use the frame pointer. The caller takes ownership of the returned frame.
+        // Return NULL on failure.
+        StackFrameARM64 *GetCallerByFramePointer(const vector<StackFrame *> &frames);
 
-  // GetCallerByFramePointer() depends on the previous frame having recovered
-  // x30($LR) which may not have been done when using CFI.
-  // This function recovers $LR in the previous frame by using the frame-pointer
-  // two frames back to read it from the stack.
-  void CorrectRegLRByFramePointer(const vector<StackFrame*>& frames,
-                                  StackFrameARM64* last_frame);
+        // Scan the stack for plausible return addresses. The caller takes ownership
+        // of the returned frame. Return NULL on failure.
+        StackFrameARM64 *GetCallerByStackScan(const vector<StackFrame *> &frames);
 
-  // Stores the CPU context corresponding to the youngest stack frame, to
-  // be returned by GetContextFrame.
-  const MDRawContextARM64* context_;
+        // GetCallerByFramePointer() depends on the previous frame having recovered
+        // x30($LR) which may not have been done when using CFI.
+        // This function recovers $LR in the previous frame by using the frame-pointer
+        // two frames back to read it from the stack.
+        void CorrectRegLRByFramePointer(const vector<StackFrame *> &frames,
+                                        StackFrameARM64 *last_frame);
 
-  // Validity mask for youngest stack frame. This is always
-  // CONTEXT_VALID_ALL in real use; it is only changeable for the sake of
-  // unit tests.
-  uint64_t context_frame_validity_;
+        // Stores the CPU context corresponding to the youngest stack frame, to
+        // be returned by GetContextFrame.
+        const MDRawContextARM64 *context_;
 
-  // A mask of the valid address bits, determined from the address range of
-  // modules_.
-  uint64_t address_range_mask_;
-};
+        // Validity mask for youngest stack frame. This is always
+        // CONTEXT_VALID_ALL in real use; it is only changeable for the sake of
+        // unit tests.
+        uint64_t context_frame_validity_;
+
+        // A mask of the valid address bits, determined from the address range of
+        // modules_.
+        uint64_t address_range_mask_;
+    };
 
 
 }  // namespace google_breakpad

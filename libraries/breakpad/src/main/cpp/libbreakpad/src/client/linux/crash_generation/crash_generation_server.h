@@ -38,97 +38,98 @@
 
 namespace google_breakpad {
 
-class ClientInfo;
+    class ClientInfo;
 
-class CrashGenerationServer {
-public:
-  // WARNING: callbacks may be invoked on a different thread
-  // than that which creates the CrashGenerationServer.  They must
-  // be thread safe.
-  typedef void (*OnClientDumpRequestCallback)(void* context,
-                                              const ClientInfo* client_info,
-                                              const string* file_path);
+    class CrashGenerationServer {
+    public:
+        // WARNING: callbacks may be invoked on a different thread
+        // than that which creates the CrashGenerationServer.  They must
+        // be thread safe.
+        typedef void (*OnClientDumpRequestCallback)(void *context,
+                                                    const ClientInfo *client_info,
+                                                    const string *file_path);
 
-  typedef void (*OnClientExitingCallback)(void* context,
-                                          const ClientInfo* client_info);
+        typedef void (*OnClientExitingCallback)(void *context,
+                                                const ClientInfo *client_info);
 
-  // Create an instance with the given parameters.
-  //
-  // Parameter listen_fd: The server fd created by CreateReportChannel().
-  // Parameter dump_callback: Callback for a client crash dump request.
-  // Parameter dump_context: Context for client crash dump request callback.
-  // Parameter exit_callback: Callback for client process exit.
-  // Parameter exit_context: Context for client exit callback.
-  // Parameter generate_dumps: Whether to automatically generate dumps.
-  //     Client code of this class might want to generate dumps explicitly
-  //     in the crash dump request callback. In that case, false can be
-  //     passed for this parameter.
-  // Parameter dump_path: Path for generating dumps; required only if true is
-  //     passed for generateDumps parameter; NULL can be passed otherwise.
-  CrashGenerationServer(const int listen_fd,
-                        OnClientDumpRequestCallback dump_callback,
-                        void* dump_context,
-                        OnClientExitingCallback exit_callback,
-                        void* exit_context,
-                        bool generate_dumps,
-                        const string* dump_path);
+        // Create an instance with the given parameters.
+        //
+        // Parameter listen_fd: The server fd created by CreateReportChannel().
+        // Parameter dump_callback: Callback for a client crash dump request.
+        // Parameter dump_context: Context for client crash dump request callback.
+        // Parameter exit_callback: Callback for client process exit.
+        // Parameter exit_context: Context for client exit callback.
+        // Parameter generate_dumps: Whether to automatically generate dumps.
+        //     Client code of this class might want to generate dumps explicitly
+        //     in the crash dump request callback. In that case, false can be
+        //     passed for this parameter.
+        // Parameter dump_path: Path for generating dumps; required only if true is
+        //     passed for generateDumps parameter; NULL can be passed otherwise.
+        CrashGenerationServer(const int listen_fd,
+                              OnClientDumpRequestCallback dump_callback,
+                              void *dump_context,
+                              OnClientExitingCallback exit_callback,
+                              void *exit_context,
+                              bool generate_dumps,
+                              const string *dump_path);
 
-  ~CrashGenerationServer();
+        ~CrashGenerationServer();
 
-  // Perform initialization steps needed to start listening to clients.
-  //
-  // Return true if initialization is successful; false otherwise.
-  bool Start();
+        // Perform initialization steps needed to start listening to clients.
+        //
+        // Return true if initialization is successful; false otherwise.
+        bool Start();
 
-  // Stop the server.
-  void Stop();
+        // Stop the server.
+        void Stop();
 
-  // Create a "channel" that can be used by clients to report crashes
-  // to a CrashGenerationServer.  |*server_fd| should be passed to
-  // this class's constructor, and |*client_fd| should be passed to
-  // the ExceptionHandler constructor in the client process.
-  static bool CreateReportChannel(int* server_fd, int* client_fd);
+        // Create a "channel" that can be used by clients to report crashes
+        // to a CrashGenerationServer.  |*server_fd| should be passed to
+        // this class's constructor, and |*client_fd| should be passed to
+        // the ExceptionHandler constructor in the client process.
+        static bool CreateReportChannel(int *server_fd, int *client_fd);
 
-private:
-  // Run the server's event loop
-  void Run();
+    private:
+        // Run the server's event loop
+        void Run();
 
-  // Invoked when an child process (client) event occurs
-  // Returning true => "keep running", false => "exit loop"
-  bool ClientEvent(short revents);
+        // Invoked when an child process (client) event occurs
+        // Returning true => "keep running", false => "exit loop"
+        bool ClientEvent(short revents);
 
-  // Invoked when the controlling thread (main) event occurs
-  // Returning true => "keep running", false => "exit loop"
-  bool ControlEvent(short revents);
+        // Invoked when the controlling thread (main) event occurs
+        // Returning true => "keep running", false => "exit loop"
+        bool ControlEvent(short revents);
 
-  // Return a unique filename at which a minidump can be written
-  bool MakeMinidumpFilename(string& outFilename);
+        // Return a unique filename at which a minidump can be written
+        bool MakeMinidumpFilename(string &outFilename);
 
-  // Trampoline to |Run()|
-  static void* ThreadMain(void* arg);
+        // Trampoline to |Run()|
+        static void *ThreadMain(void *arg);
 
-  int server_fd_;
+        int server_fd_;
 
-  OnClientDumpRequestCallback dump_callback_;
-  void* dump_context_;
+        OnClientDumpRequestCallback dump_callback_;
+        void *dump_context_;
 
-  OnClientExitingCallback exit_callback_;
-  void* exit_context_;
+        OnClientExitingCallback exit_callback_;
+        void *exit_context_;
 
-  bool generate_dumps_;
+        bool generate_dumps_;
 
-  string dump_dir_;
+        string dump_dir_;
 
-  bool started_;
+        bool started_;
 
-  pthread_t thread_;
-  int control_pipe_in_;
-  int control_pipe_out_;
+        pthread_t thread_;
+        int control_pipe_in_;
+        int control_pipe_out_;
 
-  // disable these
-  CrashGenerationServer(const CrashGenerationServer&);
-  CrashGenerationServer& operator=(const CrashGenerationServer&);
-};
+        // disable these
+        CrashGenerationServer(const CrashGenerationServer &);
+
+        CrashGenerationServer &operator=(const CrashGenerationServer &);
+    };
 
 } // namespace google_breakpad
 

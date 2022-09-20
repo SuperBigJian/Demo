@@ -34,44 +34,44 @@
 
 namespace google_breakpad {
 
-typedef enum {
-  notPeCoff = 0,
-  peWithoutBuildId = 1,
-  peWithBuildId = 2
-} PEFileFormat;
+    typedef enum {
+        notPeCoff = 0,
+        peWithoutBuildId = 1,
+        peWithBuildId = 2
+    } PEFileFormat;
 
-class PEFile {
- public:
-  /**
-   * Attempts to parse RSDS_DEBUG_FORMAT record from a PE (Portable
-   * Executable) file. To do this we check whether the loaded file is a PE
-   * file, and if it is - try to find IMAGE_DEBUG_DIRECTORY structure with
-   * its type set to IMAGE_DEBUG_TYPE_CODEVIEW.
-   *
-   * @param filename Filename for the module to parse.
-   * @param debug_info RSDS_DEBUG_FORMAT struct to be populated with PE debug
-   * info (GUID and age).
-   * @return
-   *   notPeCoff: not PE/COFF file;
-   *   peWithoutBuildId: a PE/COFF file but build-id is not set;
-   *   peWithBuildId: a PE/COFF file and build-id is set.
-   */
-  static PEFileFormat TryGetDebugInfo(const char* filename,
-                                      PRSDS_DEBUG_FORMAT debug_info);
+    class PEFile {
+    public:
+        /**
+         * Attempts to parse RSDS_DEBUG_FORMAT record from a PE (Portable
+         * Executable) file. To do this we check whether the loaded file is a PE
+         * file, and if it is - try to find IMAGE_DEBUG_DIRECTORY structure with
+         * its type set to IMAGE_DEBUG_TYPE_CODEVIEW.
+         *
+         * @param filename Filename for the module to parse.
+         * @param debug_info RSDS_DEBUG_FORMAT struct to be populated with PE debug
+         * info (GUID and age).
+         * @return
+         *   notPeCoff: not PE/COFF file;
+         *   peWithoutBuildId: a PE/COFF file but build-id is not set;
+         *   peWithBuildId: a PE/COFF file and build-id is set.
+         */
+        static PEFileFormat TryGetDebugInfo(const char *filename,
+                                            PRSDS_DEBUG_FORMAT debug_info);
 
- private:
-  template <class TStruct>
-  static const TStruct* TryReadStruct(const void* base,
-                                      const DWORD position,
-                                      const size_t file_size) {
-    if (position + sizeof(TStruct) >= file_size){
-      return nullptr;
-    }
+    private:
+        template<class TStruct>
+        static const TStruct *TryReadStruct(const void *base,
+                                            const DWORD position,
+                                            const size_t file_size) {
+            if (position + sizeof(TStruct) >= file_size) {
+                return nullptr;
+            }
 
-    const void* ptr = static_cast<const char*>(base) + position;
-    return reinterpret_cast<const TStruct*>(ptr);
-  }
-};
+            const void *ptr = static_cast<const char *>(base) + position;
+            return reinterpret_cast<const TStruct *>(ptr);
+        }
+    };
 
 }  // namespace google_breakpad
 #endif  // CLIENT_LINUX_MINIDUMP_WRITER_PE_FILE_H_

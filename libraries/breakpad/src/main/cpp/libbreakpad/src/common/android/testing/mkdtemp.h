@@ -53,57 +53,57 @@
 
 namespace {
 
-char* breakpad_mkdtemp(char* path) {
-  if (path == NULL) {
-    errno = EINVAL;
-    return NULL;
-  }
+    char *breakpad_mkdtemp(char *path) {
+        if (path == NULL) {
+            errno = EINVAL;
+            return NULL;
+        }
 
-  // 'path' must be terminated with six 'X'
-  const char kSuffix[] = "XXXXXX";
-  const size_t kSuffixLen = strlen(kSuffix);
-  char* path_end = path + strlen(path);
+        // 'path' must be terminated with six 'X'
+        const char kSuffix[] = "XXXXXX";
+        const size_t kSuffixLen = strlen(kSuffix);
+        char *path_end = path + strlen(path);
 
-  if (static_cast<size_t>(path_end - path) < kSuffixLen ||
-      memcmp(path_end - kSuffixLen, kSuffix, kSuffixLen) != 0) {
-    errno = EINVAL;
-    return NULL;
-  }
+        if (static_cast<size_t>(path_end - path) < kSuffixLen ||
+            memcmp(path_end - kSuffixLen, kSuffix, kSuffixLen) != 0) {
+            errno = EINVAL;
+            return NULL;
+        }
 
-  // If 'path' contains a directory separator, check that it exists to
-  // avoid looping later.
-  char* sep = strrchr(path, '/');
-  if (sep != NULL) {
-    struct stat st;
-    int ret;
-    *sep = '\0';  // temporarily zero-terminate the dirname.
-    ret = stat(path, &st);
-    *sep = '/';   // restore full path.
-    if (ret < 0)
-      return NULL;
-    if (!S_ISDIR(st.st_mode)) {
-      errno = ENOTDIR;
-      return NULL;
+        // If 'path' contains a directory separator, check that it exists to
+        // avoid looping later.
+        char *sep = strrchr(path, '/');
+        if (sep != NULL) {
+            struct stat st;
+            int ret;
+            *sep = '\0';  // temporarily zero-terminate the dirname.
+            ret = stat(path, &st);
+            *sep = '/';   // restore full path.
+            if (ret < 0)
+                return NULL;
+            if (!S_ISDIR(st.st_mode)) {
+                errno = ENOTDIR;
+                return NULL;
+            }
+        }
+
+        // Loop. On each iteration, replace the XXXXXX suffix with a random
+        // number.
+        int tries;
+        for (tries = 128; tries > 0; tries--) {
+            int random = rand() % 1000000;
+
+            snprintf(path_end - kSuffixLen, kSuffixLen + 1, "%0d", random);
+            if (mkdir(path, 0700) == 0)
+                return path;  // Success
+
+            if (errno != EEXIST)
+                return NULL;
+        }
+
+        assert(errno == EEXIST);
+        return NULL;
     }
-  }
-
-  // Loop. On each iteration, replace the XXXXXX suffix with a random
-  // number.
-  int tries;
-  for (tries = 128; tries > 0; tries--) {
-    int random = rand() % 1000000;
-
-    snprintf(path_end - kSuffixLen, kSuffixLen + 1, "%0d", random);
-    if (mkdir(path, 0700) == 0)
-      return path;  // Success
-
-    if (errno != EEXIST)
-      return NULL;
-  }
-
-  assert(errno == EEXIST);
-  return NULL;
-}
 
 }  // namespace
 

@@ -41,65 +41,66 @@
 
 namespace google_breakpad {
 
-namespace {
+    namespace {
 
-class CrashGenerationClientImpl : public CrashGenerationClient {
- public:
-  explicit CrashGenerationClientImpl(int server_fd) : server_fd_(server_fd) {}
-  virtual ~CrashGenerationClientImpl() {}
+        class CrashGenerationClientImpl : public CrashGenerationClient {
+        public:
+            explicit CrashGenerationClientImpl(int server_fd) : server_fd_(server_fd) {}
 
-  virtual bool RequestDump(const void* blob, size_t blob_size) {
-    int fds[2];
-    if (sys_pipe(fds) < 0)
-      return false;
-    static const unsigned kControlMsgSize = CMSG_SPACE(sizeof(int));
+            virtual ~CrashGenerationClientImpl() {}
 
-    struct kernel_iovec iov;
-    iov.iov_base = const_cast<void*>(blob);
-    iov.iov_len = blob_size;
+            virtual bool RequestDump(const void *blob, size_t blob_size) {
+                int fds[2];
+                if (sys_pipe(fds) < 0)
+                    return false;
+                static const unsigned kControlMsgSize = CMSG_SPACE(sizeof(int));
 
-    struct kernel_msghdr msg = { 0 };
-    msg.msg_iov = &iov;
-    msg.msg_iovlen = 1;
-    char cmsg[kControlMsgSize] = "";
-    msg.msg_control = cmsg;
-    msg.msg_controllen = sizeof(cmsg);
+                struct kernel_iovec iov;
+                iov.iov_base = const_cast<void *>(blob);
+                iov.iov_len = blob_size;
 
-    struct cmsghdr* hdr = CMSG_FIRSTHDR(&msg);
-    hdr->cmsg_level = SOL_SOCKET;
-    hdr->cmsg_type = SCM_RIGHTS;
-    hdr->cmsg_len = CMSG_LEN(sizeof(int));
-    int* p = reinterpret_cast<int*>(CMSG_DATA(hdr));
-    *p = fds[1];
+                struct kernel_msghdr msg = {0};
+                msg.msg_iov = &iov;
+                msg.msg_iovlen = 1;
+                char cmsg[kControlMsgSize] = "";
+                msg.msg_control = cmsg;
+                msg.msg_controllen = sizeof(cmsg);
 
-    ssize_t ret = HANDLE_EINTR(sys_sendmsg(server_fd_, &msg, 0));
-    sys_close(fds[1]);
-    if (ret < 0) {
-      sys_close(fds[0]);
-      return false;
-    }
+                struct cmsghdr *hdr = CMSG_FIRSTHDR(&msg);
+                hdr->cmsg_level = SOL_SOCKET;
+                hdr->cmsg_type = SCM_RIGHTS;
+                hdr->cmsg_len = CMSG_LEN(sizeof(int));
+                int *p = reinterpret_cast<int *>(CMSG_DATA(hdr));
+                *p = fds[1];
 
-    // Wait for an ACK from the server.
-    char b;
-    IGNORE_RET(HANDLE_EINTR(sys_read(fds[0], &b, 1)));
-    sys_close(fds[0]);
+                ssize_t ret = HANDLE_EINTR(sys_sendmsg(server_fd_, &msg, 0));
+                sys_close(fds[1]);
+                if (ret < 0) {
+                    sys_close(fds[0]);
+                    return false;
+                }
 
-    return true;
-  }
+                // Wait for an ACK from the server.
+                char b;
+                IGNORE_RET(HANDLE_EINTR(sys_read(fds[0], &b, 1)));
+                sys_close(fds[0]);
 
- private:
-  int server_fd_;
+                return true;
+            }
 
-  DISALLOW_COPY_AND_ASSIGN(CrashGenerationClientImpl);
-};
+        private:
+            int server_fd_;
 
-}  // namespace
+            DISALLOW_COPY_AND_ASSIGN(CrashGenerationClientImpl);
+        };
+
+    }  // namespace
 
 // static
-CrashGenerationClient* CrashGenerationClient::TryCreate(int server_fd) {
-  if (server_fd < 0)
-    return NULL;
-  return new CrashGenerationClientImpl(server_fd);
-}
+    CrashGenerationClient *CrashGenerationClient::TryCreate(int server_fd) {
+        if (server_fd < 0)
+            return NULL;
+        return new CrashGenerationClientImpl(server_fd);
+    }
 
 }  // namespace google_breakpad

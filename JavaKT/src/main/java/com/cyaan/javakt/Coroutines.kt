@@ -1,7 +1,6 @@
 package com.cyaan.javakt
 
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 
 fun main(args: Array<String>) {

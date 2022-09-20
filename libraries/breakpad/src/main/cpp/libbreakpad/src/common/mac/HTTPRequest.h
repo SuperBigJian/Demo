@@ -30,6 +30,7 @@
 #import <Foundation/Foundation.h>
 
 NS_ASSUME_NONNULL_BEGIN
+
 /**
  Represents a single HTTP request. Sending the request is synchronous.
  Once the send is complete, the response will be set.
@@ -38,34 +39,34 @@ NS_ASSUME_NONNULL_BEGIN
  It is not intended to be instantiated directly.
  */
 @interface HTTPRequest : NSObject {
- @protected
-  NSURL* URL_;                   // The destination URL (STRONG)
-  NSHTTPURLResponse* response_;  // The response from the send (STRONG)
+@protected
+    NSURL *URL_;                   // The destination URL (STRONG)
+    NSHTTPURLResponse *response_;  // The response from the send (STRONG)
 }
 
 /**
  Initializes the HTTPRequest and sets its URL.
  */
-- (id)initWithURL:(NSURL*)URL;
+- (id)initWithURL:(NSURL *)URL;
 
-- (NSURL*)URL;
+- (NSURL *)URL;
 
-- (NSHTTPURLResponse*)response;
+- (NSHTTPURLResponse *)response;
 
-- (NSString*)HTTPMethod;  // Internal, don't call outside class hierarchy.
+- (NSString *)HTTPMethod;  // Internal, don't call outside class hierarchy.
 
-- (NSString*)contentType;  // Internal, don't call outside class hierarchy.
+- (NSString *)contentType;  // Internal, don't call outside class hierarchy.
 
-- (NSData*)bodyData;  // Internal, don't call outside class hierarchy.
+- (NSData *)bodyData;  // Internal, don't call outside class hierarchy.
 
-- (NSData*)send:(NSError**)error;
+- (NSData *)send:(NSError **)error;
 
 /**
  Appends a file to the HTTP request, either by filename or by file content
  (in the form of NSData).
  */
-+ (void)appendFileToBodyData:(NSMutableData*)data
-                    withName:(NSString*)name
++ (void)appendFileToBodyData:(NSMutableData *)data
+                    withName:(NSString *)name
               withFileOrData:(id)fileOrData;
 
 @end

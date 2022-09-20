@@ -29,6 +29,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
             with(pluginManager) {
                 apply("com.android.application")
                 apply("org.jetbrains.kotlin.android")
+                apply("kotlin-kapt")
                 apply("common.android.hilt")
                 apply("common.android.compose")
             }

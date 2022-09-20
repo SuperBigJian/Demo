@@ -36,8 +36,9 @@
 
 namespace google_breakpad {
 
-string BaseName(const string& path);
-string DirName(const string& path);
+    string BaseName(const string &path);
+
+    string DirName(const string &path);
 
 }  // namespace google_breakpad
 

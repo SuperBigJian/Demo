@@ -54,81 +54,96 @@ namespace google_breakpad {
 // MicrodumpModuleList contains all of the loaded code modules for a process
 // in the form of MicrodumpModules.  It maintains a vector of these modules
 // and provides access to a code module corresponding to a specific address.
-class MicrodumpModules : public BasicCodeModules {
- public:
-  // Takes over ownership of |module|.
-  void Add(const CodeModule* module);
+    class MicrodumpModules : public BasicCodeModules {
+    public:
+        // Takes over ownership of |module|.
+        void Add(const CodeModule *module);
 
-  // Enables/disables module address range shrink.
-  void SetEnableModuleShrink(bool is_enabled);
-};
+        // Enables/disables module address range shrink.
+        void SetEnableModuleShrink(bool is_enabled);
+    };
 
 // MicrodumpContext carries a CPU-specific context.
 // See dump_context.h for documentation.
-class MicrodumpContext : public DumpContext {
- public:
-  virtual void SetContextARM(MDRawContextARM* arm);
-  virtual void SetContextARM64(MDRawContextARM64* arm64);
-  virtual void SetContextX86(MDRawContextX86* x86);
-  virtual void SetContextMIPS(MDRawContextMIPS* mips32);
-  virtual void SetContextMIPS64(MDRawContextMIPS* mips64);
-};
+    class MicrodumpContext : public DumpContext {
+    public:
+        virtual void SetContextARM(MDRawContextARM *arm);
+
+        virtual void SetContextARM64(MDRawContextARM64 *arm64);
+
+        virtual void SetContextX86(MDRawContextX86 *x86);
+
+        virtual void SetContextMIPS(MDRawContextMIPS *mips32);
+
+        virtual void SetContextMIPS64(MDRawContextMIPS *mips64);
+    };
 
 // This class provides access to microdump memory regions.
 // See memory_region.h for documentation.
-class MicrodumpMemoryRegion : public MemoryRegion {
- public:
-  MicrodumpMemoryRegion();
-  virtual ~MicrodumpMemoryRegion() {}
+    class MicrodumpMemoryRegion : public MemoryRegion {
+    public:
+        MicrodumpMemoryRegion();
 
-  // Set this region's address and contents. If we have placed an
-  // instance of this class in a test fixture class, individual tests
-  // can use this to provide the region's contents.
-  void Init(uint64_t base_address, const std::vector<uint8_t>& contents);
+        virtual ~MicrodumpMemoryRegion() {}
 
-  virtual uint64_t GetBase() const;
-  virtual uint32_t GetSize() const;
+        // Set this region's address and contents. If we have placed an
+        // instance of this class in a test fixture class, individual tests
+        // can use this to provide the region's contents.
+        void Init(uint64_t base_address, const std::vector <uint8_t> &contents);
 
-  virtual bool GetMemoryAtAddress(uint64_t address, uint8_t* value) const;
-  virtual bool GetMemoryAtAddress(uint64_t address, uint16_t* value) const;
-  virtual bool GetMemoryAtAddress(uint64_t address, uint32_t* value) const;
-  virtual bool GetMemoryAtAddress(uint64_t address, uint64_t* value) const;
+        virtual uint64_t GetBase() const;
 
-  // Print a human-readable representation of the object to stdout.
-  virtual void Print() const;
+        virtual uint32_t GetSize() const;
 
- private:
-  // Fetch a little-endian value from ADDRESS in contents_ whose size
-  // is BYTES, and store it in *VALUE.  Returns true on success.
-  template<typename ValueType>
-  bool GetMemoryLittleEndian(uint64_t address, ValueType* value) const;
+        virtual bool GetMemoryAtAddress(uint64_t address, uint8_t *value) const;
 
-  uint64_t base_address_;
-  std::vector<uint8_t> contents_;
-};
+        virtual bool GetMemoryAtAddress(uint64_t address, uint16_t *value) const;
+
+        virtual bool GetMemoryAtAddress(uint64_t address, uint32_t *value) const;
+
+        virtual bool GetMemoryAtAddress(uint64_t address, uint64_t *value) const;
+
+        // Print a human-readable representation of the object to stdout.
+        virtual void Print() const;
+
+    private:
+        // Fetch a little-endian value from ADDRESS in contents_ whose size
+        // is BYTES, and store it in *VALUE.  Returns true on success.
+        template<typename ValueType>
+        bool GetMemoryLittleEndian(uint64_t address, ValueType *value) const;
+
+        uint64_t base_address_;
+        std::vector <uint8_t> contents_;
+    };
 
 // Microdump is the user's interface to a microdump file.  It provides access to
 // the microdump's context, memory regions and modules.
-class Microdump {
- public:
-  explicit Microdump(const string& contents);
-  virtual ~Microdump() {}
+    class Microdump {
+    public:
+        explicit Microdump(const string &contents);
 
-  DumpContext* GetContext() { return context_.get(); }
-  MicrodumpMemoryRegion* GetMemory() { return stack_region_.get(); }
-  MicrodumpModules* GetModules() { return modules_.get(); }
-  SystemInfo* GetSystemInfo() { return system_info_.get(); }
+        virtual ~Microdump() {}
 
-  string GetCrashReason() { return crash_reason_; }
-  uint64_t GetCrashAddress() { return crash_address_; }
- private:
-  scoped_ptr<MicrodumpContext> context_;
-  scoped_ptr<MicrodumpMemoryRegion> stack_region_;
-  scoped_ptr<MicrodumpModules> modules_;
-  scoped_ptr<SystemInfo> system_info_;
-  string crash_reason_;
-  uint64_t crash_address_;
-};
+        DumpContext *GetContext() { return context_.get(); }
+
+        MicrodumpMemoryRegion *GetMemory() { return stack_region_.get(); }
+
+        MicrodumpModules *GetModules() { return modules_.get(); }
+
+        SystemInfo *GetSystemInfo() { return system_info_.get(); }
+
+        string GetCrashReason() { return crash_reason_; }
+
+        uint64_t GetCrashAddress() { return crash_address_; }
+
+    private:
+        scoped_ptr <MicrodumpContext> context_;
+        scoped_ptr <MicrodumpMemoryRegion> stack_region_;
+        scoped_ptr <MicrodumpModules> modules_;
+        scoped_ptr <SystemInfo> system_info_;
+        string crash_reason_;
+        uint64_t crash_address_;
+    };
 
 }  // namespace google_breakpad
 

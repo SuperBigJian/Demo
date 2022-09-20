@@ -50,147 +50,149 @@
 
 namespace {
 
-using google_breakpad::AddressMap;
-using google_breakpad::linked_ptr;
+    using google_breakpad::AddressMap;
+    using google_breakpad::linked_ptr;
 
 // A CountedObject holds an int.  A global (not thread safe!) count of
 // allocated CountedObjects is maintained to help test memory management.
-class CountedObject {
- public:
-  explicit CountedObject(int id) : id_(id) { ++count_; }
-  ~CountedObject() { --count_; }
+    class CountedObject {
+    public:
+        explicit CountedObject(int id) : id_(id) { ++count_; }
 
-  static int count() { return count_; }
-  int id() const { return id_; }
+        ~CountedObject() { --count_; }
 
- private:
-  static int count_;
-  int id_;
-};
+        static int count() { return count_; }
 
-int CountedObject::count_;
+        int id() const { return id_; }
 
-typedef int AddressType;
-typedef AddressMap< AddressType, linked_ptr<CountedObject> > TestMap;
+    private:
+        static int count_;
+        int id_;
+    };
 
-static bool DoAddressMapTest() {
-  ASSERT_EQ(CountedObject::count(), 0);
+    int CountedObject::count_;
 
-  TestMap test_map;
-  linked_ptr<CountedObject> entry;
-  AddressType address;
+    typedef int AddressType;
+    typedef AddressMap <AddressType, linked_ptr<CountedObject>> TestMap;
 
-  // Check that a new map is truly empty.
-  ASSERT_FALSE(test_map.Retrieve(0, &entry, &address));
-  ASSERT_FALSE(test_map.Retrieve(INT_MIN, &entry, &address));
-  ASSERT_FALSE(test_map.Retrieve(INT_MAX, &entry, &address));
+    static bool DoAddressMapTest() {
+        ASSERT_EQ(CountedObject::count(), 0);
 
-  // Check that Clear clears the map without leaking.
-  ASSERT_EQ(CountedObject::count(), 0);
-  ASSERT_TRUE(test_map.Store(1,
-      linked_ptr<CountedObject>(new CountedObject(0))));
-  ASSERT_TRUE(test_map.Retrieve(1, &entry, &address));
-  ASSERT_EQ(CountedObject::count(), 1);
-  test_map.Clear();
-  ASSERT_EQ(CountedObject::count(), 1);  // still holding entry in this scope
+        TestMap test_map;
+        linked_ptr <CountedObject> entry;
+        AddressType address;
 
-  // Check that a cleared map is truly empty.
-  ASSERT_FALSE(test_map.Retrieve(0, &entry, &address));
-  ASSERT_FALSE(test_map.Retrieve(INT_MIN, &entry, &address));
-  ASSERT_FALSE(test_map.Retrieve(INT_MAX, &entry, &address));
+        // Check that a new map is truly empty.
+        ASSERT_FALSE(test_map.Retrieve(0, &entry, &address));
+        ASSERT_FALSE(test_map.Retrieve(INT_MIN, &entry, &address));
+        ASSERT_FALSE(test_map.Retrieve(INT_MAX, &entry, &address));
 
-  // Check a single-element map.
-  ASSERT_TRUE(test_map.Store(10,
-      linked_ptr<CountedObject>(new CountedObject(1))));
-  ASSERT_FALSE(test_map.Retrieve(9, &entry, &address));
-  ASSERT_TRUE(test_map.Retrieve(10, &entry, &address));
-  ASSERT_EQ(CountedObject::count(), 1);
-  ASSERT_EQ(entry->id(), 1);
-  ASSERT_EQ(address, 10);
-  ASSERT_TRUE(test_map.Retrieve(11, &entry, &address));
-  ASSERT_TRUE(test_map.Retrieve(11, &entry, NULL));     // NULL ok here
+        // Check that Clear clears the map without leaking.
+        ASSERT_EQ(CountedObject::count(), 0);
+        ASSERT_TRUE(test_map.Store(1,
+                                   linked_ptr<CountedObject>(new CountedObject(0))));
+        ASSERT_TRUE(test_map.Retrieve(1, &entry, &address));
+        ASSERT_EQ(CountedObject::count(), 1);
+        test_map.Clear();
+        ASSERT_EQ(CountedObject::count(), 1);  // still holding entry in this scope
 
-  // Add some more elements.
-  ASSERT_TRUE(test_map.Store(5,
-      linked_ptr<CountedObject>(new CountedObject(2))));
-  ASSERT_EQ(CountedObject::count(), 2);
-  ASSERT_TRUE(test_map.Store(20,
-      linked_ptr<CountedObject>(new CountedObject(3))));
-  ASSERT_TRUE(test_map.Store(15,
-      linked_ptr<CountedObject>(new CountedObject(4))));
-  ASSERT_FALSE(test_map.Store(10,
-      linked_ptr<CountedObject>(new CountedObject(5))));  // already in map
-  ASSERT_TRUE(test_map.Store(16,
-      linked_ptr<CountedObject>(new CountedObject(6))));
-  ASSERT_TRUE(test_map.Store(14,
-      linked_ptr<CountedObject>(new CountedObject(7))));
+        // Check that a cleared map is truly empty.
+        ASSERT_FALSE(test_map.Retrieve(0, &entry, &address));
+        ASSERT_FALSE(test_map.Retrieve(INT_MIN, &entry, &address));
+        ASSERT_FALSE(test_map.Retrieve(INT_MAX, &entry, &address));
 
-  // Nothing was stored with a key under 5.  Don't use ASSERT inside loops
-  // because it won't show exactly which key/entry/address failed.
-  for (AddressType key = 0; key < 5; ++key) {
-    if (test_map.Retrieve(key, &entry, &address)) {
-      fprintf(stderr,
-              "FAIL: retrieve %d expected false observed true @ %s:%d\n",
-              key, __FILE__, __LINE__);
-      return false;
+        // Check a single-element map.
+        ASSERT_TRUE(test_map.Store(10,
+                                   linked_ptr<CountedObject>(new CountedObject(1))));
+        ASSERT_FALSE(test_map.Retrieve(9, &entry, &address));
+        ASSERT_TRUE(test_map.Retrieve(10, &entry, &address));
+        ASSERT_EQ(CountedObject::count(), 1);
+        ASSERT_EQ(entry->id(), 1);
+        ASSERT_EQ(address, 10);
+        ASSERT_TRUE(test_map.Retrieve(11, &entry, &address));
+        ASSERT_TRUE(test_map.Retrieve(11, &entry, NULL));     // NULL ok here
+
+        // Add some more elements.
+        ASSERT_TRUE(test_map.Store(5,
+                                   linked_ptr<CountedObject>(new CountedObject(2))));
+        ASSERT_EQ(CountedObject::count(), 2);
+        ASSERT_TRUE(test_map.Store(20,
+                                   linked_ptr<CountedObject>(new CountedObject(3))));
+        ASSERT_TRUE(test_map.Store(15,
+                                   linked_ptr<CountedObject>(new CountedObject(4))));
+        ASSERT_FALSE(test_map.Store(10,
+                                    linked_ptr<CountedObject>(new CountedObject(5))));  // already in map
+        ASSERT_TRUE(test_map.Store(16,
+                                   linked_ptr<CountedObject>(new CountedObject(6))));
+        ASSERT_TRUE(test_map.Store(14,
+                                   linked_ptr<CountedObject>(new CountedObject(7))));
+
+        // Nothing was stored with a key under 5.  Don't use ASSERT inside loops
+        // because it won't show exactly which key/entry/address failed.
+        for (AddressType key = 0; key < 5; ++key) {
+            if (test_map.Retrieve(key, &entry, &address)) {
+                fprintf(stderr,
+                        "FAIL: retrieve %d expected false observed true @ %s:%d\n",
+                        key, __FILE__, __LINE__);
+                return false;
+            }
+        }
+
+        // Check everything that was stored.
+        const int id_verify[] = {0, 0, 0, 0, 0,    // unused
+                                 2, 2, 2, 2, 2,    // 5 - 9
+                                 1, 1, 1, 1, 7,    // 10 - 14
+                                 4, 6, 6, 6, 6,    // 15 - 19
+                                 3, 3, 3, 3, 3,    // 20 - 24
+                                 3, 3, 3, 3, 3};  // 25 - 29
+        const AddressType address_verify[] = {0, 0, 0, 0, 0,    // unused
+                                              5, 5, 5, 5, 5,    // 5 - 9
+                                              10, 10, 10, 10, 14,    // 10 - 14
+                                              15, 16, 16, 16, 16,    // 15 - 19
+                                              20, 20, 20, 20, 20,    // 20 - 24
+                                              20, 20, 20, 20, 20};  // 25 - 29
+
+        for (AddressType key = 5; key < 30; ++key) {
+            if (!test_map.Retrieve(key, &entry, &address)) {
+                fprintf(stderr,
+                        "FAIL: retrieve %d expected true observed false @ %s:%d\n",
+                        key, __FILE__, __LINE__);
+                return false;
+            }
+            if (entry->id() != id_verify[key]) {
+                fprintf(stderr,
+                        "FAIL: retrieve %d expected entry %d observed %d @ %s:%d\n",
+                        key, id_verify[key], entry->id(), __FILE__, __LINE__);
+                return false;
+            }
+            if (address != address_verify[key]) {
+                fprintf(stderr,
+                        "FAIL: retrieve %d expected address %d observed %d @ %s:%d\n",
+                        key, address_verify[key], address, __FILE__, __LINE__);
+                return false;
+            }
+        }
+
+        // The stored objects should still be in the map.
+        ASSERT_EQ(CountedObject::count(), 6);
+
+        return true;
     }
-  }
 
-  // Check everything that was stored.
-  const int id_verify[] = { 0, 0, 0, 0, 0,    // unused
-                            2, 2, 2, 2, 2,    // 5 - 9
-                            1, 1, 1, 1, 7,    // 10 - 14
-                            4, 6, 6, 6, 6,    // 15 - 19
-                            3, 3, 3, 3, 3,    // 20 - 24
-                            3, 3, 3, 3, 3 };  // 25 - 29
-  const AddressType address_verify[] = {  0,  0,  0,  0,  0,    // unused
-                                          5,  5,  5,  5,  5,    // 5 - 9
-                                         10, 10, 10, 10, 14,    // 10 - 14
-                                         15, 16, 16, 16, 16,    // 15 - 19
-                                         20, 20, 20, 20, 20,    // 20 - 24
-                                         20, 20, 20, 20, 20 };  // 25 - 29
+    static bool RunTests() {
+        if (!DoAddressMapTest())
+            return false;
 
-  for (AddressType key = 5; key < 30; ++key) {
-    if (!test_map.Retrieve(key, &entry, &address)) {
-      fprintf(stderr,
-              "FAIL: retrieve %d expected true observed false @ %s:%d\n",
-              key, __FILE__, __LINE__);
-      return false;
+        // Leak check.
+        ASSERT_EQ(CountedObject::count(), 0);
+
+        return true;
     }
-    if (entry->id() != id_verify[key]) {
-      fprintf(stderr,
-              "FAIL: retrieve %d expected entry %d observed %d @ %s:%d\n",
-              key, id_verify[key], entry->id(), __FILE__, __LINE__);
-      return false;
-    }
-    if (address != address_verify[key]) {
-      fprintf(stderr,
-              "FAIL: retrieve %d expected address %d observed %d @ %s:%d\n",
-              key, address_verify[key], address, __FILE__, __LINE__);
-      return false;
-    }
-  }
-
-  // The stored objects should still be in the map.
-  ASSERT_EQ(CountedObject::count(), 6);
-
-  return true;
-}
-
-static bool RunTests() {
-  if (!DoAddressMapTest())
-    return false;
-
-  // Leak check.
-  ASSERT_EQ(CountedObject::count(), 0);
-
-  return true;
-}
 
 }  // namespace
 
-int main(int argc, char** argv) {
-  BPLOG_INIT(&argc, &argv);
+int main(int argc, char **argv) {
+    BPLOG_INIT(&argc, &argv);
 
-  return RunTests() ? 0 : 1;
+    return RunTests() ? 0 : 1;
 }

@@ -45,44 +45,44 @@ namespace google_breakpad {
 // A derived class of MemoryRange with added methods for handling minidump
 // specific data structures. To avoid virtual functions, it is not designed
 // to be used polymorphically.
-class MinidumpMemoryRange : public MemoryRange {
- public:
-  MinidumpMemoryRange() {}
+    class MinidumpMemoryRange : public MemoryRange {
+    public:
+        MinidumpMemoryRange() {}
 
-  MinidumpMemoryRange(const void* data, size_t length)
-      : MemoryRange(data, length) {}
+        MinidumpMemoryRange(const void *data, size_t length)
+                : MemoryRange(data, length) {}
 
-  // Returns a subrange of |length| bytes at |offset| bytes of this memory
-  // range, or an empty range if the subrange is out of bounds.
-  // This methods overrides the base implemementation in order to return
-  // an instance of MinidumpMemoryRange instead of MemoryRange.
-  MinidumpMemoryRange Subrange(size_t sub_offset, size_t sub_length) const {
-    if (Covers(sub_offset, sub_length))
-      return MinidumpMemoryRange(data() + sub_offset, sub_length);
-    return MinidumpMemoryRange();
-  }
+        // Returns a subrange of |length| bytes at |offset| bytes of this memory
+        // range, or an empty range if the subrange is out of bounds.
+        // This methods overrides the base implemementation in order to return
+        // an instance of MinidumpMemoryRange instead of MemoryRange.
+        MinidumpMemoryRange Subrange(size_t sub_offset, size_t sub_length) const {
+            if (Covers(sub_offset, sub_length))
+                return MinidumpMemoryRange(data() + sub_offset, sub_length);
+            return MinidumpMemoryRange();
+        }
 
-  // Returns a subrange that covers the offset and length specified by
-  // |location|, or an empty range if the subrange is out of bounds.
-  MinidumpMemoryRange Subrange(const MDLocationDescriptor& location) const {
-    return MinidumpMemoryRange::Subrange(location.rva, location.data_size);
-  }
+        // Returns a subrange that covers the offset and length specified by
+        // |location|, or an empty range if the subrange is out of bounds.
+        MinidumpMemoryRange Subrange(const MDLocationDescriptor &location) const {
+            return MinidumpMemoryRange::Subrange(location.rva, location.data_size);
+        }
 
-  // Gets a STL string from a MDString at |sub_offset| bytes of this memory
-  // range. This method only works correctly for ASCII characters and does
-  // not convert between UTF-16 and UTF-8.
-  const std::string GetAsciiMDString(size_t sub_offset) const {
-    std::string str;
-    const MDString* md_str = GetData<MDString>(sub_offset);
-    if (md_str) {
-      const uint16_t* buffer = &md_str->buffer[0];
-      for (uint32_t i = 0; i < md_str->length && buffer[i]; ++i) {
-        str.push_back(buffer[i]);
-      }
-    }
-    return str;
-  }
-};
+        // Gets a STL string from a MDString at |sub_offset| bytes of this memory
+        // range. This method only works correctly for ASCII characters and does
+        // not convert between UTF-16 and UTF-8.
+        const std::string GetAsciiMDString(size_t sub_offset) const {
+            std::string str;
+            const MDString *md_str = GetData<MDString>(sub_offset);
+            if (md_str) {
+                const uint16_t *buffer = &md_str->buffer[0];
+                for (uint32_t i = 0; i < md_str->length && buffer[i]; ++i) {
+                    str.push_back(buffer[i]);
+                }
+            }
+            return str;
+        }
+    };
 
 }  // namespace google_breakpad
 

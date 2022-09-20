@@ -42,62 +42,63 @@
 
 namespace google_breakpad {
 
-class CodeModule {
- public:
-  virtual ~CodeModule() {}
+    class CodeModule {
+    public:
+        virtual ~CodeModule() {}
 
-  // The base address of this code module as it was loaded by the process.
-  // (uint64_t)-1 on error.
-  virtual uint64_t base_address() const = 0;
+        // The base address of this code module as it was loaded by the process.
+        // (uint64_t)-1 on error.
+        virtual uint64_t base_address() const = 0;
 
-  // The size of the code module.  0 on error.
-  virtual uint64_t size() const = 0;
+        // The size of the code module.  0 on error.
+        virtual uint64_t size() const = 0;
 
-  // The path or file name that the code module was loaded from.  Empty on
-  // error.
-  virtual string code_file() const = 0;
+        // The path or file name that the code module was loaded from.  Empty on
+        // error.
+        virtual string code_file() const = 0;
 
-  // An identifying string used to discriminate between multiple versions and
-  // builds of the same code module.  This may contain a uuid, timestamp,
-  // version number, or any combination of this or other information, in an
-  // implementation-defined format.  Empty on error.
-  virtual string code_identifier() const = 0;
+        // An identifying string used to discriminate between multiple versions and
+        // builds of the same code module.  This may contain a uuid, timestamp,
+        // version number, or any combination of this or other information, in an
+        // implementation-defined format.  Empty on error.
+        virtual string code_identifier() const = 0;
 
-  // The filename containing debugging information associated with the code
-  // module.  If debugging information is stored in a file separate from the
-  // code module itself (as is the case when .pdb or .dSYM files are used),
-  // this will be different from code_file.  If debugging information is
-  // stored in the code module itself (possibly prior to stripping), this
-  // will be the same as code_file.  Empty on error.
-  virtual string debug_file() const = 0;
+        // The filename containing debugging information associated with the code
+        // module.  If debugging information is stored in a file separate from the
+        // code module itself (as is the case when .pdb or .dSYM files are used),
+        // this will be different from code_file.  If debugging information is
+        // stored in the code module itself (possibly prior to stripping), this
+        // will be the same as code_file.  Empty on error.
+        virtual string debug_file() const = 0;
 
-  // An identifying string similar to code_identifier, but identifies a
-  // specific version and build of the associated debug file.  This may be
-  // the same as code_identifier when the debug_file and code_file are
-  // identical or when the same identifier is used to identify distinct
-  // debug and code files.
-  virtual string debug_identifier() const = 0;
+        // An identifying string similar to code_identifier, but identifies a
+        // specific version and build of the associated debug file.  This may be
+        // the same as code_identifier when the debug_file and code_file are
+        // identical or when the same identifier is used to identify distinct
+        // debug and code files.
+        virtual string debug_identifier() const = 0;
 
-  // A human-readable representation of the code module's version.  Empty on
-  // error.
-  virtual string version() const = 0;
+        // A human-readable representation of the code module's version.  Empty on
+        // error.
+        virtual string version() const = 0;
 
-  // Creates a new copy of this CodeModule object, which the caller takes
-  // ownership of.  The new CodeModule may be of a different concrete class
-  // than the CodeModule being copied, but will behave identically to the
-  // copied CodeModule as far as the CodeModule interface is concerned.
-  virtual CodeModule* Copy() const = 0;
+        // Creates a new copy of this CodeModule object, which the caller takes
+        // ownership of.  The new CodeModule may be of a different concrete class
+        // than the CodeModule being copied, but will behave identically to the
+        // copied CodeModule as far as the CodeModule interface is concerned.
+        virtual CodeModule *Copy() const = 0;
 
-  // Getter and setter for shrink_down_delta.  This is used when the address
-  // range for a module is shrunk down due to address range conflicts with
-  // other modules.  The base_address and size fields are not updated and they
-  // should always reflect the original values (reported in the minidump).
-  virtual uint64_t shrink_down_delta() const = 0;
-  virtual void SetShrinkDownDelta(uint64_t shrink_down_delta) = 0;
+        // Getter and setter for shrink_down_delta.  This is used when the address
+        // range for a module is shrunk down due to address range conflicts with
+        // other modules.  The base_address and size fields are not updated and they
+        // should always reflect the original values (reported in the minidump).
+        virtual uint64_t shrink_down_delta() const = 0;
 
-  // Whether the module was unloaded from memory.
-  virtual bool is_unloaded() const = 0;
-};
+        virtual void SetShrinkDownDelta(uint64_t shrink_down_delta) = 0;
+
+        // Whether the module was unloaded from memory.
+        virtual bool is_unloaded() const = 0;
+    };
 
 }  // namespace google_breakpad
 

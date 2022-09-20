@@ -37,14 +37,14 @@ NS_ASSUME_NONNULL_BEGIN
  Represents an HTTP PUT request.
  */
 @interface HTTPPutRequest : HTTPRequest {
- @protected
-  NSString* file_;
+@protected
+    NSString *file_;
 }
 
 /**
  Sets the path of the file that will be sent in the PUT request.
  */
-- (void)setFile:(NSString*)file;
+- (void)setFile:(NSString *)file;
 
 @end
 

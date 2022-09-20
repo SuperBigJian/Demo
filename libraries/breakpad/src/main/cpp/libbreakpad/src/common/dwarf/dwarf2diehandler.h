@@ -180,189 +180,206 @@ namespace google_breakpad {
 //     - recurse, with the new handler and the child die
 // - Finish()
 // - destruction
-class DIEHandler {
- public:
-  DIEHandler() { }
-  virtual ~DIEHandler() { }
+    class DIEHandler {
+    public:
+        DIEHandler() {}
 
-  // When we visit a DIE, we first use these member functions to
-  // report the DIE's attributes and their values.  These have the
-  // same restrictions as the corresponding member functions of
-  // dwarf2reader::Dwarf2Handler.
-  //
-  // Since DWARF does not specify in what order attributes must
-  // appear, avoid making decisions in these functions that would be
-  // affected by the presence of other attributes. The EndAttributes
-  // function is a more appropriate place for such work, as all the
-  // DIE's attributes have been seen at that point.
-  //
-  // The default definitions ignore the values they are passed.
-  virtual void ProcessAttributeUnsigned(enum DwarfAttribute attr,
-                                        enum DwarfForm form,
-                                        uint64_t data) { }
-  virtual void ProcessAttributeSigned(enum DwarfAttribute attr,
-                                      enum DwarfForm form,
-                                      int64_t data) { }
-  virtual void ProcessAttributeReference(enum DwarfAttribute attr,
-                                         enum DwarfForm form,
-                                         uint64_t data) { }
-  virtual void ProcessAttributeBuffer(enum DwarfAttribute attr,
-                                      enum DwarfForm form,
-                                      const uint8_t* data,
-                                      uint64_t len) { }
-  virtual void ProcessAttributeString(enum DwarfAttribute attr,
-                                      enum DwarfForm form,
-                                      const string& data) { }
-  virtual void ProcessAttributeSignature(enum DwarfAttribute attr,
-                                         enum DwarfForm form,
-                                         uint64_t signture) { }
+        virtual ~DIEHandler() {}
 
-  // Once we have reported all the DIE's attributes' values, we call
-  // this member function.  If it returns false, we skip all the DIE's
-  // children.  If it returns true, we call FindChildHandler on each
-  // child.  If that returns a handler object, we use that to visit
-  // the child; otherwise, we skip the child.
-  //
-  // This is a good place to make decisions that depend on more than
-  // one attribute. DWARF does not specify in what order attributes
-  // must appear, so only when the EndAttributes function is called
-  // does the handler have a complete picture of the DIE's attributes.
-  //
-  // The default definition elects to ignore the DIE's children.
-  // You'll need to override this if you override FindChildHandler,
-  // but at least the default behavior isn't to pass the children to
-  // FindChildHandler, which then ignores them all.
-  virtual bool EndAttributes() { return false; }
+        // When we visit a DIE, we first use these member functions to
+        // report the DIE's attributes and their values.  These have the
+        // same restrictions as the corresponding member functions of
+        // dwarf2reader::Dwarf2Handler.
+        //
+        // Since DWARF does not specify in what order attributes must
+        // appear, avoid making decisions in these functions that would be
+        // affected by the presence of other attributes. The EndAttributes
+        // function is a more appropriate place for such work, as all the
+        // DIE's attributes have been seen at that point.
+        //
+        // The default definitions ignore the values they are passed.
+        virtual void ProcessAttributeUnsigned(enum DwarfAttribute attr,
+                                              enum DwarfForm form,
+                                              uint64_t data) {}
 
-  // If EndAttributes returns true to indicate that some of the DIE's
-  // children might be of interest, then we apply this function to
-  // each of the DIE's children.  If it returns a handler object, then
-  // we use that to visit the child DIE.  If it returns NULL, we skip
-  // that child DIE (and all its descendants).
-  //
-  // OFFSET is the offset of the child; TAG indicates what kind of DIE
-  // it is.
-  //
-  // The default definition skips all children.
-  virtual DIEHandler* FindChildHandler(uint64_t offset, enum DwarfTag tag) {
-    return NULL;
-  }
+        virtual void ProcessAttributeSigned(enum DwarfAttribute attr,
+                                            enum DwarfForm form,
+                                            int64_t data) {}
 
-  // When we are done processing a DIE, we call this member function.
-  // This happens after the EndAttributes call, all FindChildHandler
-  // calls (if any), and all operations on the children themselves (if
-  // any). We call Finish on every handler --- even if EndAttributes
-  // returns false.
-  virtual void Finish() { };
-};
+        virtual void ProcessAttributeReference(enum DwarfAttribute attr,
+                                               enum DwarfForm form,
+                                               uint64_t data) {}
+
+        virtual void ProcessAttributeBuffer(enum DwarfAttribute attr,
+                                            enum DwarfForm form,
+                                            const uint8_t *data,
+                                            uint64_t len) {}
+
+        virtual void ProcessAttributeString(enum DwarfAttribute attr,
+                                            enum DwarfForm form,
+                                            const string &data) {}
+
+        virtual void ProcessAttributeSignature(enum DwarfAttribute attr,
+                                               enum DwarfForm form,
+                                               uint64_t signture) {}
+
+        // Once we have reported all the DIE's attributes' values, we call
+        // this member function.  If it returns false, we skip all the DIE's
+        // children.  If it returns true, we call FindChildHandler on each
+        // child.  If that returns a handler object, we use that to visit
+        // the child; otherwise, we skip the child.
+        //
+        // This is a good place to make decisions that depend on more than
+        // one attribute. DWARF does not specify in what order attributes
+        // must appear, so only when the EndAttributes function is called
+        // does the handler have a complete picture of the DIE's attributes.
+        //
+        // The default definition elects to ignore the DIE's children.
+        // You'll need to override this if you override FindChildHandler,
+        // but at least the default behavior isn't to pass the children to
+        // FindChildHandler, which then ignores them all.
+        virtual bool EndAttributes() { return false; }
+
+        // If EndAttributes returns true to indicate that some of the DIE's
+        // children might be of interest, then we apply this function to
+        // each of the DIE's children.  If it returns a handler object, then
+        // we use that to visit the child DIE.  If it returns NULL, we skip
+        // that child DIE (and all its descendants).
+        //
+        // OFFSET is the offset of the child; TAG indicates what kind of DIE
+        // it is.
+        //
+        // The default definition skips all children.
+        virtual DIEHandler *FindChildHandler(uint64_t offset, enum DwarfTag tag) {
+            return NULL;
+        }
+
+        // When we are done processing a DIE, we call this member function.
+        // This happens after the EndAttributes call, all FindChildHandler
+        // calls (if any), and all operations on the children themselves (if
+        // any). We call Finish on every handler --- even if EndAttributes
+        // returns false.
+        virtual void Finish() {};
+    };
 
 // A subclass of DIEHandler, with additional kludges for handling the
 // compilation unit's root die.
-class RootDIEHandler : public DIEHandler {
- public:
-  bool handle_inline;
+    class RootDIEHandler : public DIEHandler {
+    public:
+        bool handle_inline;
 
-  explicit RootDIEHandler(bool handle_inline = false)
-      : handle_inline(handle_inline) {}
-  virtual ~RootDIEHandler() {}
+        explicit RootDIEHandler(bool handle_inline = false)
+                : handle_inline(handle_inline) {}
 
-  // We pass the values reported via Dwarf2Handler::StartCompilationUnit
-  // to this member function, and skip the entire compilation unit if it
-  // returns false.  So the root DIE handler is actually also
-  // responsible for handling the compilation unit metadata.
-  // The default definition always visits the compilation unit.
-  virtual bool StartCompilationUnit(uint64_t offset, uint8_t address_size,
-                                    uint8_t offset_size, uint64_t cu_length,
-                                    uint8_t dwarf_version) { return true; }
+        virtual ~RootDIEHandler() {}
 
-  // For the root DIE handler only, we pass the offset, tag and
-  // attributes of the compilation unit's root DIE.  This is the only
-  // way the root DIE handler can find the root DIE's tag.  If this
-  // function returns true, we will visit the root DIE using the usual
-  // DIEHandler methods; otherwise, we skip the entire compilation
-  // unit.
-  //
-  // The default definition elects to visit the root DIE.
-  virtual bool StartRootDIE(uint64_t offset, enum DwarfTag tag) { return true; }
-};
+        // We pass the values reported via Dwarf2Handler::StartCompilationUnit
+        // to this member function, and skip the entire compilation unit if it
+        // returns false.  So the root DIE handler is actually also
+        // responsible for handling the compilation unit metadata.
+        // The default definition always visits the compilation unit.
+        virtual bool StartCompilationUnit(uint64_t offset, uint8_t address_size,
+                                          uint8_t offset_size, uint64_t cu_length,
+                                          uint8_t dwarf_version) { return true; }
 
-class DIEDispatcher: public Dwarf2Handler {
- public:
-  // Create a Dwarf2Handler which uses ROOT_HANDLER as the handler for
-  // the compilation unit's root die, as described for the DIEHandler
-  // class.
-  DIEDispatcher(RootDIEHandler* root_handler) : root_handler_(root_handler) { }
-  // Destroying a DIEDispatcher destroys all active handler objects
-  // except the root handler.
-  ~DIEDispatcher();
-  bool StartCompilationUnit(uint64_t offset, uint8_t address_size,
-                            uint8_t offset_size, uint64_t cu_length,
-                            uint8_t dwarf_version);
-  bool StartDIE(uint64_t offset, enum DwarfTag tag);
-  void ProcessAttributeUnsigned(uint64_t offset,
-                                enum DwarfAttribute attr,
-                                enum DwarfForm form,
-                                uint64_t data);
-  void ProcessAttributeSigned(uint64_t offset,
-                              enum DwarfAttribute attr,
-                              enum DwarfForm form,
-                              int64_t data);
-  void ProcessAttributeReference(uint64_t offset,
-                                 enum DwarfAttribute attr,
-                                 enum DwarfForm form,
-                                 uint64_t data);
-  void ProcessAttributeBuffer(uint64_t offset,
-                              enum DwarfAttribute attr,
-                              enum DwarfForm form,
-                              const uint8_t* data,
-                              uint64_t len);
-  void ProcessAttributeString(uint64_t offset,
-                              enum DwarfAttribute attr,
-                              enum DwarfForm form,
-                              const string& data);
-  void ProcessAttributeSignature(uint64_t offset,
-                                 enum DwarfAttribute attr,
-                                 enum DwarfForm form,
-                                 uint64_t signature);
-  void EndDIE(uint64_t offset);
+        // For the root DIE handler only, we pass the offset, tag and
+        // attributes of the compilation unit's root DIE.  This is the only
+        // way the root DIE handler can find the root DIE's tag.  If this
+        // function returns true, we will visit the root DIE using the usual
+        // DIEHandler methods; otherwise, we skip the entire compilation
+        // unit.
+        //
+        // The default definition elects to visit the root DIE.
+        virtual bool StartRootDIE(uint64_t offset, enum DwarfTag tag) { return true; }
+    };
 
- private:
+    class DIEDispatcher : public Dwarf2Handler {
+    public:
+        // Create a Dwarf2Handler which uses ROOT_HANDLER as the handler for
+        // the compilation unit's root die, as described for the DIEHandler
+        // class.
+        DIEDispatcher(RootDIEHandler *root_handler) : root_handler_(root_handler) {}
 
-  // The type of a handler stack entry.  This includes some fields
-  // which don't really need to be on the stack --- they could just be
-  // single data members of DIEDispatcher --- but putting them here
-  // makes it easier to see that the code is correct.
-  struct HandlerStack {
-    // The offset of the DIE for this handler stack entry.
-    uint64_t offset_;
+        // Destroying a DIEDispatcher destroys all active handler objects
+        // except the root handler.
+        ~DIEDispatcher();
 
-    // The handler object interested in this DIE's attributes and
-    // children.  If NULL, we're not interested in either.
-    DIEHandler* handler_;
+        bool StartCompilationUnit(uint64_t offset, uint8_t address_size,
+                                  uint8_t offset_size, uint64_t cu_length,
+                                  uint8_t dwarf_version);
 
-    // Have we reported the end of this DIE's attributes to the handler?
-    bool reported_attributes_end_;
-  };
+        bool StartDIE(uint64_t offset, enum DwarfTag tag);
 
-  // Stack of DIE attribute handlers.  At StartDIE(D), the top of the
-  // stack is the handler of D's parent, whom we may ask for a handler
-  // for D itself.  At EndDIE(D), the top of the stack is D's handler.
-  // Special cases:
-  //
-  // - Before we've seen the compilation unit's root DIE, the stack is
-  //   empty; we'll call root_handler_'s special member functions, and
-  //   perhaps push root_handler_ on the stack to look at the root's
-  //   immediate children.
-  //
-  // - When we decide to ignore a subtree, we only push an entry on
-  //   the stack for the root of the tree being ignored, rather than
-  //   pushing lots of stack entries with handler_ set to NULL.
-  std::stack<HandlerStack> die_handlers_;
+        void ProcessAttributeUnsigned(uint64_t offset,
+                                      enum DwarfAttribute attr,
+                                      enum DwarfForm form,
+                                      uint64_t data);
 
-  // The root handler.  We don't push it on die_handlers_ until we
-  // actually get the StartDIE call for the root.
-  RootDIEHandler* root_handler_;
-};
+        void ProcessAttributeSigned(uint64_t offset,
+                                    enum DwarfAttribute attr,
+                                    enum DwarfForm form,
+                                    int64_t data);
+
+        void ProcessAttributeReference(uint64_t offset,
+                                       enum DwarfAttribute attr,
+                                       enum DwarfForm form,
+                                       uint64_t data);
+
+        void ProcessAttributeBuffer(uint64_t offset,
+                                    enum DwarfAttribute attr,
+                                    enum DwarfForm form,
+                                    const uint8_t *data,
+                                    uint64_t len);
+
+        void ProcessAttributeString(uint64_t offset,
+                                    enum DwarfAttribute attr,
+                                    enum DwarfForm form,
+                                    const string &data);
+
+        void ProcessAttributeSignature(uint64_t offset,
+                                       enum DwarfAttribute attr,
+                                       enum DwarfForm form,
+                                       uint64_t signature);
+
+        void EndDIE(uint64_t offset);
+
+    private:
+
+        // The type of a handler stack entry.  This includes some fields
+        // which don't really need to be on the stack --- they could just be
+        // single data members of DIEDispatcher --- but putting them here
+        // makes it easier to see that the code is correct.
+        struct HandlerStack {
+            // The offset of the DIE for this handler stack entry.
+            uint64_t offset_;
+
+            // The handler object interested in this DIE's attributes and
+            // children.  If NULL, we're not interested in either.
+            DIEHandler *handler_;
+
+            // Have we reported the end of this DIE's attributes to the handler?
+            bool reported_attributes_end_;
+        };
+
+        // Stack of DIE attribute handlers.  At StartDIE(D), the top of the
+        // stack is the handler of D's parent, whom we may ask for a handler
+        // for D itself.  At EndDIE(D), the top of the stack is D's handler.
+        // Special cases:
+        //
+        // - Before we've seen the compilation unit's root DIE, the stack is
+        //   empty; we'll call root_handler_'s special member functions, and
+        //   perhaps push root_handler_ on the stack to look at the root's
+        //   immediate children.
+        //
+        // - When we decide to ignore a subtree, we only push an entry on
+        //   the stack for the root of the tree being ignored, rather than
+        //   pushing lots of stack entries with handler_ set to NULL.
+        std::stack <HandlerStack> die_handlers_;
+
+        // The root handler.  We don't push it on die_handlers_ until we
+        // actually get the StartDIE call for the root.
+        RootDIEHandler *root_handler_;
+    };
 
 } // namespace google_breakpad
 #endif  // COMMON_DWARF_DWARF2DIEHANDLER_H__

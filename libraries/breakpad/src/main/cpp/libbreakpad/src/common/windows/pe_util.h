@@ -36,42 +36,44 @@
 
 namespace google_breakpad {
 
-using std::wstring;
+    using std::wstring;
 
 // Reads |pe_file| and populates |info|. Returns true on success.
 // Only supports PE32+ format, ie. a 64bit PE file.
 // Will fail if |pe_file| does not contain a valid CodeView record.
-bool ReadModuleInfo(const wstring& pe_file, PDBModuleInfo* info);
+    bool ReadModuleInfo(const wstring &pe_file, PDBModuleInfo *info);
 
 // Reads |pe_file| and populates |info|. Returns true on success.
-bool ReadPEInfo(const wstring& pe_file, PEModuleInfo* info);
+    bool ReadPEInfo(const wstring &pe_file, PEModuleInfo *info);
 
 // Reads |pe_file| and prints frame data (aka. unwind info) to |out_file|.
 // Only supports PE32+ format, ie. a 64bit PE file.
-bool PrintPEFrameData(const wstring& pe_file, FILE* out_file);
+    bool PrintPEFrameData(const wstring &pe_file, FILE *out_file);
 
 // Combines a GUID |signature| and DWORD |age| to create a Breakpad debug
 // identifier.
-wstring GenerateDebugIdentifier(DWORD age, GUID signature);
+    wstring GenerateDebugIdentifier(DWORD age, GUID signature);
 
 // Combines a DWORD |signature| and DWORD |age| to create a Breakpad debug
 // identifier.
-wstring GenerateDebugIdentifier(DWORD age, DWORD signature);
+    wstring GenerateDebugIdentifier(DWORD age, DWORD signature);
 
 // Converts |machine| enum value to the corresponding string used by Breakpad.
 // The enum is IMAGE_FILE_MACHINE_*, contained in winnt.h.
-constexpr const wchar_t* FileHeaderMachineToCpuString(WORD machine) {
-  switch (machine) {
-    case IMAGE_FILE_MACHINE_I386: {
-      return L"x86";
+    constexpr const wchar_t *FileHeaderMachineToCpuString(WORD machine) {
+        switch (machine) {
+            case IMAGE_FILE_MACHINE_I386: {
+                return L"x86";
+            }
+            case IMAGE_FILE_MACHINE_IA64:
+            case IMAGE_FILE_MACHINE_AMD64: {
+                return L"x86_64";
+            }
+            default: {
+                return L"unknown";
+            }
+        }
     }
-    case IMAGE_FILE_MACHINE_IA64:
-    case IMAGE_FILE_MACHINE_AMD64: {
-      return L"x86_64";
-    }
-    default: { return L"unknown"; }
-  }
-}
 
 }  // namespace google_breakpad
 

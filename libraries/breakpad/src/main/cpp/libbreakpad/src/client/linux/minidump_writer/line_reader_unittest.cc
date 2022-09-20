@@ -39,131 +39,221 @@ using namespace google_breakpad;
 
 namespace {
 
-typedef testing::Test LineReaderTest;
+    typedef testing::Test LineReaderTest;
 
-class ScopedTestFile : public AutoTestFile {
-public:
-  explicit ScopedTestFile(const char* text)
-    : AutoTestFile("line_reader", text) {
-  }
+    class ScopedTestFile : public AutoTestFile {
+    public:
+        explicit ScopedTestFile(const char *text)
+                : AutoTestFile("line_reader", text) {
+        }
 
-  ScopedTestFile(const char* text, size_t text_len)
-    : AutoTestFile("line_reader", text, text_len) {
-  }
-};
+        ScopedTestFile(const char *text, size_t text_len)
+                : AutoTestFile("line_reader", text, text_len) {
+        }
+    };
 
 }
 
-TEST(LineReaderTest, EmptyFile) {
-  ScopedTestFile file("");
-  ASSERT_TRUE(file.IsOk());
-  LineReader reader(file.GetFd());
+TEST(LineReaderTest, EmptyFile
+) {
+ScopedTestFile file("");
+ASSERT_TRUE(file
+.
 
-  const char* line;
-  unsigned len;
-  ASSERT_FALSE(reader.GetNextLine(&line, &len));
+IsOk()
+
+);
+LineReader reader(file.GetFd());
+
+const char *line;
+unsigned len;
+ASSERT_FALSE(reader
+.
+GetNextLine(&line, &len
+));
 }
 
-TEST(LineReaderTest, OneLineTerminated) {
-  ScopedTestFile file("a\n");
-  ASSERT_TRUE(file.IsOk());
-  LineReader reader(file.GetFd());
+TEST(LineReaderTest, OneLineTerminated
+) {
+ScopedTestFile file("a\n");
+ASSERT_TRUE(file
+.
 
-  const char* line;
-  unsigned int len;
-  ASSERT_TRUE(reader.GetNextLine(&line, &len));
-  ASSERT_EQ((unsigned int)1, len);
-  ASSERT_EQ('a', line[0]);
-  ASSERT_EQ('\0', line[1]);
-  reader.PopLine(len);
+IsOk()
 
-  ASSERT_FALSE(reader.GetNextLine(&line, &len));
+);
+LineReader reader(file.GetFd());
+
+const char *line;
+unsigned int len;
+ASSERT_TRUE(reader
+.
+GetNextLine(&line, &len
+));
+ASSERT_EQ((unsigned int)1, len);
+ASSERT_EQ('a', line[0]);
+ASSERT_EQ('\0', line[1]);
+reader.
+PopLine(len);
+
+ASSERT_FALSE(reader
+.
+GetNextLine(&line, &len
+));
 }
 
-TEST(LineReaderTest, OneLine) {
-  ScopedTestFile file("a");
-  ASSERT_TRUE(file.IsOk());
-  LineReader reader(file.GetFd());
+TEST(LineReaderTest, OneLine
+) {
+ScopedTestFile file("a");
+ASSERT_TRUE(file
+.
 
-  const char* line;
-  unsigned len;
-  ASSERT_TRUE(reader.GetNextLine(&line, &len));
-  ASSERT_EQ((unsigned)1, len);
-  ASSERT_EQ('a', line[0]);
-  ASSERT_EQ('\0', line[1]);
-  reader.PopLine(len);
+IsOk()
 
-  ASSERT_FALSE(reader.GetNextLine(&line, &len));
+);
+LineReader reader(file.GetFd());
+
+const char *line;
+unsigned len;
+ASSERT_TRUE(reader
+.
+GetNextLine(&line, &len
+));
+ASSERT_EQ((unsigned)1, len);
+ASSERT_EQ('a', line[0]);
+ASSERT_EQ('\0', line[1]);
+reader.
+PopLine(len);
+
+ASSERT_FALSE(reader
+.
+GetNextLine(&line, &len
+));
 }
 
-TEST(LineReaderTest, TwoLinesTerminated) {
-  ScopedTestFile file("a\nb\n");
-  ASSERT_TRUE(file.IsOk());
-  LineReader reader(file.GetFd());
+TEST(LineReaderTest, TwoLinesTerminated
+) {
+ScopedTestFile file("a\nb\n");
+ASSERT_TRUE(file
+.
 
-  const char* line;
-  unsigned len;
-  ASSERT_TRUE(reader.GetNextLine(&line, &len));
-  ASSERT_EQ((unsigned)1, len);
-  ASSERT_EQ('a', line[0]);
-  ASSERT_EQ('\0', line[1]);
-  reader.PopLine(len);
+IsOk()
 
-  ASSERT_TRUE(reader.GetNextLine(&line, &len));
-  ASSERT_EQ((unsigned)1, len);
-  ASSERT_EQ('b', line[0]);
-  ASSERT_EQ('\0', line[1]);
-  reader.PopLine(len);
+);
+LineReader reader(file.GetFd());
 
-  ASSERT_FALSE(reader.GetNextLine(&line, &len));
+const char *line;
+unsigned len;
+ASSERT_TRUE(reader
+.
+GetNextLine(&line, &len
+));
+ASSERT_EQ((unsigned)1, len);
+ASSERT_EQ('a', line[0]);
+ASSERT_EQ('\0', line[1]);
+reader.
+PopLine(len);
+
+ASSERT_TRUE(reader
+.
+GetNextLine(&line, &len
+));
+ASSERT_EQ((unsigned)1, len);
+ASSERT_EQ('b', line[0]);
+ASSERT_EQ('\0', line[1]);
+reader.
+PopLine(len);
+
+ASSERT_FALSE(reader
+.
+GetNextLine(&line, &len
+));
 }
 
-TEST(LineReaderTest, TwoLines) {
-  ScopedTestFile file("a\nb");
-  ASSERT_TRUE(file.IsOk());
-  LineReader reader(file.GetFd());
+TEST(LineReaderTest, TwoLines
+) {
+ScopedTestFile file("a\nb");
+ASSERT_TRUE(file
+.
 
-  const char* line;
-  unsigned len;
-  ASSERT_TRUE(reader.GetNextLine(&line, &len));
-  ASSERT_EQ((unsigned)1, len);
-  ASSERT_EQ('a', line[0]);
-  ASSERT_EQ('\0', line[1]);
-  reader.PopLine(len);
+IsOk()
 
-  ASSERT_TRUE(reader.GetNextLine(&line, &len));
-  ASSERT_EQ((unsigned)1, len);
-  ASSERT_EQ('b', line[0]);
-  ASSERT_EQ('\0', line[1]);
-  reader.PopLine(len);
+);
+LineReader reader(file.GetFd());
 
-  ASSERT_FALSE(reader.GetNextLine(&line, &len));
+const char *line;
+unsigned len;
+ASSERT_TRUE(reader
+.
+GetNextLine(&line, &len
+));
+ASSERT_EQ((unsigned)1, len);
+ASSERT_EQ('a', line[0]);
+ASSERT_EQ('\0', line[1]);
+reader.
+PopLine(len);
+
+ASSERT_TRUE(reader
+.
+GetNextLine(&line, &len
+));
+ASSERT_EQ((unsigned)1, len);
+ASSERT_EQ('b', line[0]);
+ASSERT_EQ('\0', line[1]);
+reader.
+PopLine(len);
+
+ASSERT_FALSE(reader
+.
+GetNextLine(&line, &len
+));
 }
 
-TEST(LineReaderTest, MaxLength) {
-  char l[LineReader::kMaxLineLen-1];
-  memset(l, 'a', sizeof(l));
-  ScopedTestFile file(l, sizeof(l));
-  ASSERT_TRUE(file.IsOk());
-  LineReader reader(file.GetFd());
+TEST(LineReaderTest, MaxLength
+) {
+char l[LineReader::kMaxLineLen - 1];
+memset(l,
+'a', sizeof(l));
+ScopedTestFile file(l, sizeof(l));
+ASSERT_TRUE(file
+.
 
-  const char* line;
-  unsigned len;
-  ASSERT_TRUE(reader.GetNextLine(&line, &len));
-  ASSERT_EQ(sizeof(l), len);
-  ASSERT_TRUE(memcmp(l, line, sizeof(l)) == 0);
-  ASSERT_EQ('\0', line[len]);
+IsOk()
+
+);
+LineReader reader(file.GetFd());
+
+const char *line;
+unsigned len;
+ASSERT_TRUE(reader
+.
+GetNextLine(&line, &len
+));
+ASSERT_EQ(sizeof(l), len);
+ASSERT_TRUE(memcmp(l, line, sizeof(l))
+== 0);
+ASSERT_EQ('\0', line[len]);
 }
 
-TEST(LineReaderTest, TooLong) {
-  // Note: this writes kMaxLineLen 'a' chars in the test file.
-  char l[LineReader::kMaxLineLen];
-  memset(l, 'a', sizeof(l));
-  ScopedTestFile file(l, sizeof(l));
-  ASSERT_TRUE(file.IsOk());
-  LineReader reader(file.GetFd());
+TEST(LineReaderTest, TooLong
+) {
+// Note: this writes kMaxLineLen 'a' chars in the test file.
+char l[LineReader::kMaxLineLen];
+memset(l,
+'a', sizeof(l));
+ScopedTestFile file(l, sizeof(l));
+ASSERT_TRUE(file
+.
 
-  const char* line;
-  unsigned len;
-  ASSERT_FALSE(reader.GetNextLine(&line, &len));
+IsOk()
+
+);
+LineReader reader(file.GetFd());
+
+const char *line;
+unsigned len;
+ASSERT_FALSE(reader
+.
+GetNextLine(&line, &len
+));
 }

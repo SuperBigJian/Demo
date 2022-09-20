@@ -41,6 +41,6 @@
 
 }
 
-- (void) testDWARFSymbolFileGeneration;
+- (void)testDWARFSymbolFileGeneration;
 
 @end

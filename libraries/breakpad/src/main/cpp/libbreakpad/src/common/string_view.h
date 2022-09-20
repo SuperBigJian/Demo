@@ -40,74 +40,74 @@ namespace google_breakpad {
 // A StringView is a string reference to a string object, but not own the
 // string object. It's a compatibile layer until we can use std::string_view in
 // C++17.
-class StringView {
- private:
-  // The start of the string, in an external buffer. It doesn't have to be
-  // null-terminated.
-  const char* data_ = "";
+    class StringView {
+    private:
+        // The start of the string, in an external buffer. It doesn't have to be
+        // null-terminated.
+        const char *data_ = "";
 
-  size_t length_ = 0;
+        size_t length_ = 0;
 
- public:
-  // Construct an empty StringView.
-  StringView() = default;
+    public:
+        // Construct an empty StringView.
+        StringView() = default;
 
-  // Disallow construct StringView from nullptr.
-  StringView(std::nullptr_t) = delete;
+        // Disallow construct StringView from nullptr.
+        StringView(std::nullptr_t) = delete;
 
-  // Construct a StringView from a cstring.
-  StringView(const char* str) : data_(str) {
-    assert(str);
-    length_ = strlen(str);
-  }
+        // Construct a StringView from a cstring.
+        StringView(const char *str) : data_(str) {
+            assert(str);
+            length_ = strlen(str);
+        }
 
-  // Construct a StringView from a cstring with fixed length.
-  StringView(const char* str, size_t length) : data_(str), length_(length) {
-    assert(str);
-  }
+        // Construct a StringView from a cstring with fixed length.
+        StringView(const char *str, size_t length) : data_(str), length_(length) {
+            assert(str);
+        }
 
-  // Construct a StringView from an std::string.
-  StringView(const string& str) : data_(str.data()), length_(str.length()) {}
+        // Construct a StringView from an std::string.
+        StringView(const string &str) : data_(str.data()), length_(str.length()) {}
 
-  string str() const { return string(data_, length_); }
+        string str() const { return string(data_, length_); }
 
-  const char* data() const { return data_; }
+        const char *data() const { return data_; }
 
-  bool empty() const { return length_ == 0; }
+        bool empty() const { return length_ == 0; }
 
-  size_t size() const { return length_; }
+        size_t size() const { return length_; }
 
-  int compare(StringView rhs) const {
-    size_t min_len = std::min(size(), rhs.size());
-    int res = memcmp(data_, rhs.data(), min_len);
-    if (res != 0)
-      return res;
-    if (size() == rhs.size())
-      return 0;
-    return size() < rhs.size() ? -1 : 1;
-  }
-};
+        int compare(StringView rhs) const {
+            size_t min_len = std::min(size(), rhs.size());
+            int res = memcmp(data_, rhs.data(), min_len);
+            if (res != 0)
+                return res;
+            if (size() == rhs.size())
+                return 0;
+            return size() < rhs.size() ? -1 : 1;
+        }
+    };
 
-inline bool operator==(StringView lhs, StringView rhs) {
-  return lhs.compare(rhs) == 0;
-}
+    inline bool operator==(StringView lhs, StringView rhs) {
+        return lhs.compare(rhs) == 0;
+    }
 
-inline bool operator!=(StringView lhs, StringView rhs) {
-  return lhs.compare(rhs) != 0;
-}
+    inline bool operator!=(StringView lhs, StringView rhs) {
+        return lhs.compare(rhs) != 0;
+    }
 
-inline bool operator<(StringView lhs, StringView rhs) {
-  return lhs.compare(rhs) < 0;
-}
+    inline bool operator<(StringView lhs, StringView rhs) {
+        return lhs.compare(rhs) < 0;
+    }
 
-inline bool operator>(StringView lhs, StringView rhs) {
-  return lhs.compare(rhs) > 0;
-}
+    inline bool operator>(StringView lhs, StringView rhs) {
+        return lhs.compare(rhs) > 0;
+    }
 
-inline std::ostream& operator<<(std::ostream& os, StringView s) {
-  os << s.str();
-  return os;
-}
+    inline std::ostream &operator<<(std::ostream &os, StringView s) {
+        os << s.str();
+        return os;
+    }
 
 }  // namespace google_breakpad
 

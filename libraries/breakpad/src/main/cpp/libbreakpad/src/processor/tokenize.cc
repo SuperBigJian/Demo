@@ -40,39 +40,39 @@ namespace google_breakpad {
 #define strtok_r strtok_s
 #endif
 
-using std::vector;
+    using std::vector;
 
-bool Tokenize(char* line,
-              const char* separators,
-              int max_tokens,
-              vector<char*>* tokens) {
-  tokens->clear();
-  tokens->reserve(max_tokens);
+    bool Tokenize(char *line,
+                  const char *separators,
+                  int max_tokens,
+                  vector<char *> *tokens) {
+        tokens->clear();
+        tokens->reserve(max_tokens);
 
-  int remaining = max_tokens;
+        int remaining = max_tokens;
 
-  // Split tokens on the separator character.
-  // strip them out before exhausting max_tokens.
-  char* save_ptr;
-  char* token = strtok_r(line, separators, &save_ptr);
-  while (token && --remaining > 0) {
-    tokens->push_back(token);
-    if (remaining > 1)
-      token = strtok_r(NULL, separators, &save_ptr);
-  }
+        // Split tokens on the separator character.
+        // strip them out before exhausting max_tokens.
+        char *save_ptr;
+        char *token = strtok_r(line, separators, &save_ptr);
+        while (token && --remaining > 0) {
+            tokens->push_back(token);
+            if (remaining > 1)
+                token = strtok_r(NULL, separators, &save_ptr);
+        }
 
-  // If there's anything left, just add it as a single token.
-  if (remaining == 0 && (token = strtok_r(NULL, "\r\n", &save_ptr))) {
-    tokens->push_back(token);
-  }
+        // If there's anything left, just add it as a single token.
+        if (remaining == 0 && (token = strtok_r(NULL, "\r\n", &save_ptr))) {
+            tokens->push_back(token);
+        }
 
-  return tokens->size() == static_cast<unsigned int>(max_tokens);
-}
+        return tokens->size() == static_cast<unsigned int>(max_tokens);
+    }
 
-void StringToVector(const string& str, vector<char>& vec) {
-  vec.resize(str.length() + 1);
-  std::copy(str.begin(), str.end(), vec.begin());
-  vec[str.length()] = '\0';
-}
+    void StringToVector(const string &str, vector<char> &vec) {
+        vec.resize(str.length() + 1);
+        std::copy(str.begin(), str.end(), vec.begin());
+        vec[str.length()] = '\0';
+    }
 
 } // namespace google_breakpad

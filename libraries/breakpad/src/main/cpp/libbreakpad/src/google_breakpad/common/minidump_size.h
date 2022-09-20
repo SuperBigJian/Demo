@@ -41,72 +41,72 @@
 
 namespace google_breakpad {
 
-template<typename T>
-class minidump_size {
- public:
-  static size_t size() { return sizeof(T); }
-};
+    template<typename T>
+    class minidump_size {
+    public:
+        static size_t size() { return sizeof(T); }
+    };
 
 // Explicit specializations for variable-length types.  The size returned
 // for these should be the size for an object without its variable-length
 // section.
 
-template<>
-class minidump_size<MDString> {
- public:
-  static size_t size() { return MDString_minsize; }
-};
+    template<>
+    class minidump_size<MDString> {
+    public:
+        static size_t size() { return MDString_minsize; }
+    };
 
-template<>
-class minidump_size<MDRawThreadList> {
- public:
-  static size_t size() { return MDRawThreadList_minsize; }
-};
+    template<>
+    class minidump_size<MDRawThreadList> {
+    public:
+        static size_t size() { return MDRawThreadList_minsize; }
+    };
 
-template<>
-class minidump_size<MDCVInfoPDB20> {
- public:
-  static size_t size() { return MDCVInfoPDB20_minsize; }
-};
+    template<>
+    class minidump_size<MDCVInfoPDB20> {
+    public:
+        static size_t size() { return MDCVInfoPDB20_minsize; }
+    };
 
-template<>
-class minidump_size<MDCVInfoPDB70> {
- public:
-  static size_t size() { return MDCVInfoPDB70_minsize; }
-};
+    template<>
+    class minidump_size<MDCVInfoPDB70> {
+    public:
+        static size_t size() { return MDCVInfoPDB70_minsize; }
+    };
 
-template<>
-class minidump_size<MDCVInfoELF> {
- public:
-  static size_t size() { return MDCVInfoELF_minsize; }
-};
+    template<>
+    class minidump_size<MDCVInfoELF> {
+    public:
+        static size_t size() { return MDCVInfoELF_minsize; }
+    };
 
-template<>
-class minidump_size<MDImageDebugMisc> {
- public:
-  static size_t size() { return MDImageDebugMisc_minsize; }
-};
+    template<>
+    class minidump_size<MDImageDebugMisc> {
+    public:
+        static size_t size() { return MDImageDebugMisc_minsize; }
+    };
 
-template<>
-class minidump_size<MDRawModuleList> {
- public:
-  static size_t size() { return MDRawModuleList_minsize; }
-};
+    template<>
+    class minidump_size<MDRawModuleList> {
+    public:
+        static size_t size() { return MDRawModuleList_minsize; }
+    };
 
-template<>
-class minidump_size<MDRawMemoryList> {
- public:
-  static size_t size() { return MDRawMemoryList_minsize; }
-};
+    template<>
+    class minidump_size<MDRawMemoryList> {
+    public:
+        static size_t size() { return MDRawMemoryList_minsize; }
+    };
 
 // Explicit specialization for MDRawModule, for which sizeof may include
 // tail-padding on some architectures but not others.
 
-template<>
-class minidump_size<MDRawModule> {
- public:
-  static size_t size() { return MD_MODULE_SIZE; }
-};
+    template<>
+    class minidump_size<MDRawModule> {
+    public:
+        static size_t size() { return MD_MODULE_SIZE; }
+    };
 
 }  // namespace google_breakpad
 

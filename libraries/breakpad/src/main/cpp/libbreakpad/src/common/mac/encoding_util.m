@@ -33,15 +33,15 @@
 #include <AvailabilityMacros.h>
 #import <Foundation/Foundation.h>
 
-NSString* PercentEncodeNSString(NSString* key) {
+NSString *PercentEncodeNSString(NSString *key) {
 #if (defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && defined(__IPHONE_9_0) && \
-     __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_9_0) ||                  \
-    (defined(MAC_OS_X_VERSION_MIN_REQUIRED) &&                             \
-     defined(MAC_OS_X_VERSION_10_11) &&                                    \
+     __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_9_0) || \
+    (defined(MAC_OS_X_VERSION_MIN_REQUIRED) && \
+     defined(MAC_OS_X_VERSION_10_11) && \
      MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_11)
-  return [key stringByAddingPercentEncodingWithAllowedCharacters:
-                  [NSCharacterSet URLQueryAllowedCharacterSet]];
+    return [key stringByAddingPercentEncodingWithAllowedCharacters:
+                    [NSCharacterSet URLQueryAllowedCharacterSet]];
 #else
-  return [key stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    return [key stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
 #endif
 }

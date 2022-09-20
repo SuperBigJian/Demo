@@ -39,77 +39,92 @@ namespace google_breakpad {
 
 // DumpContext carries a CPU-specific MDRawContext structure, which contains CPU
 // context such as register states.
-class DumpContext : public DumpObject {
- public:
-  virtual ~DumpContext();
+    class DumpContext : public DumpObject {
+    public:
+        virtual ~DumpContext();
 
-  // Returns an MD_CONTEXT_* value such as MD_CONTEXT_X86 or MD_CONTEXT_PPC
-  // identifying the CPU type that the context was collected from.  The
-  // returned value will identify the CPU only, and will have any other
-  // MD_CONTEXT_* bits masked out.  Returns 0 on failure.
-  uint32_t GetContextCPU() const;
+        // Returns an MD_CONTEXT_* value such as MD_CONTEXT_X86 or MD_CONTEXT_PPC
+        // identifying the CPU type that the context was collected from.  The
+        // returned value will identify the CPU only, and will have any other
+        // MD_CONTEXT_* bits masked out.  Returns 0 on failure.
+        uint32_t GetContextCPU() const;
 
-  // Return the raw value of |context_flags_|
-  uint32_t GetContextFlags() const;
+        // Return the raw value of |context_flags_|
+        uint32_t GetContextFlags() const;
 
-  // Returns raw CPU-specific context data for the named CPU type.  If the
-  // context data does not match the CPU type or does not exist, returns NULL.
-  const MDRawContextAMD64* GetContextAMD64() const;
-  const MDRawContextARM*   GetContextARM() const;
-  const MDRawContextARM64* GetContextARM64() const;
-  const MDRawContextMIPS*  GetContextMIPS() const;
-  const MDRawContextPPC*   GetContextPPC() const;
-  const MDRawContextPPC64* GetContextPPC64() const;
-  const MDRawContextSPARC* GetContextSPARC() const;
-  const MDRawContextX86*   GetContextX86() const;
+        // Returns raw CPU-specific context data for the named CPU type.  If the
+        // context data does not match the CPU type or does not exist, returns NULL.
+        const MDRawContextAMD64 *GetContextAMD64() const;
 
-  // A convenience method to get the instruction pointer out of the
-  // MDRawContext, since it varies per-CPU architecture.
-  bool GetInstructionPointer(uint64_t* ip) const;
+        const MDRawContextARM *GetContextARM() const;
 
-  // Similar to the GetInstructionPointer method, this method gets the stack
-  // pointer for all CPU architectures.
-  bool GetStackPointer(uint64_t* sp) const;
+        const MDRawContextARM64 *GetContextARM64() const;
 
-  // Print a human-readable representation of the object to stdout.
-  void Print();
+        const MDRawContextMIPS *GetContextMIPS() const;
 
- protected:
-  DumpContext();
+        const MDRawContextPPC *GetContextPPC() const;
 
-  // Sets row CPU-specific context data for the names CPU type.
-  void SetContextFlags(uint32_t context_flags);
-  void SetContextX86(MDRawContextX86* x86);
-  void SetContextPPC(MDRawContextPPC* ppc);
-  void SetContextPPC64(MDRawContextPPC64* ppc64);
-  void SetContextAMD64(MDRawContextAMD64* amd64);
-  void SetContextSPARC(MDRawContextSPARC* ctx_sparc);
-  void SetContextARM(MDRawContextARM* arm);
-  void SetContextARM64(MDRawContextARM64* arm64);
-  void SetContextMIPS(MDRawContextMIPS* ctx_mips);
+        const MDRawContextPPC64 *GetContextPPC64() const;
 
-  // Free the CPU-specific context structure.
-  void FreeContext();
+        const MDRawContextSPARC *GetContextSPARC() const;
 
- private:
-  // The CPU-specific context structure.
-  union {
-    MDRawContextBase*  base;
-    MDRawContextX86*   x86;
-    MDRawContextPPC*   ppc;
-    MDRawContextPPC64* ppc64;
-    MDRawContextAMD64* amd64;
-    // on Solaris SPARC, sparc is defined as a numeric constant,
-    // so variables can NOT be named as sparc
-    MDRawContextSPARC* ctx_sparc;
-    MDRawContextARM*   arm;
-    MDRawContextARM64* arm64;
-    MDRawContextMIPS*  ctx_mips;
-  } context_;
+        const MDRawContextX86 *GetContextX86() const;
 
-  // Store this separately because of the weirdo AMD64 context
-  uint32_t context_flags_;
-};
+        // A convenience method to get the instruction pointer out of the
+        // MDRawContext, since it varies per-CPU architecture.
+        bool GetInstructionPointer(uint64_t *ip) const;
+
+        // Similar to the GetInstructionPointer method, this method gets the stack
+        // pointer for all CPU architectures.
+        bool GetStackPointer(uint64_t *sp) const;
+
+        // Print a human-readable representation of the object to stdout.
+        void Print();
+
+    protected:
+        DumpContext();
+
+        // Sets row CPU-specific context data for the names CPU type.
+        void SetContextFlags(uint32_t context_flags);
+
+        void SetContextX86(MDRawContextX86 *x86);
+
+        void SetContextPPC(MDRawContextPPC *ppc);
+
+        void SetContextPPC64(MDRawContextPPC64 *ppc64);
+
+        void SetContextAMD64(MDRawContextAMD64 *amd64);
+
+        void SetContextSPARC(MDRawContextSPARC *ctx_sparc);
+
+        void SetContextARM(MDRawContextARM *arm);
+
+        void SetContextARM64(MDRawContextARM64 *arm64);
+
+        void SetContextMIPS(MDRawContextMIPS *ctx_mips);
+
+        // Free the CPU-specific context structure.
+        void FreeContext();
+
+    private:
+        // The CPU-specific context structure.
+        union {
+            MDRawContextBase *base;
+            MDRawContextX86 *x86;
+            MDRawContextPPC *ppc;
+            MDRawContextPPC64 *ppc64;
+            MDRawContextAMD64 *amd64;
+            // on Solaris SPARC, sparc is defined as a numeric constant,
+            // so variables can NOT be named as sparc
+            MDRawContextSPARC *ctx_sparc;
+            MDRawContextARM *arm;
+            MDRawContextARM64 *arm64;
+            MDRawContextMIPS *ctx_mips;
+        } context_;
+
+        // Store this separately because of the weirdo AMD64 context
+        uint32_t context_flags_;
+    };
 
 }  // namespace google_breakpad
 

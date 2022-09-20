@@ -38,14 +38,14 @@
 
 namespace MacStringUtils {
 
-using std::string;
+    using std::string;
 
 // Convert a CoreFoundation string into a std::string
-string ConvertToString(CFStringRef str);
+    string ConvertToString(CFStringRef str);
 
 // Return the idx'th decimal integer in str, separated by non-decimal-digits
 // E.g., str = 10.4.8, idx = 1 -> 4
-unsigned int IntegerValueAtIndex(string& str, unsigned int idx);
+    unsigned int IntegerValueAtIndex(string &str, unsigned int idx);
 
 }  // namespace MacStringUtils
 

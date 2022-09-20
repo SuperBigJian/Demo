@@ -40,38 +40,72 @@ using google_breakpad::Module;
 using google_breakpad::StabsToModule;
 using std::vector;
 
-TEST(StabsToModule, SimpleCU) {
-  Module m("name", "os", "arch", "id");
-  StabsToModule h(&m);
+TEST(StabsToModule, SimpleCU
+) {
+Module m("name", "os", "arch", "id");
+StabsToModule h(&m);
 
-  // Feed in a simple compilation unit that defines a function with
-  // one line.
-  EXPECT_TRUE(h.StartCompilationUnit("compilation-unit", 0x9f4d1271e50db93bLL,
-                                     "build-directory"));
-  EXPECT_TRUE(h.StartFunction("function", 0xfde4abbed390c394LL));
-  EXPECT_TRUE(h.Line(0xfde4abbed390c394LL, "source-file-name", 174823314));
-  EXPECT_TRUE(h.EndFunction(0xfde4abbed390c3a4LL));
-  EXPECT_TRUE(h.EndCompilationUnit(0xfee4abbed390c3a4LL));
-  h.Finalize();
+// Feed in a simple compilation unit that defines a function with
+// one line.
+EXPECT_TRUE(h
+.StartCompilationUnit("compilation-unit", 0x9f4d1271e50db93bLL,
+"build-directory"));
+EXPECT_TRUE(h
+.StartFunction("function", 0xfde4abbed390c394LL));
+EXPECT_TRUE(h
+.Line(0xfde4abbed390c394LL, "source-file-name", 174823314));
+EXPECT_TRUE(h
+.EndFunction(0xfde4abbed390c3a4LL));
+EXPECT_TRUE(h
+.EndCompilationUnit(0xfee4abbed390c3a4LL));
+h.
 
-  // Now check to see what has been added to the Module.
-  Module::File *file = m.FindExistingFile("source-file-name");
-  ASSERT_TRUE(file != NULL);
+Finalize();
 
-  vector<Module::Function*> functions;
-  m.GetFunctions(&functions, functions.end());
-  ASSERT_EQ((size_t) 1, functions.size());
-  Module::Function *function = functions[0];
-  EXPECT_STREQ("function", function->name.str().c_str());
-  EXPECT_EQ(0xfde4abbed390c394LL, function->address);
-  EXPECT_EQ(0x10U, function->ranges[0].size);
-  EXPECT_EQ(0U, function->parameter_size);
-  ASSERT_EQ((size_t) 1, function->lines.size());
-  Module::Line *line = &function->lines[0];
-  EXPECT_EQ(0xfde4abbed390c394LL, line->address);
-  EXPECT_EQ(0x10U, line->size); // derived from EndFunction
-  EXPECT_TRUE(line->file == file);
-  EXPECT_EQ(174823314, line->number);
+// Now check to see what has been added to the Module.
+Module::File *file = m.FindExistingFile("source-file-name");
+ASSERT_TRUE(file
+!= NULL);
+
+vector<Module::Function *> functions;
+m.
+GetFunctions(&functions, functions
+.
+
+end()
+
+);
+ASSERT_EQ((size_t)
+1, functions.
+
+size()
+
+);
+Module::Function *function = functions[0];
+EXPECT_STREQ("function", function->name.
+
+str()
+
+.
+
+c_str()
+
+);
+EXPECT_EQ(0xfde4abbed390c394LL, function->address);
+EXPECT_EQ(0x10U, function->ranges[0].size);
+EXPECT_EQ(0U, function->parameter_size);
+ASSERT_EQ((size_t)
+1, function->lines.
+
+size()
+
+);
+Module::Line *line = &function->lines[0];
+EXPECT_EQ(0xfde4abbed390c394LL, line->address);
+EXPECT_EQ(0x10U, line->size); // derived from EndFunction
+EXPECT_TRUE(line
+->file == file);
+EXPECT_EQ(174823314, line->number);
 }
 
 #ifdef __GNUC__
@@ -103,84 +137,147 @@ TEST(StabsToModule, Externs) {
 }
 #endif  // __GNUC__
 
-TEST(StabsToModule, DuplicateFunctionNames) {
-  Module m("name", "os", "arch", "id");
-  StabsToModule h(&m);
+TEST(StabsToModule, DuplicateFunctionNames
+) {
+Module m("name", "os", "arch", "id");
+StabsToModule h(&m);
 
-  // Compilation unit with one function, mangled name.
-  EXPECT_TRUE(h.StartCompilationUnit("compilation-unit", 0xf2cfda36ecf7f46cLL,
-                                     "build-directory"));
-  EXPECT_TRUE(h.StartFunction("funcfoo",
-                              0xf2cfda36ecf7f46dLL));
-  EXPECT_TRUE(h.EndFunction(0));
-  EXPECT_TRUE(h.StartFunction("funcfoo",
-                              0xf2cfda36ecf7f46dLL));
-  EXPECT_TRUE(h.EndFunction(0));
-  EXPECT_TRUE(h.EndCompilationUnit(0));
+// Compilation unit with one function, mangled name.
+EXPECT_TRUE(h
+.StartCompilationUnit("compilation-unit", 0xf2cfda36ecf7f46cLL,
+"build-directory"));
+EXPECT_TRUE(h
+.StartFunction("funcfoo",
+0xf2cfda36ecf7f46dLL));
+EXPECT_TRUE(h
+.EndFunction(0));
+EXPECT_TRUE(h
+.StartFunction("funcfoo",
+0xf2cfda36ecf7f46dLL));
+EXPECT_TRUE(h
+.EndFunction(0));
+EXPECT_TRUE(h
+.EndCompilationUnit(0));
 
-  h.Finalize();
+h.
 
-  // Now check to see what has been added to the Module.
-  Module::File *file = m.FindExistingFile("compilation-unit");
-  ASSERT_TRUE(file != NULL);
+Finalize();
 
-  vector<Module::Function*> functions;
-  m.GetFunctions(&functions, functions.end());
-  ASSERT_EQ(1U, functions.size());
+// Now check to see what has been added to the Module.
+Module::File *file = m.FindExistingFile("compilation-unit");
+ASSERT_TRUE(file
+!= NULL);
 
-  Module::Function *function = functions[0];
-  EXPECT_EQ(0xf2cfda36ecf7f46dLL, function->address);
-  EXPECT_LT(0U, function->ranges[0].size); // should have used dummy size
-  EXPECT_EQ(0U, function->parameter_size);
-  ASSERT_EQ(0U, function->lines.size());
+vector<Module::Function *> functions;
+m.
+GetFunctions(&functions, functions
+.
+
+end()
+
+);
+ASSERT_EQ(1U, functions.
+
+size()
+
+);
+
+Module::Function *function = functions[0];
+EXPECT_EQ(0xf2cfda36ecf7f46dLL, function->address);
+EXPECT_LT(0U, function->ranges[0].size); // should have used dummy size
+EXPECT_EQ(0U, function->parameter_size);
+ASSERT_EQ(0U, function->lines.
+
+size()
+
+);
 }
 
-TEST(InferSizes, LineSize) {
-  Module m("name", "os", "arch", "id");
-  StabsToModule h(&m);
+TEST(InferSizes, LineSize
+) {
+Module m("name", "os", "arch", "id");
+StabsToModule h(&m);
 
-  // Feed in a simple compilation unit that defines a function with
-  // one line.
-  EXPECT_TRUE(h.StartCompilationUnit("compilation-unit", 0xb4513962eff94e92LL,
-                                     "build-directory"));
-  EXPECT_TRUE(h.StartFunction("function", 0xb4513962eff94e92LL));
-  EXPECT_TRUE(h.Line(0xb4513962eff94e92LL, "source-file-name-1", 77396614));
-  EXPECT_TRUE(h.Line(0xb4513963eff94e92LL, "source-file-name-2", 87660088));
-  EXPECT_TRUE(h.EndFunction(0));  // unknown function end address
-  EXPECT_TRUE(h.EndCompilationUnit(0)); // unknown CU end address
-  EXPECT_TRUE(h.StartCompilationUnit("compilation-unit-2", 0xb4523963eff94e92LL,
-                                     "build-directory-2")); // next boundary
-  EXPECT_TRUE(h.EndCompilationUnit(0));
-  h.Finalize();
+// Feed in a simple compilation unit that defines a function with
+// one line.
+EXPECT_TRUE(h
+.StartCompilationUnit("compilation-unit", 0xb4513962eff94e92LL,
+"build-directory"));
+EXPECT_TRUE(h
+.StartFunction("function", 0xb4513962eff94e92LL));
+EXPECT_TRUE(h
+.Line(0xb4513962eff94e92LL, "source-file-name-1", 77396614));
+EXPECT_TRUE(h
+.Line(0xb4513963eff94e92LL, "source-file-name-2", 87660088));
+EXPECT_TRUE(h
+.EndFunction(0));  // unknown function end address
+EXPECT_TRUE(h
+.EndCompilationUnit(0)); // unknown CU end address
+EXPECT_TRUE(h
+.StartCompilationUnit("compilation-unit-2", 0xb4523963eff94e92LL,
+"build-directory-2")); // next boundary
+EXPECT_TRUE(h
+.EndCompilationUnit(0));
+h.
 
-  // Now check to see what has been added to the Module.
-  Module::File *file1 = m.FindExistingFile("source-file-name-1");
-  ASSERT_TRUE(file1 != NULL);
-  Module::File *file2 = m.FindExistingFile("source-file-name-2");
-  ASSERT_TRUE(file2 != NULL);
+Finalize();
 
-  vector<Module::Function*> functions;
-  m.GetFunctions(&functions, functions.end());
-  ASSERT_EQ((size_t) 1, functions.size());
+// Now check to see what has been added to the Module.
+Module::File *file1 = m.FindExistingFile("source-file-name-1");
+ASSERT_TRUE(file1
+!= NULL);
+Module::File *file2 = m.FindExistingFile("source-file-name-2");
+ASSERT_TRUE(file2
+!= NULL);
 
-  Module::Function *function = functions[0];
-  EXPECT_STREQ("function", function->name.str().c_str());
-  EXPECT_EQ(0xb4513962eff94e92LL, function->address);
-  EXPECT_EQ(0x1000100000000ULL, function->ranges[0].size); // inferred from CU end
-  EXPECT_EQ(0U, function->parameter_size);
-  ASSERT_EQ((size_t) 2, function->lines.size());
+vector<Module::Function *> functions;
+m.
+GetFunctions(&functions, functions
+.
 
-  Module::Line *line1 = &function->lines[0];
-  EXPECT_EQ(0xb4513962eff94e92LL, line1->address);
-  EXPECT_EQ(0x100000000ULL, line1->size); // derived from EndFunction
-  EXPECT_TRUE(line1->file == file1);
-  EXPECT_EQ(77396614, line1->number);
+end()
 
-  Module::Line *line2 = &function->lines[1];
-  EXPECT_EQ(0xb4513963eff94e92LL, line2->address);
-  EXPECT_EQ(0x1000000000000ULL, line2->size); // derived from EndFunction
-  EXPECT_TRUE(line2->file == file2);
-  EXPECT_EQ(87660088, line2->number);
+);
+ASSERT_EQ((size_t)
+1, functions.
+
+size()
+
+);
+
+Module::Function *function = functions[0];
+EXPECT_STREQ("function", function->name.
+
+str()
+
+.
+
+c_str()
+
+);
+EXPECT_EQ(0xb4513962eff94e92LL, function->address);
+EXPECT_EQ(0x1000100000000ULL, function->ranges[0].size); // inferred from CU end
+EXPECT_EQ(0U, function->parameter_size);
+ASSERT_EQ((size_t)
+2, function->lines.
+
+size()
+
+);
+
+Module::Line *line1 = &function->lines[0];
+EXPECT_EQ(0xb4513962eff94e92LL, line1->address);
+EXPECT_EQ(0x100000000ULL, line1->size); // derived from EndFunction
+EXPECT_TRUE(line1
+->file == file1);
+EXPECT_EQ(77396614, line1->number);
+
+Module::Line *line2 = &function->lines[1];
+EXPECT_EQ(0xb4513963eff94e92LL, line2->address);
+EXPECT_EQ(0x1000000000000ULL, line2->size); // derived from EndFunction
+EXPECT_TRUE(line2
+->file == file2);
+EXPECT_EQ(87660088, line2->number);
 }
 
 #ifdef __GNUC__
@@ -226,16 +323,21 @@ TEST(FunctionNames, Mangled) {
 // when it does so, it doesn't clean up the debugging information that
 // refers to them. In STABS, this results in compilation units whose
 // SO addresses are zero.
-TEST(Omitted, Function) {
-  Module m("name", "os", "arch", "id");
-  StabsToModule h(&m);
+TEST(Omitted, Function
+) {
+Module m("name", "os", "arch", "id");
+StabsToModule h(&m);
 
-  // The StartCompilationUnit and EndCompilationUnit calls may both have an
-  // address of zero if the compilation unit has had sections removed.
-  EXPECT_TRUE(h.StartCompilationUnit("compilation-unit", 0, "build-directory"));
-  EXPECT_TRUE(h.StartFunction("function", 0x2a133596));
-  EXPECT_TRUE(h.EndFunction(0));
-  EXPECT_TRUE(h.EndCompilationUnit(0));
+// The StartCompilationUnit and EndCompilationUnit calls may both have an
+// address of zero if the compilation unit has had sections removed.
+EXPECT_TRUE(h
+.StartCompilationUnit("compilation-unit", 0, "build-directory"));
+EXPECT_TRUE(h
+.StartFunction("function", 0x2a133596));
+EXPECT_TRUE(h
+.EndFunction(0));
+EXPECT_TRUE(h
+.EndCompilationUnit(0));
 }
 
 // TODO --- if we actually cared about STABS. Even without these we've

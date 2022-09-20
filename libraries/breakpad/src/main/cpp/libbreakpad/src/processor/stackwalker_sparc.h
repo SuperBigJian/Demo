@@ -45,31 +45,32 @@
 
 namespace google_breakpad {
 
-class CodeModules;
+    class CodeModules;
 
-class StackwalkerSPARC : public Stackwalker {
- public:
-  // context is a sparc context object that gives access to sparc-specific
-  // register state corresponding to the innermost called frame to be
-  // included in the stack.  The other arguments are passed directly through
-  // to the base Stackwalker constructor.
-  StackwalkerSPARC(const SystemInfo* system_info,
-                   const MDRawContextSPARC* context,
-                   MemoryRegion* memory,
-                   const CodeModules* modules,
-                   StackFrameSymbolizer* frame_symbolizer);
+    class StackwalkerSPARC : public Stackwalker {
+    public:
+        // context is a sparc context object that gives access to sparc-specific
+        // register state corresponding to the innermost called frame to be
+        // included in the stack.  The other arguments are passed directly through
+        // to the base Stackwalker constructor.
+        StackwalkerSPARC(const SystemInfo *system_info,
+                         const MDRawContextSPARC *context,
+                         MemoryRegion *memory,
+                         const CodeModules *modules,
+                         StackFrameSymbolizer *frame_symbolizer);
 
- private:
-  // Implementation of Stackwalker, using sparc context (%fp, %sp, %pc) and
-  // stack conventions
-  virtual StackFrame* GetContextFrame();
-  virtual StackFrame* GetCallerFrame(const CallStack* stack,
-                                     bool stack_scan_allowed);
+    private:
+        // Implementation of Stackwalker, using sparc context (%fp, %sp, %pc) and
+        // stack conventions
+        virtual StackFrame *GetContextFrame();
 
-  // Stores the CPU context corresponding to the innermost stack frame to
-  // be returned by GetContextFrame.
-  const MDRawContextSPARC* context_;
-};
+        virtual StackFrame *GetCallerFrame(const CallStack *stack,
+                                           bool stack_scan_allowed);
+
+        // Stores the CPU context corresponding to the innermost stack frame to
+        // be returned by GetContextFrame.
+        const MDRawContextSPARC *context_;
+    };
 
 
 }  // namespace google_breakpad

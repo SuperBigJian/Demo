@@ -47,106 +47,106 @@
 
 namespace google_breakpad {
 
-using std::vector;
+    using std::vector;
 
-BasicCodeModules::BasicCodeModules(const CodeModules* that,
-                                   MergeRangeStrategy strategy)
-    : main_address_(0), map_() {
-  BPLOG_IF(ERROR, !that) << "BasicCodeModules::BasicCodeModules requires "
-                            "|that|";
-  assert(that);
+    BasicCodeModules::BasicCodeModules(const CodeModules *that,
+                                       MergeRangeStrategy strategy)
+            : main_address_(0), map_() {
+        BPLOG_IF(ERROR, !that) << "BasicCodeModules::BasicCodeModules requires "
+                                  "|that|";
+        assert(that);
 
-  map_.SetMergeStrategy(strategy);
+        map_.SetMergeStrategy(strategy);
 
-  const CodeModule *main_module = that->GetMainModule();
-  if (main_module)
-    main_address_ = main_module->base_address();
+        const CodeModule *main_module = that->GetMainModule();
+        if (main_module)
+            main_address_ = main_module->base_address();
 
-  unsigned int count = that->module_count();
-  for (unsigned int i = 0; i < count; ++i) {
-    // Make a copy of the module and insert it into the map.  Use
-    // GetModuleAtIndex because ordering is unimportant when slurping the
-    // entire list, and GetModuleAtIndex may be faster than
-    // GetModuleAtSequence.
-    linked_ptr<const CodeModule> module(that->GetModuleAtIndex(i)->Copy());
-    if (!map_.StoreRange(module->base_address(), module->size(), module)) {
-      BPLOG(ERROR) << "Module " << module->code_file()
-                   << " could not be stored";
+        unsigned int count = that->module_count();
+        for (unsigned int i = 0; i < count; ++i) {
+            // Make a copy of the module and insert it into the map.  Use
+            // GetModuleAtIndex because ordering is unimportant when slurping the
+            // entire list, and GetModuleAtIndex may be faster than
+            // GetModuleAtSequence.
+            linked_ptr<const CodeModule> module(that->GetModuleAtIndex(i)->Copy());
+            if (!map_.StoreRange(module->base_address(), module->size(), module)) {
+                BPLOG(ERROR) << "Module " << module->code_file()
+                             << " could not be stored";
+            }
+        }
+
+        // Report modules with shrunk ranges.
+        for (unsigned int i = 0; i < count; ++i) {
+            linked_ptr<const CodeModule> module(that->GetModuleAtIndex(i)->Copy());
+            uint64_t delta = 0;
+            if (map_.RetrieveRange(module->base_address() + module->size() - 1,
+                                   &module, NULL /* base */, &delta, NULL /* size */) &&
+                delta > 0) {
+                BPLOG(INFO) << "The range for module " << module->code_file()
+                            << " was shrunk down by " << HexString(delta) << " bytes.";
+                linked_ptr <CodeModule> shrunk_range_module(module->Copy());
+                shrunk_range_module->SetShrinkDownDelta(delta);
+                shrunk_range_modules_.push_back(shrunk_range_module);
+            }
+        }
+
+        // TODO(ivanpe): Report modules with conflicting ranges.  The list of such
+        // modules should be copied from |that|.
     }
-  }
 
-  // Report modules with shrunk ranges.
-  for (unsigned int i = 0; i < count; ++i) {
-    linked_ptr<const CodeModule> module(that->GetModuleAtIndex(i)->Copy());
-    uint64_t delta = 0;
-    if (map_.RetrieveRange(module->base_address() + module->size() - 1,
-                           &module, NULL /* base */, &delta, NULL /* size */) &&
-        delta > 0) {
-      BPLOG(INFO) << "The range for module " << module->code_file()
-                  << " was shrunk down by " << HexString(delta) << " bytes.";
-      linked_ptr<CodeModule> shrunk_range_module(module->Copy());
-      shrunk_range_module->SetShrinkDownDelta(delta);
-      shrunk_range_modules_.push_back(shrunk_range_module);
+    BasicCodeModules::BasicCodeModules() : main_address_(0), map_() {}
+
+    BasicCodeModules::~BasicCodeModules() {
     }
-  }
 
-  // TODO(ivanpe): Report modules with conflicting ranges.  The list of such
-  // modules should be copied from |that|.
-}
+    unsigned int BasicCodeModules::module_count() const {
+        return map_.GetCount();
+    }
 
-BasicCodeModules::BasicCodeModules() : main_address_(0), map_() { }
+    const CodeModule *BasicCodeModules::GetModuleForAddress(
+            uint64_t address) const {
+        linked_ptr<const CodeModule> module;
+        if (!map_.RetrieveRange(address, &module, NULL /* base */, NULL /* delta */,
+                                NULL /* size */)) {
+            BPLOG(INFO) << "No module at " << HexString(address);
+            return NULL;
+        }
 
-BasicCodeModules::~BasicCodeModules() {
-}
+        return module.get();
+    }
 
-unsigned int BasicCodeModules::module_count() const {
-  return map_.GetCount();
-}
+    const CodeModule *BasicCodeModules::GetMainModule() const {
+        return GetModuleForAddress(main_address_);
+    }
 
-const CodeModule* BasicCodeModules::GetModuleForAddress(
-    uint64_t address) const {
-  linked_ptr<const CodeModule> module;
-  if (!map_.RetrieveRange(address, &module, NULL /* base */, NULL /* delta */,
-                          NULL /* size */)) {
-    BPLOG(INFO) << "No module at " << HexString(address);
-    return NULL;
-  }
+    const CodeModule *BasicCodeModules::GetModuleAtSequence(
+            unsigned int sequence) const {
+        linked_ptr<const CodeModule> module;
+        if (!map_.RetrieveRangeAtIndex(sequence, &module, NULL /* base */,
+                                       NULL /* delta */, NULL /* size */)) {
+            BPLOG(ERROR) << "RetrieveRangeAtIndex failed for sequence " << sequence;
+            return NULL;
+        }
 
-  return module.get();
-}
+        return module.get();
+    }
 
-const CodeModule* BasicCodeModules::GetMainModule() const {
-  return GetModuleForAddress(main_address_);
-}
+    const CodeModule *BasicCodeModules::GetModuleAtIndex(
+            unsigned int index) const {
+        // This class stores everything in a RangeMap, without any more-efficient
+        // way to walk the list of CodeModule objects.  Implement GetModuleAtIndex
+        // using GetModuleAtSequence, which meets all of the requirements, and
+        // in addition, guarantees ordering.
+        return GetModuleAtSequence(index);
+    }
 
-const CodeModule* BasicCodeModules::GetModuleAtSequence(
-    unsigned int sequence) const {
-  linked_ptr<const CodeModule> module;
-  if (!map_.RetrieveRangeAtIndex(sequence, &module, NULL /* base */,
-                                 NULL /* delta */, NULL /* size */)) {
-    BPLOG(ERROR) << "RetrieveRangeAtIndex failed for sequence " << sequence;
-    return NULL;
-  }
+    const CodeModules *BasicCodeModules::Copy() const {
+        return new BasicCodeModules(this, map_.GetMergeStrategy());
+    }
 
-  return module.get();
-}
-
-const CodeModule* BasicCodeModules::GetModuleAtIndex(
-    unsigned int index) const {
-  // This class stores everything in a RangeMap, without any more-efficient
-  // way to walk the list of CodeModule objects.  Implement GetModuleAtIndex
-  // using GetModuleAtSequence, which meets all of the requirements, and
-  // in addition, guarantees ordering.
-  return GetModuleAtSequence(index);
-}
-
-const CodeModules* BasicCodeModules::Copy() const {
-  return new BasicCodeModules(this, map_.GetMergeStrategy());
-}
-
-vector<linked_ptr<const CodeModule> >
-BasicCodeModules::GetShrunkRangeModules() const {
-  return shrunk_range_modules_;
-}
+    vector <linked_ptr<const CodeModule>>
+    BasicCodeModules::GetShrunkRangeModules() const {
+        return shrunk_range_modules_;
+    }
 
 }  // namespace google_breakpad

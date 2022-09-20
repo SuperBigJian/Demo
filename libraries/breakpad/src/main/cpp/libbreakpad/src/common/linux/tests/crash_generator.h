@@ -48,73 +48,73 @@ namespace google_breakpad {
 // dump file is expected to be created upon the termination of the child
 // process, which can then be used for testing code that processes core
 // dump files.
-class CrashGenerator {
- public:
-  CrashGenerator();
+    class CrashGenerator {
+    public:
+        CrashGenerator();
 
-  ~CrashGenerator();
+        ~CrashGenerator();
 
-  // Returns true if a core dump file named 'core' will be generated in
-  // the current directory for a test that produces a crash by checking
-  // if /proc/sys/kernel/core_pattern has the default value 'core'.
-  bool HasDefaultCorePattern() const;
+        // Returns true if a core dump file named 'core' will be generated in
+        // the current directory for a test that produces a crash by checking
+        // if /proc/sys/kernel/core_pattern has the default value 'core'.
+        bool HasDefaultCorePattern() const;
 
-  // Returns the expected path of the core dump file.
-  string GetCoreFilePath() const;
+        // Returns the expected path of the core dump file.
+        string GetCoreFilePath() const;
 
-  // Returns the directory of a copy of proc files of the child process.
-  string GetDirectoryOfProcFilesCopy() const;
+        // Returns the directory of a copy of proc files of the child process.
+        string GetDirectoryOfProcFilesCopy() const;
 
-  // Returns whether current resource limits would prevent `CreateChildCrash`
-  // from operating.
-  bool HasResourceLimitsAmenableToCrashCollection() const;
+        // Returns whether current resource limits would prevent `CreateChildCrash`
+        // from operating.
+        bool HasResourceLimitsAmenableToCrashCollection() const;
 
-  // Creates a crash (and a core dump file) by creating a child process with
-  // |num_threads| threads, and the terminating the child process by sending
-  // a signal with number |crash_signal| to the |crash_thread|-th thread.
-  // Returns true on success.
-  bool CreateChildCrash(unsigned num_threads, unsigned crash_thread,
-                        int crash_signal, pid_t* child_pid);
+        // Creates a crash (and a core dump file) by creating a child process with
+        // |num_threads| threads, and the terminating the child process by sending
+        // a signal with number |crash_signal| to the |crash_thread|-th thread.
+        // Returns true on success.
+        bool CreateChildCrash(unsigned num_threads, unsigned crash_thread,
+                              int crash_signal, pid_t *child_pid);
 
-  // Returns the thread ID of the |index|-th thread in the child process.
-  // This method does not validate |index|.
-  pid_t GetThreadId(unsigned index) const;
+        // Returns the thread ID of the |index|-th thread in the child process.
+        // This method does not validate |index|.
+        pid_t GetThreadId(unsigned index) const;
 
- private:
-  // Copies the following proc files of the process with |pid| to the directory
-  // at |path|: auxv, cmdline, environ, maps, status
-  // The directory must have been created. Returns true on success.
-  bool CopyProcFiles(pid_t pid, const char* path) const;
+    private:
+        // Copies the following proc files of the process with |pid| to the directory
+        // at |path|: auxv, cmdline, environ, maps, status
+        // The directory must have been created. Returns true on success.
+        bool CopyProcFiles(pid_t pid, const char *path) const;
 
-  // Creates |num_threads| threads in the child process.
-  void CreateThreadsInChildProcess(unsigned num_threads);
+        // Creates |num_threads| threads in the child process.
+        void CreateThreadsInChildProcess(unsigned num_threads);
 
-  // Sets the maximum size of core dump file (both the soft and hard limit)
-  // to |limit| bytes. Returns true on success.
-  bool SetCoreFileSizeLimit(rlim_t limit) const;
+        // Sets the maximum size of core dump file (both the soft and hard limit)
+        // to |limit| bytes. Returns true on success.
+        bool SetCoreFileSizeLimit(rlim_t limit) const;
 
-  // Creates a shared memory of |memory_size| bytes for communicating thread
-  // IDs between the parent and child process. Returns true on success.
-  bool MapSharedMemory(size_t memory_size);
+        // Creates a shared memory of |memory_size| bytes for communicating thread
+        // IDs between the parent and child process. Returns true on success.
+        bool MapSharedMemory(size_t memory_size);
 
-  // Releases any shared memory created by MapSharedMemory(). Returns true on
-  // success.
-  bool UnmapSharedMemory();
+        // Releases any shared memory created by MapSharedMemory(). Returns true on
+        // success.
+        bool UnmapSharedMemory();
 
-  // Returns the pointer to the thread ID of the |index|-th thread in the child
-  // process. This method does not validate |index|.
-  pid_t* GetThreadIdPointer(unsigned index);
+        // Returns the pointer to the thread ID of the |index|-th thread in the child
+        // process. This method does not validate |index|.
+        pid_t *GetThreadIdPointer(unsigned index);
 
-  // Temporary directory in which a core file is generated.
-  AutoTempDir temp_dir_;
+        // Temporary directory in which a core file is generated.
+        AutoTempDir temp_dir_;
 
-  // Shared memory for communicating thread IDs between the parent and
-  // child process.
-  void* shared_memory_;
+        // Shared memory for communicating thread IDs between the parent and
+        // child process.
+        void *shared_memory_;
 
-  // Number of bytes mapped for |shared_memory_|.
-  size_t shared_memory_size_;
-};
+        // Number of bytes mapped for |shared_memory_|.
+        size_t shared_memory_size_;
+    };
 
 }  // namespace google_breakpad
 

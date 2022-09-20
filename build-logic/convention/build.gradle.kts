@@ -16,8 +16,6 @@
 
 plugins {
     `kotlin-dsl`
-//    id("version-catalog")
-//    id("maven-publish")
 }
 
 group = "com.cyaan.common.buildlogic"
@@ -49,6 +47,10 @@ gradlePlugin {
         register("androidRoom") {
             id = "common.android.room"
             implementationClass = "AndroidRoomConventionPlugin"
+        }
+        register("androidPermissions") {
+            id = "common.android.permissions"
+            implementationClass = "AndroidPermissionsConventionPlugin"
         }
         register("androidLibrary") {
             id = "common.android.library"

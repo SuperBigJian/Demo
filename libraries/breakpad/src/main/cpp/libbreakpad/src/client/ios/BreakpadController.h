@@ -39,44 +39,44 @@
 // collecting server. By default, no crash reports are sent, the user must call
 // |setUploadingEnabled:YES| to start the uploading.
 @interface BreakpadController : NSObject {
- @private
-  // The dispatch queue that will own the breakpad reference.
-  dispatch_queue_t queue_;
+@private
+    // The dispatch queue that will own the breakpad reference.
+    dispatch_queue_t queue_;
 
-  // Instance of Breakpad crash reporter. This is owned by the queue, but can
-  // be created on the main thread at startup.
-  BreakpadRef breakpadRef_;
+    // Instance of Breakpad crash reporter. This is owned by the queue, but can
+    // be created on the main thread at startup.
+    BreakpadRef breakpadRef_;
 
-  // The dictionary that contains configuration for breakpad. Modifying it
-  // should only happen when the controller is not started. The initial value
-  // is the infoDictionary of the bundle of the application.
-  NSMutableDictionary* configuration_;
+    // The dictionary that contains configuration for breakpad. Modifying it
+    // should only happen when the controller is not started. The initial value
+    // is the infoDictionary of the bundle of the application.
+    NSMutableDictionary *configuration_;
 
-  // Whether or not crash reports should be uploaded.
-  BOOL enableUploads_;
+    // Whether or not crash reports should be uploaded.
+    BOOL enableUploads_;
 
-  // Whether the controller has been started on the main thread. This is only
-  // used to assert the initialization order is correct.
-  BOOL started_;
+    // Whether the controller has been started on the main thread. This is only
+    // used to assert the initialization order is correct.
+    BOOL started_;
 
-  // The interval to wait between two uploads. Value is 0 if no upload must be
-  // done.
-  int uploadIntervalInSeconds_;
+    // The interval to wait between two uploads. Value is 0 if no upload must be
+    // done.
+    int uploadIntervalInSeconds_;
 
-  // The dictionary that contains additional server parameters to send when
-  // uploading crash reports.
-  NSDictionary* uploadTimeParameters_;
+    // The dictionary that contains additional server parameters to send when
+    // uploading crash reports.
+    NSDictionary *uploadTimeParameters_;
 
-  // The callback to call on report upload completion.
-  BreakpadUploadCompletionCallback uploadCompleteCallback_;
+    // The callback to call on report upload completion.
+    BreakpadUploadCompletionCallback uploadCompleteCallback_;
 }
 
 // Singleton.
-+ (BreakpadController*)sharedInstance;
++ (BreakpadController *)sharedInstance;
 
 // Update the controller configuration. Merges its old configuration with the
 // new one. Merge is done by replacing the old values by the new values.
-- (void)updateConfiguration:(NSDictionary*)configuration;
+- (void)updateConfiguration:(NSDictionary *)configuration;
 
 // Reset the controller configuration to its initial value, which is the
 // infoDictionary of the bundle of the application.
@@ -84,7 +84,7 @@
 
 // Configure the URL to upload the report to. This must be called at least once
 // if the URL is not in the bundle information.
-- (void)setUploadingURL:(NSString*)url;
+- (void)setUploadingURL:(NSString *)url;
 
 // Set the minimal interval between two uploads in seconds. This must be called
 // at least once if the interval is not in the bundle information. A value of 0
@@ -92,11 +92,11 @@
 - (void)setUploadInterval:(int)intervalInSeconds;
 
 // Set additional server parameters to send when uploading crash reports.
-- (void)setParametersToAddAtUploadTime:(NSDictionary*)uploadTimeParameters;
+- (void)setParametersToAddAtUploadTime:(NSDictionary *)uploadTimeParameters;
 
 // Specify an upload parameter that will be added to the crash report when a
 // crash report is generated. See |BreakpadAddUploadParameter|.
-- (void)addUploadParameter:(NSString*)value forKey:(NSString*)key;
+- (void)addUploadParameter:(NSString *)value forKey:(NSString *)key;
 
 // Sets the callback to be called after uploading a crash report to the server.
 // Only the latest callback registered will be called.
@@ -104,12 +104,12 @@
 
 // Remove a previously-added parameter from the upload parameter set. See
 // |BreakpadRemoveUploadParameter|.
-- (void)removeUploadParameterForKey:(NSString*)key;
+- (void)removeUploadParameterForKey:(NSString *)key;
 
 // Access the underlying BreakpadRef. This method is asynchronous, and will be
 // executed on the thread owning the BreakpadRef variable. Moreover, if the
 // controller is not started, the block will be called with a NULL parameter.
-- (void)withBreakpadRef:(void(^)(BreakpadRef))callback;
+- (void)withBreakpadRef:(void (^)(BreakpadRef))callback;
 
 // Starts the BreakpadController by registering crash handlers. If
 // |onCurrentThread| is YES, all setup is done on the current thread, otherwise
@@ -127,10 +127,10 @@
 - (void)setUploadingEnabled:(BOOL)enabled;
 
 // Check if there is currently a crash report to upload.
-- (void)hasReportToUpload:(void(^)(BOOL))callback;
+- (void)hasReportToUpload:(void (^)(BOOL))callback;
 
 // Get the number of crash reports waiting to upload.
-- (void)getCrashReportCount:(void(^)(int))callback;
+- (void)getCrashReportCount:(void (^)(int))callback;
 
 // Get the next report to upload.
 // - If upload is disabled, callback will be called with (nil, -1).
@@ -139,14 +139,14 @@
 // - if no delay is needed, callback will be called with (0, configuration),
 //   configuration being next report to upload, or nil if none is pending.
 - (void)getNextReportConfigurationOrSendDelay:
-    (void(^)(NSDictionary*, int))callback;
+        (void (^)(NSDictionary *, int))callback;
 
 // Get the date of the most recent crash report.
-- (void)getDateOfMostRecentCrashReport:(void(^)(NSDate *))callback;
+- (void)getDateOfMostRecentCrashReport:(void (^)(NSDate *))callback;
 
 // Sends synchronously the report specified by |configuration|. This method is
 // NOT thread safe and must be called from the breakpad thread.
-- (void)threadUnsafeSendReportWithConfiguration:(NSDictionary*)configuration
+- (void)threadUnsafeSendReportWithConfiguration:(NSDictionary *)configuration
                                 withBreakpadRef:(BreakpadRef)ref;
 
 @end

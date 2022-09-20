@@ -34,40 +34,56 @@
 
 namespace {
 
-using google_breakpad::AddIgnoringOverflow;
-using google_breakpad::AddWithOverflowCheck;
+    using google_breakpad::AddIgnoringOverflow;
+    using google_breakpad::AddWithOverflowCheck;
 
-TEST(SafeMath, AddOverflowWorksAsIntended) {
-  EXPECT_EQ(AddWithOverflowCheck<uint8_t>(0, 0),
-            std::make_pair<uint8_t>(0, false));
-  EXPECT_EQ(AddWithOverflowCheck<uint8_t>(0, 255),
-            std::make_pair<uint8_t>(255, false));
-  EXPECT_EQ(AddWithOverflowCheck<uint8_t>(1, 255),
-            std::make_pair<uint8_t>(0, true));
+    TEST(SafeMath, AddOverflowWorksAsIntended
+    ) {
+    EXPECT_EQ(AddWithOverflowCheck<uint8_t>(0, 0),
+            std::make_pair<uint8_t>(0, false)
+    );
+    EXPECT_EQ(AddWithOverflowCheck<uint8_t>(0, 255),
+            std::make_pair<uint8_t>(255, false)
+    );
+    EXPECT_EQ(AddWithOverflowCheck<uint8_t>(1, 255),
+            std::make_pair<uint8_t>(0, true)
+    );
 
-  EXPECT_EQ(AddWithOverflowCheck<int8_t>(-128, 127),
-            std::make_pair<int8_t>(-1, false));
-  EXPECT_EQ(AddWithOverflowCheck<int8_t>(127, -128),
-            std::make_pair<int8_t>(-1, false));
-  EXPECT_EQ(AddWithOverflowCheck<int8_t>(1, -128),
-            std::make_pair<int8_t>(-127, false));
-  EXPECT_EQ(AddWithOverflowCheck<int8_t>(127, -1),
-            std::make_pair<int8_t>(126, false));
+    EXPECT_EQ(AddWithOverflowCheck<int8_t>(-128, 127),
+            std::make_pair<int8_t>(-1, false)
+    );
+    EXPECT_EQ(AddWithOverflowCheck<int8_t>(127, -128),
+            std::make_pair<int8_t>(-1, false)
+    );
+    EXPECT_EQ(AddWithOverflowCheck<int8_t>(1, -128),
+            std::make_pair<int8_t>(-127, false)
+    );
+    EXPECT_EQ(AddWithOverflowCheck<int8_t>(127, -1),
+            std::make_pair<int8_t>(126, false)
+    );
 
-  EXPECT_EQ(AddWithOverflowCheck<int8_t>(-128, -1),
-            std::make_pair<int8_t>(127, true));
-  EXPECT_EQ(AddWithOverflowCheck<int8_t>(-128, -128),
-            std::make_pair<int8_t>(0, true));
-  EXPECT_EQ(AddWithOverflowCheck<int8_t>(127, 1),
-            std::make_pair<int8_t>(-128, true));
-  EXPECT_EQ(AddWithOverflowCheck<int8_t>(127, 127),
-            std::make_pair<int8_t>(-2, true));
+    EXPECT_EQ(AddWithOverflowCheck<int8_t>(-128, -1),
+            std::make_pair<int8_t>(127, true)
+    );
+    EXPECT_EQ(AddWithOverflowCheck<int8_t>(-128, -128),
+            std::make_pair<int8_t>(0, true)
+    );
+    EXPECT_EQ(AddWithOverflowCheck<int8_t>(127, 1),
+            std::make_pair<int8_t>(-128, true)
+    );
+    EXPECT_EQ(AddWithOverflowCheck<int8_t>(127, 127),
+            std::make_pair<int8_t>(-2, true)
+    );
 }
 
-TEST(SafeMath, AddIgnoringOverflowWorksAsIntended) {
-  EXPECT_EQ(AddIgnoringOverflow<uint8_t>(0, 0), 0);
-  EXPECT_EQ(AddIgnoringOverflow<uint8_t>(0, 255), 255);
-  EXPECT_EQ(AddIgnoringOverflow<uint8_t>(1, 255), 0);
+TEST(SafeMath, AddIgnoringOverflowWorksAsIntended
+) {
+EXPECT_EQ(AddIgnoringOverflow<uint8_t>(0, 0),
+0);
+EXPECT_EQ(AddIgnoringOverflow<uint8_t>(0, 255),
+255);
+EXPECT_EQ(AddIgnoringOverflow<uint8_t>(1, 255),
+0);
 }
 
 }  // namespace

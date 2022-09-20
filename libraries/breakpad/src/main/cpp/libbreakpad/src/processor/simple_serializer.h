@@ -44,21 +44,23 @@
 
 namespace google_breakpad {
 
-typedef uint64_t MemAddr;
+    typedef uint64_t MemAddr;
 
 // Default implementation of SimpleSerializer template.
 // Specializations are defined in "simple_serializer-inl.h".
-template<class Type> class SimpleSerializer {
- public:
-  // Calculate and return the size of the 'item'.
-  static size_t SizeOf(const Type& item) { return sizeof(item); }
-  // Write 'item' to memory location 'dest', and return to the "end" address of
-  // data written, i.e., the address after the final byte written.
-  static char* Write(const Type& item, char* dest) {
-    new (dest) Type(item);
-    return dest + SizeOf(item);
-  }
-};
+    template<class Type>
+    class SimpleSerializer {
+    public:
+        // Calculate and return the size of the 'item'.
+        static size_t SizeOf(const Type &item) { return sizeof(item); }
+
+        // Write 'item' to memory location 'dest', and return to the "end" address of
+        // data written, i.e., the address after the final byte written.
+        static char *Write(const Type &item, char *dest) {
+            new(dest) Type(item);
+            return dest + SizeOf(item);
+        }
+    };
 
 }  // namespace google_breakpad
 

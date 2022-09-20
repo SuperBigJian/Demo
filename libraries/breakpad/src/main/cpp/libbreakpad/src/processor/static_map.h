@@ -69,75 +69,79 @@
 namespace google_breakpad {
 
 // Default functor to compare keys.
-template<typename Key>
-class DefaultCompare {
- public:
-  int operator()(const Key& k1, const Key& k2) const {
-    if (k1 < k2) return -1;
-    if (k1 == k2) return 0;
-    return 1;
-  }
-};
+    template<typename Key>
+    class DefaultCompare {
+    public:
+        int operator()(const Key &k1, const Key &k2) const {
+            if (k1 < k2) return -1;
+            if (k1 == k2) return 0;
+            return 1;
+        }
+    };
 
-template<typename Key, typename Value, typename Compare = DefaultCompare<Key> >
-class StaticMap {
- public:
-  typedef StaticMapIterator<Key, Value, Compare> iterator;
-  typedef StaticMapIterator<Key, Value, Compare> const_iterator;
+    template<typename Key, typename Value, typename Compare = DefaultCompare<Key> >
+    class StaticMap {
+    public:
+        typedef StaticMapIterator <Key, Value, Compare> iterator;
+        typedef StaticMapIterator <Key, Value, Compare> const_iterator;
 
-  StaticMap() : raw_data_(0),
-                num_nodes_(0),
-                offsets_(0),
-                compare_() { }
+        StaticMap() : raw_data_(0),
+                      num_nodes_(0),
+                      offsets_(0),
+                      compare_() {}
 
-  explicit StaticMap(const char* raw_data);
+        explicit StaticMap(const char *raw_data);
 
-  inline bool empty() const { return num_nodes_ == 0; }
-  inline unsigned int size() const { return num_nodes_; }
+        inline bool empty() const { return num_nodes_ == 0; }
 
-  // Return iterators.
-  inline iterator begin() const { return IteratorAtIndex(0); }
-  inline iterator last() const { return IteratorAtIndex(num_nodes_ - 1); }
-  inline iterator end() const { return IteratorAtIndex(num_nodes_); }
-  inline iterator IteratorAtIndex(int index) const {
-    return iterator(raw_data_, index);
-  }
+        inline unsigned int size() const { return num_nodes_; }
 
-  // Lookup operations.
-  iterator find(const Key& k) const;
+        // Return iterators.
+        inline iterator begin() const { return IteratorAtIndex(0); }
 
-  // lower_bound(k) searches in a sorted range for the first element that has a
-  // key not less than the argument k.
-  iterator lower_bound(const Key& k) const;
+        inline iterator last() const { return IteratorAtIndex(num_nodes_ - 1); }
 
-  // upper_bound(k) searches in a sorted range for the first element that has a
-  // key greater than the argument k.
-  iterator upper_bound(const Key& k) const;
+        inline iterator end() const { return IteratorAtIndex(num_nodes_); }
 
-  // Checks if the underlying memory data conforms to the predefined pattern:
-  // first check the number of nodes is non-negative,
-  // then check both offsets and keys are strictly increasing (sorted).
-  bool ValidateInMemoryStructure() const;
+        inline iterator IteratorAtIndex(int index) const {
+            return iterator(raw_data_, index);
+        }
 
- private:
-  const Key GetKeyAtIndex(int i) const;
+        // Lookup operations.
+        iterator find(const Key &k) const;
 
-  // Start address of a raw memory chunk with serialized data.
-  const char* raw_data_;
+        // lower_bound(k) searches in a sorted range for the first element that has a
+        // key not less than the argument k.
+        iterator lower_bound(const Key &k) const;
 
-  // Number of nodes in the static map.
-  int32_t num_nodes_;
+        // upper_bound(k) searches in a sorted range for the first element that has a
+        // key greater than the argument k.
+        iterator upper_bound(const Key &k) const;
 
-  // Array of offset addresses for stored values.
-  // For example:
-  // address_of_i-th_node_value = raw_data_ + offsets_[i]
-  const uint32_t* offsets_;
+        // Checks if the underlying memory data conforms to the predefined pattern:
+        // first check the number of nodes is non-negative,
+        // then check both offsets and keys are strictly increasing (sorted).
+        bool ValidateInMemoryStructure() const;
 
-  // keys_[i] = key of i_th node
-  const Key* keys_;
+    private:
+        const Key GetKeyAtIndex(int i) const;
 
-  Compare compare_;
-};
+        // Start address of a raw memory chunk with serialized data.
+        const char *raw_data_;
+
+        // Number of nodes in the static map.
+        int32_t num_nodes_;
+
+        // Array of offset addresses for stored values.
+        // For example:
+        // address_of_i-th_node_value = raw_data_ + offsets_[i]
+        const uint32_t *offsets_;
+
+        // keys_[i] = key of i_th node
+        const Key *keys_;
+
+        Compare compare_;
+    };
 
 }  // namespace google_breakpad
 

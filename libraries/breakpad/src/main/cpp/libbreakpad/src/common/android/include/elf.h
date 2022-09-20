@@ -61,15 +61,15 @@ extern "C" {
 #undef Elf64_Nhdr
 
 typedef struct {
-  Elf32_Word n_namesz;
-  Elf32_Word n_descsz;
-  Elf32_Word n_type;
+    Elf32_Word n_namesz;
+    Elf32_Word n_descsz;
+    Elf32_Word n_type;
 } Elf32_Nhdr;
 
 typedef struct {
-  Elf64_Word n_namesz;
-  Elf64_Word n_descsz;
-  Elf64_Word n_type;
+    Elf64_Word n_namesz;
+    Elf64_Word n_descsz;
+    Elf64_Word n_type;
 } Elf64_Nhdr;
 
 #undef Elf32_auxv_t
@@ -78,14 +78,14 @@ typedef struct {
 typedef struct {
     uint32_t a_type;
     union {
-      uint32_t a_val;
+        uint32_t a_val;
     } a_un;
 } Elf32_auxv_t;
 
 typedef struct {
     uint64_t a_type;
     union {
-      uint64_t a_val;
+        uint64_t a_val;
     } a_un;
 } Elf64_auxv_t;
 
@@ -93,19 +93,19 @@ typedef struct {
 #undef Elf64_Dyn
 
 typedef struct {
-  Elf32_Sword   d_tag;
-  union {
-    Elf32_Word  d_val;
-    Elf32_Addr  d_ptr;
-  } d_un;
+    Elf32_Sword d_tag;
+    union {
+        Elf32_Word d_val;
+        Elf32_Addr d_ptr;
+    } d_un;
 } Elf32_Dyn;
 
 typedef struct {
-  Elf64_Sxword   d_tag;
-  union {
-    Elf64_Xword  d_val;
-    Elf64_Addr   d_ptr;
-  } d_un;
+    Elf64_Sxword d_tag;
+    union {
+        Elf64_Xword d_val;
+        Elf64_Addr d_ptr;
+    } d_un;
 } Elf64_Dyn;
 
 

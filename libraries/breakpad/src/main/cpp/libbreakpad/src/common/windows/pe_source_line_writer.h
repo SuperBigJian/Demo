@@ -37,32 +37,33 @@
 
 namespace google_breakpad {
 
-using std::wstring;
+    using std::wstring;
 
 // PESourceLineWriter uses a pe file produced by Visual C++ to output
 // a line/address map for use with BasicSourceLineResolver.
 // NOTE: Only supports PE32+ format, ie. a 64bit PE file.
-class PESourceLineWriter {
-public:
-  explicit PESourceLineWriter(const wstring& pe_file);
-  ~PESourceLineWriter();
+    class PESourceLineWriter {
+    public:
+        explicit PESourceLineWriter(const wstring &pe_file);
 
-  // Writes Breakpad symbols from the pe file to |symbol_file|.
-  // Returns true on success.
-  bool WriteSymbols(FILE* symbol_file);
+        ~PESourceLineWriter();
 
-  // Retrieves information about the module. Returns true on success.
-  bool GetModuleInfo(PDBModuleInfo* info);
+        // Writes Breakpad symbols from the pe file to |symbol_file|.
+        // Returns true on success.
+        bool WriteSymbols(FILE *symbol_file);
 
-  // Retrieves information about the module's PE file.  Returns
-  // true on success.
-  bool GetPEInfo(PEModuleInfo* info);
+        // Retrieves information about the module. Returns true on success.
+        bool GetModuleInfo(PDBModuleInfo *info);
 
-private:
-  const wstring pe_file_;
+        // Retrieves information about the module's PE file.  Returns
+        // true on success.
+        bool GetPEInfo(PEModuleInfo *info);
 
-  DISALLOW_COPY_AND_ASSIGN(PESourceLineWriter);
-};
+    private:
+        const wstring pe_file_;
+
+        DISALLOW_COPY_AND_ASSIGN(PESourceLineWriter);
+    };
 
 }  // namespace google_breakpad
 

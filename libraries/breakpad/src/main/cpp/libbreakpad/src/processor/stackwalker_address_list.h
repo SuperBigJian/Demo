@@ -43,29 +43,30 @@
 
 namespace google_breakpad {
 
-class CodeModules;
+    class CodeModules;
 
-class StackwalkerAddressList : public Stackwalker {
- public:
-  // Initializes this stack walker with an explicit set of frame addresses.
-  // |modules| and |frame_symbolizer| are passed directly through to the base
-  // Stackwalker constructor.
-  StackwalkerAddressList(const uint64_t* frames,
-                         size_t frame_count,
-                         const CodeModules* modules,
-                         StackFrameSymbolizer* frame_symbolizer);
+    class StackwalkerAddressList : public Stackwalker {
+    public:
+        // Initializes this stack walker with an explicit set of frame addresses.
+        // |modules| and |frame_symbolizer| are passed directly through to the base
+        // Stackwalker constructor.
+        StackwalkerAddressList(const uint64_t *frames,
+                               size_t frame_count,
+                               const CodeModules *modules,
+                               StackFrameSymbolizer *frame_symbolizer);
 
- private:
-  // Implementation of Stackwalker.
-  virtual StackFrame* GetContextFrame();
-  virtual StackFrame* GetCallerFrame(const CallStack* stack,
-                                     bool stack_scan_allowed);
+    private:
+        // Implementation of Stackwalker.
+        virtual StackFrame *GetContextFrame();
 
-  const uint64_t* frames_;
-  size_t frame_count_;
+        virtual StackFrame *GetCallerFrame(const CallStack *stack,
+                                           bool stack_scan_allowed);
 
-  DISALLOW_COPY_AND_ASSIGN(StackwalkerAddressList);
-};
+        const uint64_t *frames_;
+        size_t frame_count_;
+
+        DISALLOW_COPY_AND_ASSIGN(StackwalkerAddressList);
+    };
 
 }  // namespace google_breakpad
 

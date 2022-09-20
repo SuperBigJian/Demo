@@ -43,160 +43,170 @@ namespace google_breakpad {
 // minidump on Windows. This abstraction is useful to hide all the gory
 // details for minidump generation and provide a clean interface to
 // the clients to generate minidumps.
-class MinidumpGenerator {
- public:
-  // Creates an instance with the given parameters.
-  // is_client_pointers specifies whether the exception_pointers and
-  // assert_info point into the process that is being dumped.
-  // Before calling WriteMinidump on the returned instance a dump file muct be
-  // specified by a call to either SetDumpFile() or GenerateDumpFile().
-  // If a full dump file will be requested via a subsequent call to either
-  // SetFullDumpFile or GenerateFullDumpFile() dump_type must include
-  // MiniDumpWithFullMemory.
-  MinidumpGenerator(const std::wstring& dump_path,
-                    const HANDLE process_handle,
-                    const DWORD process_id,
-                    const DWORD thread_id,
-                    const DWORD requesting_thread_id,
-                    EXCEPTION_POINTERS* exception_pointers,
-                    MDRawAssertionInfo* assert_info,
-                    const MINIDUMP_TYPE dump_type,
-                    const bool is_client_pointers);
+    class MinidumpGenerator {
+    public:
+        // Creates an instance with the given parameters.
+        // is_client_pointers specifies whether the exception_pointers and
+        // assert_info point into the process that is being dumped.
+        // Before calling WriteMinidump on the returned instance a dump file muct be
+        // specified by a call to either SetDumpFile() or GenerateDumpFile().
+        // If a full dump file will be requested via a subsequent call to either
+        // SetFullDumpFile or GenerateFullDumpFile() dump_type must include
+        // MiniDumpWithFullMemory.
+        MinidumpGenerator(const std::wstring &dump_path,
+                          const HANDLE process_handle,
+                          const DWORD process_id,
+                          const DWORD thread_id,
+                          const DWORD requesting_thread_id,
+                          EXCEPTION_POINTERS *exception_pointers,
+                          MDRawAssertionInfo *assert_info,
+                          const MINIDUMP_TYPE dump_type,
+                          const bool is_client_pointers);
 
-  ~MinidumpGenerator();
+        ~MinidumpGenerator();
 
-  void SetDumpFile(const HANDLE dump_file) { dump_file_ = dump_file; }
-  void SetFullDumpFile(const HANDLE full_dump_file) {
-    full_dump_file_ = full_dump_file;
-  }
+        void SetDumpFile(const HANDLE dump_file) { dump_file_ = dump_file; }
 
-  // Generate the name for the dump file that will be written to once
-  // WriteMinidump() is called. Can only be called once and cannot be called
-  // if the dump file is set via SetDumpFile().
-  bool GenerateDumpFile(std::wstring* dump_path);
+        void SetFullDumpFile(const HANDLE full_dump_file) {
+            full_dump_file_ = full_dump_file;
+        }
 
-  // Generate the name for the full dump file that will be written to once
-  // WriteMinidump() is called. Cannot be called unless the minidump type
-  // includes MiniDumpWithFullMemory. Can only be called once and cannot be
-  // called if the dump file is set via SetFullDumpFile().
-  bool GenerateFullDumpFile(std::wstring* full_dump_path);
+        // Generate the name for the dump file that will be written to once
+        // WriteMinidump() is called. Can only be called once and cannot be called
+        // if the dump file is set via SetDumpFile().
+        bool GenerateDumpFile(std::wstring *dump_path);
 
-  void SetAdditionalStreams(
-      MINIDUMP_USER_STREAM_INFORMATION* additional_streams) {
-    additional_streams_ = additional_streams;
-  }
+        // Generate the name for the full dump file that will be written to once
+        // WriteMinidump() is called. Cannot be called unless the minidump type
+        // includes MiniDumpWithFullMemory. Can only be called once and cannot be
+        // called if the dump file is set via SetFullDumpFile().
+        bool GenerateFullDumpFile(std::wstring *full_dump_path);
 
-  void SetCallback(MINIDUMP_CALLBACK_INFORMATION* callback_info) {
-    callback_info_ = callback_info;
-  }
+        void SetAdditionalStreams(
+                MINIDUMP_USER_STREAM_INFORMATION *additional_streams) {
+            additional_streams_ = additional_streams;
+        }
 
-  // Writes the minidump with the given parameters. Stores the
-  // dump file path in the dump_path parameter if dump generation
-  // succeeds.
-  bool WriteMinidump();
+        void SetCallback(MINIDUMP_CALLBACK_INFORMATION *callback_info) {
+            callback_info_ = callback_info;
+        }
 
- private:
-  // Function pointer type for MiniDumpWriteDump, which is looked up
-  // dynamically.
-  typedef BOOL (WINAPI* MiniDumpWriteDumpType)(
-      HANDLE hProcess,
-      DWORD ProcessId,
-      HANDLE hFile,
-      MINIDUMP_TYPE DumpType,
-      CONST PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam,
-      CONST PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam,
-      CONST PMINIDUMP_CALLBACK_INFORMATION CallbackParam);
+        // Writes the minidump with the given parameters. Stores the
+        // dump file path in the dump_path parameter if dump generation
+        // succeeds.
+        bool WriteMinidump();
 
-  // Function pointer type for UuidCreate, which is looked up dynamically.
-  typedef RPC_STATUS (RPC_ENTRY* UuidCreateType)(UUID* Uuid);
+    private:
+        // Function pointer type for MiniDumpWriteDump, which is looked up
+        // dynamically.
+        typedef BOOL (WINAPI
+        * MiniDumpWriteDumpType)(
+        HANDLE hProcess,
+                DWORD
+        ProcessId,
+        HANDLE hFile,
+                MINIDUMP_TYPE
+        DumpType,
+        CONST PMINIDUMP_EXCEPTION_INFORMATION
+        ExceptionParam,
+        CONST PMINIDUMP_USER_STREAM_INFORMATION
+        UserStreamParam,
+        CONST PMINIDUMP_CALLBACK_INFORMATION
+        CallbackParam);
 
-  // Loads the appropriate DLL lazily in a thread safe way.
-  HMODULE GetDbghelpModule();
+        // Function pointer type for UuidCreate, which is looked up dynamically.
+        typedef RPC_STATUS (RPC_ENTRY
+        * UuidCreateType)(
+        UUID *Uuid
+        );
 
-  // Loads the appropriate DLL and gets a pointer to the MiniDumpWriteDump
-  // function lazily and in a thread-safe manner.
-  MiniDumpWriteDumpType GetWriteDump();
+        // Loads the appropriate DLL lazily in a thread safe way.
+        HMODULE GetDbghelpModule();
 
-  // Loads the appropriate DLL lazily in a thread safe way.
-  HMODULE GetRpcrt4Module();
+        // Loads the appropriate DLL and gets a pointer to the MiniDumpWriteDump
+        // function lazily and in a thread-safe manner.
+        MiniDumpWriteDumpType GetWriteDump();
 
-  // Loads the appropriate DLL and gets a pointer to the UuidCreate
-  // function lazily and in a thread-safe manner.
-  UuidCreateType GetCreateUuid();
+        // Loads the appropriate DLL lazily in a thread safe way.
+        HMODULE GetRpcrt4Module();
 
-  // Returns the path for the file to write dump to.
-  bool GenerateDumpFilePath(std::wstring* file_path);
+        // Loads the appropriate DLL and gets a pointer to the UuidCreate
+        // function lazily and in a thread-safe manner.
+        UuidCreateType GetCreateUuid();
 
-  // Handle to dynamically loaded DbgHelp.dll.
-  HMODULE dbghelp_module_;
+        // Returns the path for the file to write dump to.
+        bool GenerateDumpFilePath(std::wstring *file_path);
 
-  // Pointer to the MiniDumpWriteDump function.
-  MiniDumpWriteDumpType write_dump_;
+        // Handle to dynamically loaded DbgHelp.dll.
+        HMODULE dbghelp_module_;
 
-  // Handle to dynamically loaded rpcrt4.dll.
-  HMODULE rpcrt4_module_;
+        // Pointer to the MiniDumpWriteDump function.
+        MiniDumpWriteDumpType write_dump_;
 
-  // Pointer to the UuidCreate function.
-  UuidCreateType create_uuid_;
+        // Handle to dynamically loaded rpcrt4.dll.
+        HMODULE rpcrt4_module_;
 
-  // Handle for the process to dump.
-  HANDLE process_handle_;
+        // Pointer to the UuidCreate function.
+        UuidCreateType create_uuid_;
 
-  // Process ID for the process to dump.
-  DWORD process_id_;
+        // Handle for the process to dump.
+        HANDLE process_handle_;
 
-  // The crashing thread ID.
-  DWORD thread_id_;
+        // Process ID for the process to dump.
+        DWORD process_id_;
 
-  // The thread ID which is requesting the dump.
-  DWORD requesting_thread_id_;
+        // The crashing thread ID.
+        DWORD thread_id_;
 
-  // Pointer to the exception information for the crash. This may point to an
-  // address in the crashing process so it should not be dereferenced.
-  EXCEPTION_POINTERS* exception_pointers_;
+        // The thread ID which is requesting the dump.
+        DWORD requesting_thread_id_;
 
-  // Assertion info for the report.
-  MDRawAssertionInfo* assert_info_;
+        // Pointer to the exception information for the crash. This may point to an
+        // address in the crashing process so it should not be dereferenced.
+        EXCEPTION_POINTERS *exception_pointers_;
 
-  // Type of minidump to generate.
-  MINIDUMP_TYPE dump_type_;
+        // Assertion info for the report.
+        MDRawAssertionInfo *assert_info_;
 
-  // Specifies whether the exception_pointers_ reference memory in the crashing
-  // process.
-  bool is_client_pointers_;
+        // Type of minidump to generate.
+        MINIDUMP_TYPE dump_type_;
 
-  // Folder path to store dump files.
-  std::wstring dump_path_;
+        // Specifies whether the exception_pointers_ reference memory in the crashing
+        // process.
+        bool is_client_pointers_;
 
-  // UUID used to make dump file names.
-  UUID uuid_;
-  bool uuid_generated_;
+        // Folder path to store dump files.
+        std::wstring dump_path_;
 
-  // The file where the dump will be written.
-  HANDLE dump_file_;
+        // UUID used to make dump file names.
+        UUID uuid_;
+        bool uuid_generated_;
 
-  // The file where the full dump will be written.
-  HANDLE full_dump_file_;
+        // The file where the dump will be written.
+        HANDLE dump_file_;
 
-  // Tracks whether the dump file handle is managed externally.
-  bool dump_file_is_internal_;
+        // The file where the full dump will be written.
+        HANDLE full_dump_file_;
 
-  // Tracks whether the full dump file handle is managed externally.
-  bool full_dump_file_is_internal_;
+        // Tracks whether the dump file handle is managed externally.
+        bool dump_file_is_internal_;
 
-  // Additional streams to be written to the dump.
-  MINIDUMP_USER_STREAM_INFORMATION* additional_streams_;
+        // Tracks whether the full dump file handle is managed externally.
+        bool full_dump_file_is_internal_;
 
-  // The user defined callback for the various stages of the dump process.
-  MINIDUMP_CALLBACK_INFORMATION* callback_info_;
+        // Additional streams to be written to the dump.
+        MINIDUMP_USER_STREAM_INFORMATION *additional_streams_;
 
-  // Critical section to sychronize action of loading modules dynamically.
-  CRITICAL_SECTION module_load_sync_;
+        // The user defined callback for the various stages of the dump process.
+        MINIDUMP_CALLBACK_INFORMATION *callback_info_;
 
-  // Critical section to synchronize action of dynamically getting function
-  // addresses from modules.
-  CRITICAL_SECTION get_proc_address_sync_;
-};
+        // Critical section to sychronize action of loading modules dynamically.
+        CRITICAL_SECTION module_load_sync_;
+
+        // Critical section to synchronize action of dynamically getting function
+        // addresses from modules.
+        CRITICAL_SECTION get_proc_address_sync_;
+    };
 
 }  // namespace google_breakpad
 

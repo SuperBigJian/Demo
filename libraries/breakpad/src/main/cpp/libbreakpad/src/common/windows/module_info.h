@@ -34,41 +34,41 @@
 
 namespace google_breakpad {
 
-using std::wstring;
+    using std::wstring;
 // A structure that carries information that identifies a module.
-struct PDBModuleInfo {
-public:
-  // The basename of the pe/pdb file from which information was loaded.
-  wstring debug_file;
+    struct PDBModuleInfo {
+    public:
+        // The basename of the pe/pdb file from which information was loaded.
+        wstring debug_file;
 
-  // The module's identifier.  For recent pe/pdb files, the identifier consists
-  // of the pe/pdb's guid, in uppercase hexadecimal form without any dashes
-  // or separators, followed immediately by the pe/pdb's age, also in
-  // uppercase hexadecimal form.  For older pe/pdb files which have no guid,
-  // the identifier is the pe/pdb's 32-bit signature value, in zero-padded
-  // hexadecimal form, followed immediately by the pe/pdb's age, in lowercase
-  // hexadecimal form.
-  wstring debug_identifier;
+        // The module's identifier.  For recent pe/pdb files, the identifier consists
+        // of the pe/pdb's guid, in uppercase hexadecimal form without any dashes
+        // or separators, followed immediately by the pe/pdb's age, also in
+        // uppercase hexadecimal form.  For older pe/pdb files which have no guid,
+        // the identifier is the pe/pdb's 32-bit signature value, in zero-padded
+        // hexadecimal form, followed immediately by the pe/pdb's age, in lowercase
+        // hexadecimal form.
+        wstring debug_identifier;
 
-  // A string identifying the cpu that the pe/pdb is associated with.
-  // Currently, this may be "x86" or "unknown".
-  wstring cpu;
-};
+        // A string identifying the cpu that the pe/pdb is associated with.
+        // Currently, this may be "x86" or "unknown".
+        wstring cpu;
+    };
 
 // A structure that carries information that identifies a PE file,
 // either an EXE or a DLL.
-struct PEModuleInfo {
-  // The basename of the PE file.
-  wstring code_file;
+    struct PEModuleInfo {
+        // The basename of the PE file.
+        wstring code_file;
 
-  // The PE file's code identifier, which consists of its timestamp
-  // and file size concatenated together into a single hex string.
-  // (The fields IMAGE_OPTIONAL_HEADER::SizeOfImage and
-  // IMAGE_FILE_HEADER::TimeDateStamp, as defined in the ImageHlp
-  // documentation.) This is not well documented, if it's documented
-  // at all, but it's what symstore does and what DbgHelp supports.
-  wstring code_identifier;
-};
+        // The PE file's code identifier, which consists of its timestamp
+        // and file size concatenated together into a single hex string.
+        // (The fields IMAGE_OPTIONAL_HEADER::SizeOfImage and
+        // IMAGE_FILE_HEADER::TimeDateStamp, as defined in the ImageHlp
+        // documentation.) This is not well documented, if it's documented
+        // at all, but it's what symstore does and what DbgHelp supports.
+        wstring code_identifier;
+    };
 
 }  // namespace google_breakpad
 

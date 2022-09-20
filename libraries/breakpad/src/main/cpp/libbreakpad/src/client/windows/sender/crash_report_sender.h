@@ -40,83 +40,85 @@
 
 #pragma warning( push )
 // Disable exception handler warnings.
-#pragma warning( disable : 4530 ) 
+#pragma warning( disable : 4530 )
 
 #include <map>
 #include <string>
 
 namespace google_breakpad {
 
-using std::wstring;
-using std::map;
+    using std::wstring;
+    using std::map;
 
-typedef enum {
-  RESULT_FAILED = 0,  // Failed to communicate with the server; try later.
-  RESULT_REJECTED,    // Successfully sent the crash report, but the
-                      // server rejected it; don't resend this report.
-  RESULT_SUCCEEDED,   // The server accepted the crash report.
-  RESULT_THROTTLED    // No attempt was made to send the crash report, because
-                      // we exceeded the maximum reports per day.
-} ReportResult;
+    typedef enum {
+        RESULT_FAILED = 0,  // Failed to communicate with the server; try later.
+        RESULT_REJECTED,    // Successfully sent the crash report, but the
+        // server rejected it; don't resend this report.
+        RESULT_SUCCEEDED,   // The server accepted the crash report.
+        RESULT_THROTTLED    // No attempt was made to send the crash report, because
+        // we exceeded the maximum reports per day.
+    } ReportResult;
 
-class CrashReportSender {
- public:
-  // Initializes a CrashReportSender instance.
-  // If checkpoint_file is non-empty, breakpad will persist crash report
-  // state to this file.  A checkpoint file is required for
-  // set_max_reports_per_day() to function properly.
-  explicit CrashReportSender(const wstring& checkpoint_file);
-  ~CrashReportSender() {}
+    class CrashReportSender {
+    public:
+        // Initializes a CrashReportSender instance.
+        // If checkpoint_file is non-empty, breakpad will persist crash report
+        // state to this file.  A checkpoint file is required for
+        // set_max_reports_per_day() to function properly.
+        explicit CrashReportSender(const wstring &checkpoint_file);
 
-  // Sets the maximum number of crash reports that will be sent in a 24-hour
-  // period.  This uses the state persisted to the checkpoint file.
-  // The default value of -1 means that there is no limit on reports sent.
-  void set_max_reports_per_day(int reports) {
-    max_reports_per_day_ = reports;
-  }
+        ~CrashReportSender() {}
 
-  int max_reports_per_day() const { return max_reports_per_day_; }
+        // Sets the maximum number of crash reports that will be sent in a 24-hour
+        // period.  This uses the state persisted to the checkpoint file.
+        // The default value of -1 means that there is no limit on reports sent.
+        void set_max_reports_per_day(int reports) {
+            max_reports_per_day_ = reports;
+        }
 
-  // Sends the specified files, along with the map of
-  // name value pairs, as a multipart POST request to the given URL.
-  // Parameter names must contain only printable ASCII characters,
-  // and may not contain a quote (") character.
-  // Only HTTP(S) URLs are currently supported.  The return value indicates
-  // the result of the operation (see above for possible results).
-  // If report_code is non-NULL and the report is sent successfully (that is,
-  // the return value is RESULT_SUCCEEDED), a code uniquely identifying the
-  // report will be returned in report_code.
-  // (Otherwise, report_code will be unchanged.)
-  ReportResult SendCrashReport(const wstring& url,
-                               const map<wstring, wstring>& parameters,
-                               const map<wstring, wstring>& files,
-                               wstring* report_code);
+        int max_reports_per_day() const { return max_reports_per_day_; }
 
- private:
-  // Reads persistent state from a checkpoint file.
-  void ReadCheckpoint(FILE* fd);
+        // Sends the specified files, along with the map of
+        // name value pairs, as a multipart POST request to the given URL.
+        // Parameter names must contain only printable ASCII characters,
+        // and may not contain a quote (") character.
+        // Only HTTP(S) URLs are currently supported.  The return value indicates
+        // the result of the operation (see above for possible results).
+        // If report_code is non-NULL and the report is sent successfully (that is,
+        // the return value is RESULT_SUCCEEDED), a code uniquely identifying the
+        // report will be returned in report_code.
+        // (Otherwise, report_code will be unchanged.)
+        ReportResult SendCrashReport(const wstring &url,
+                                     const map <wstring, wstring> &parameters,
+                                     const map <wstring, wstring> &files,
+                                     wstring *report_code);
 
-  // Called when a new report has been sent, to update the checkpoint state.
-  void ReportSent(int today);
+    private:
+        // Reads persistent state from a checkpoint file.
+        void ReadCheckpoint(FILE *fd);
 
-  // Returns today's date (UTC) formatted as YYYYMMDD.
-  int GetCurrentDate() const;
+        // Called when a new report has been sent, to update the checkpoint state.
+        void ReportSent(int today);
 
-  // Opens the checkpoint file with the specified mode.
-  // Returns zero on success, or an error code on failure.
-  int OpenCheckpointFile(const wchar_t* mode, FILE** fd);
+        // Returns today's date (UTC) formatted as YYYYMMDD.
+        int GetCurrentDate() const;
 
-  wstring checkpoint_file_;
-  int max_reports_per_day_;
-  // The last date on which we sent a report, expressed as YYYYMMDD.
-  int last_sent_date_;
-  // Number of reports sent on last_sent_date_
-  int reports_sent_;
+        // Opens the checkpoint file with the specified mode.
+        // Returns zero on success, or an error code on failure.
+        int OpenCheckpointFile(const wchar_t *mode, FILE **fd);
 
-  // Disallow copy constructor and operator=
-  explicit CrashReportSender(const CrashReportSender&);
-  void operator=(const CrashReportSender&);
-};
+        wstring checkpoint_file_;
+        int max_reports_per_day_;
+        // The last date on which we sent a report, expressed as YYYYMMDD.
+        int last_sent_date_;
+        // Number of reports sent on last_sent_date_
+        int reports_sent_;
+
+        // Disallow copy constructor and operator=
+        explicit CrashReportSender(const CrashReportSender &);
+
+        void operator=(const CrashReportSender &);
+    };
 
 }  // namespace google_breakpad
 

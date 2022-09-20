@@ -33,52 +33,52 @@
 
 namespace google_breakpad {
 
-void LaunchReporter(const char *reporter_executable_path,
-                    const char *config_file_path) {
-  const char* argv[] = { reporter_executable_path, config_file_path, NULL };
+    void LaunchReporter(const char *reporter_executable_path,
+                        const char *config_file_path) {
+        const char *argv[] = {reporter_executable_path, config_file_path, NULL};
 
-  // Launch the reporter
-  pid_t pid = fork();
+        // Launch the reporter
+        pid_t pid = fork();
 
-  if (pid == -1) {
-    perror("fork");
-    fprintf(stderr, "Failed to fork reporter process\n");
-    return;
-  }
+        if (pid == -1) {
+            perror("fork");
+            fprintf(stderr, "Failed to fork reporter process\n");
+            return;
+        }
 
-  // If we're in the child, load in our new executable and run.
-  // The parent will not wait for the child to complete.
-  if (pid == 0) {
-    execv(argv[0], (char* const*)argv);
-    perror("exec");
-    fprintf(stderr,
-            "Failed to launch reporter process from path %s\n",
-            reporter_executable_path);
-    unlink(config_file_path);  // launch failed - get rid of config file
-    _exit(1);
-  }
+        // If we're in the child, load in our new executable and run.
+        // The parent will not wait for the child to complete.
+        if (pid == 0) {
+            execv(argv[0], (char *const *) argv);
+            perror("exec");
+            fprintf(stderr,
+                    "Failed to launch reporter process from path %s\n",
+                    reporter_executable_path);
+            unlink(config_file_path);  // launch failed - get rid of config file
+            _exit(1);
+        }
 
-  // Wait until the Reporter child process exits.
-  //
+        // Wait until the Reporter child process exits.
+        //
 
-  // We'll use a timeout of one minute.
-  int timeout_count = 60;   // 60 seconds
+        // We'll use a timeout of one minute.
+        int timeout_count = 60;   // 60 seconds
 
-  while (timeout_count-- > 0) {
-    int status;
-    pid_t result = waitpid(pid, &status, WNOHANG);
+        while (timeout_count-- > 0) {
+            int status;
+            pid_t result = waitpid(pid, &status, WNOHANG);
 
-    if (result == 0) {
-      // The child has not yet finished.
-      sleep(1);
-    } else if (result == -1) {
-      // error occurred.
-      break;
-    } else {
-      // child has finished
-      break;
+            if (result == 0) {
+                // The child has not yet finished.
+                sleep(1);
+            } else if (result == -1) {
+                // error occurred.
+                break;
+            } else {
+                // child has finished
+                break;
+            }
+        }
     }
-  }
-}
 
 }  // namespace google_breakpad

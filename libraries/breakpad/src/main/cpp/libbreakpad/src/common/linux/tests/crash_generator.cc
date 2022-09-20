@@ -47,6 +47,7 @@
 #if defined(__ANDROID__)
 #include "common/android/testing/pthread_fixes.h"
 #endif
+
 #include "common/linux/eintr_wrapper.h"
 #include "common/tests/auto_tempdir.h"
 #include "common/tests/file_utils.h"
@@ -54,285 +55,285 @@
 
 namespace {
 
-struct ThreadData {
-  pthread_t thread;
-  pthread_barrier_t* barrier;
-  pid_t* thread_id_ptr;
-};
+    struct ThreadData {
+        pthread_t thread;
+        pthread_barrier_t *barrier;
+        pid_t *thread_id_ptr;
+    };
 
-const char* const kProcFilesToCopy[] = {
-  "auxv", "cmdline", "environ", "maps", "status"
-};
-const size_t kNumProcFilesToCopy =
-    sizeof(kProcFilesToCopy) / sizeof(kProcFilesToCopy[0]);
+    const char *const kProcFilesToCopy[] = {
+            "auxv", "cmdline", "environ", "maps", "status"
+    };
+    const size_t kNumProcFilesToCopy =
+            sizeof(kProcFilesToCopy) / sizeof(kProcFilesToCopy[0]);
 
-int gettid() {
-  // Glibc does not provide a wrapper for this.
-  return syscall(__NR_gettid);
-}
+    int gettid() {
+        // Glibc does not provide a wrapper for this.
+        return syscall(__NR_gettid);
+    }
 
-int tkill(pid_t tid, int sig) {
-  // Glibc does not provide a wrapper for this.
-  return syscall(__NR_tkill, tid, sig);
-}
+    int tkill(pid_t tid, int sig) {
+        // Glibc does not provide a wrapper for this.
+        return syscall(__NR_tkill, tid, sig);
+    }
 
 // Core file size limit set to 1 MB, which is big enough for test purposes.
-const rlim_t kCoreSizeLimit = 1024 * 1024;
+    const rlim_t kCoreSizeLimit = 1024 * 1024;
 
-void* thread_function(void* data) {
-  ThreadData* thread_data = reinterpret_cast<ThreadData*>(data);
-  volatile pid_t thread_id = gettid();
-  *(thread_data->thread_id_ptr) = thread_id;
-  int result = pthread_barrier_wait(thread_data->barrier);
-  if (result != 0 && result != PTHREAD_BARRIER_SERIAL_THREAD) {
-    perror("Failed to wait for sync barrier");
-    exit(1);
-  }
-  while (true) {
-    sched_yield();
-  }
-}
+    void *thread_function(void *data) {
+        ThreadData *thread_data = reinterpret_cast<ThreadData *>(data);
+        volatile pid_t thread_id = gettid();
+        *(thread_data->thread_id_ptr) = thread_id;
+        int result = pthread_barrier_wait(thread_data->barrier);
+        if (result != 0 && result != PTHREAD_BARRIER_SERIAL_THREAD) {
+            perror("Failed to wait for sync barrier");
+            exit(1);
+        }
+        while (true) {
+            sched_yield();
+        }
+    }
 
 }  // namespace
 
 namespace google_breakpad {
 
-CrashGenerator::CrashGenerator()
-    : shared_memory_(NULL),
-      shared_memory_size_(0) {
-}
-
-CrashGenerator::~CrashGenerator() {
-  UnmapSharedMemory();
-}
-
-bool CrashGenerator::HasDefaultCorePattern() const {
-  char buffer[8];
-  ssize_t buffer_size = sizeof(buffer);
-  return ReadFile("/proc/sys/kernel/core_pattern", buffer, &buffer_size) &&
-         buffer_size == 5 && memcmp(buffer, "core", 4) == 0;
-}
-
-string CrashGenerator::GetCoreFilePath() const {
-  return temp_dir_.path() + "/core";
-}
-
-string CrashGenerator::GetDirectoryOfProcFilesCopy() const {
-  return temp_dir_.path() + "/proc";
-}
-
-pid_t CrashGenerator::GetThreadId(unsigned index) const {
-  return reinterpret_cast<pid_t*>(shared_memory_)[index];
-}
-
-pid_t* CrashGenerator::GetThreadIdPointer(unsigned index) {
-  return reinterpret_cast<pid_t*>(shared_memory_) + index;
-}
-
-bool CrashGenerator::MapSharedMemory(size_t memory_size) {
-  if (!UnmapSharedMemory())
-    return false;
-
-  void* mapped_memory = mmap(0, memory_size, PROT_READ | PROT_WRITE,
-                             MAP_SHARED | MAP_ANONYMOUS, -1, 0);
-  if (mapped_memory == MAP_FAILED) {
-    perror("CrashGenerator: Failed to map shared memory");
-    return false;
-  }
-
-  memset(mapped_memory, 0, memory_size);
-  shared_memory_ = mapped_memory;
-  shared_memory_size_ = memory_size;
-  return true;
-}
-
-bool CrashGenerator::UnmapSharedMemory() {
-  if (!shared_memory_)
-    return true;
-
-  if (munmap(shared_memory_, shared_memory_size_) == 0) {
-    shared_memory_ = NULL;
-    shared_memory_size_ = 0;
-    return true;
-  }
-
-  perror("CrashGenerator: Failed to unmap shared memory");
-  return false;
-}
-
-bool CrashGenerator::SetCoreFileSizeLimit(rlim_t limit) const {
-  struct rlimit limits = { limit, limit };
-  if (setrlimit(RLIMIT_CORE, &limits) == -1) {
-    perror("CrashGenerator: Failed to set core file size limit");
-    return false;
-  }
-  return true;
-}
-
-bool CrashGenerator::HasResourceLimitsAmenableToCrashCollection() const {
-  struct rlimit limits;
-  if (getrlimit(RLIMIT_CORE, &limits) == -1) {
-    perror("CrashGenerator: Failed to get core file size limit");
-    return false;
-  }
-  return limits.rlim_max >= kCoreSizeLimit;
-}
-
-bool CrashGenerator::CreateChildCrash(
-    unsigned num_threads, unsigned crash_thread, int crash_signal,
-    pid_t* child_pid) {
-  if (num_threads == 0 || crash_thread >= num_threads) {
-    fprintf(stderr, "CrashGenerator: Invalid thread counts; num_threads=%u"
-                    " crash_thread=%u\n", num_threads, crash_thread);
-    return false;
-  }
-
-  if (!MapSharedMemory(num_threads * sizeof(pid_t))) {
-    perror("CrashGenerator: Unable to map shared memory");
-    return false;
-  }
-
-  pid_t pid = fork();
-  if (pid == 0) {
-    // Custom signal handlers, which may have been installed by a test launcher,
-    // are undesirable in this child.
-    if (signal(crash_signal, SIG_DFL) == SIG_ERR) {
-      perror("CrashGenerator: signal");
-      exit(1);
+    CrashGenerator::CrashGenerator()
+            : shared_memory_(NULL),
+              shared_memory_size_(0) {
     }
-    if (chdir(temp_dir_.path().c_str()) == -1) {
-      perror("CrashGenerator: Failed to change directory");
-      exit(1);
+
+    CrashGenerator::~CrashGenerator() {
+        UnmapSharedMemory();
     }
-    if (SetCoreFileSizeLimit(kCoreSizeLimit)) {
-      CreateThreadsInChildProcess(num_threads);
-      string proc_dir = GetDirectoryOfProcFilesCopy();
-      if (mkdir(proc_dir.c_str(), 0755) == -1) {
-        perror("CrashGenerator: Failed to create proc directory");
-        exit(1);
-      }
-      if (!CopyProcFiles(getpid(), proc_dir.c_str())) {
-        fprintf(stderr, "CrashGenerator: Failed to copy proc files\n");
-        exit(1);
-      }
-      // On Android the signal sometimes doesn't seem to get sent even though
-      // tkill returns '0'.  Retry a couple of times if the signal doesn't get
-      // through on the first go:
-      // https://bugs.chromium.org/p/google-breakpad/issues/detail?id=579
-#if defined(__ANDROID__)
-      const int kRetries = 60;
-      const unsigned int kSleepTimeInSeconds = 1;
-#else
-      const int kRetries = 1;
-      const unsigned int kSleepTimeInSeconds = 600;
-#endif
-      for (int i = 0; i < kRetries; i++) {
-        if (tkill(*GetThreadIdPointer(crash_thread), crash_signal) == -1) {
-          perror("CrashGenerator: Failed to kill thread by signal");
-        } else {
-          // At this point, we've queued the signal for delivery, but there's no
-          // guarantee when it'll be delivered.  We don't want the main thread to
-          // race and exit before the thread we signaled is processed.  So sleep
-          // long enough that we won't flake even under fairly high load.
-          // TODO: See if we can't be a bit more deterministic.  There doesn't
-          // seem to be an API to check on signal delivery status, so we can't
-          // really poll and wait for the kernel to declare the signal has been
-          // delivered.  If it has, and things worked, we'd be killed, so the
-          // sleep length doesn't really matter.
-          sleep(kSleepTimeInSeconds);
+
+    bool CrashGenerator::HasDefaultCorePattern() const {
+        char buffer[8];
+        ssize_t buffer_size = sizeof(buffer);
+        return ReadFile("/proc/sys/kernel/core_pattern", buffer, &buffer_size) &&
+               buffer_size == 5 && memcmp(buffer, "core", 4) == 0;
+    }
+
+    string CrashGenerator::GetCoreFilePath() const {
+        return temp_dir_.path() + "/core";
+    }
+
+    string CrashGenerator::GetDirectoryOfProcFilesCopy() const {
+        return temp_dir_.path() + "/proc";
+    }
+
+    pid_t CrashGenerator::GetThreadId(unsigned index) const {
+        return reinterpret_cast<pid_t *>(shared_memory_)[index];
+    }
+
+    pid_t *CrashGenerator::GetThreadIdPointer(unsigned index) {
+        return reinterpret_cast<pid_t *>(shared_memory_) + index;
+    }
+
+    bool CrashGenerator::MapSharedMemory(size_t memory_size) {
+        if (!UnmapSharedMemory())
+            return false;
+
+        void *mapped_memory = mmap(0, memory_size, PROT_READ | PROT_WRITE,
+                                   MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+        if (mapped_memory == MAP_FAILED) {
+            perror("CrashGenerator: Failed to map shared memory");
+            return false;
         }
-      }
-    } else {
-      perror("CrashGenerator: Failed to set core limit");
-    }
-    exit(1);
-  } else if (pid == -1) {
-    perror("CrashGenerator: Failed to create child process");
-    return false;
-  }
 
-  int status;
-  if (HANDLE_EINTR(waitpid(pid, &status, 0)) == -1) {
-    perror("CrashGenerator: Failed to wait for child process");
-    return false;
-  }
-  if (!WIFSIGNALED(status) || WTERMSIG(status) != crash_signal) {
-    fprintf(stderr, "CrashGenerator: Child process not killed by the expected signal\n"
-                    "  exit status=0x%x pid=%u signaled=%s sig=%d expected=%d\n",
+        memset(mapped_memory, 0, memory_size);
+        shared_memory_ = mapped_memory;
+        shared_memory_size_ = memory_size;
+        return true;
+    }
+
+    bool CrashGenerator::UnmapSharedMemory() {
+        if (!shared_memory_)
+            return true;
+
+        if (munmap(shared_memory_, shared_memory_size_) == 0) {
+            shared_memory_ = NULL;
+            shared_memory_size_ = 0;
+            return true;
+        }
+
+        perror("CrashGenerator: Failed to unmap shared memory");
+        return false;
+    }
+
+    bool CrashGenerator::SetCoreFileSizeLimit(rlim_t limit) const {
+        struct rlimit limits = {limit, limit};
+        if (setrlimit(RLIMIT_CORE, &limits) == -1) {
+            perror("CrashGenerator: Failed to set core file size limit");
+            return false;
+        }
+        return true;
+    }
+
+    bool CrashGenerator::HasResourceLimitsAmenableToCrashCollection() const {
+        struct rlimit limits;
+        if (getrlimit(RLIMIT_CORE, &limits) == -1) {
+            perror("CrashGenerator: Failed to get core file size limit");
+            return false;
+        }
+        return limits.rlim_max >= kCoreSizeLimit;
+    }
+
+    bool CrashGenerator::CreateChildCrash(
+            unsigned num_threads, unsigned crash_thread, int crash_signal,
+            pid_t *child_pid) {
+        if (num_threads == 0 || crash_thread >= num_threads) {
+            fprintf(stderr, "CrashGenerator: Invalid thread counts; num_threads=%u"
+                            " crash_thread=%u\n", num_threads, crash_thread);
+            return false;
+        }
+
+        if (!MapSharedMemory(num_threads * sizeof(pid_t))) {
+            perror("CrashGenerator: Unable to map shared memory");
+            return false;
+        }
+
+        pid_t pid = fork();
+        if (pid == 0) {
+            // Custom signal handlers, which may have been installed by a test launcher,
+            // are undesirable in this child.
+            if (signal(crash_signal, SIG_DFL) == SIG_ERR) {
+                perror("CrashGenerator: signal");
+                exit(1);
+            }
+            if (chdir(temp_dir_.path().c_str()) == -1) {
+                perror("CrashGenerator: Failed to change directory");
+                exit(1);
+            }
+            if (SetCoreFileSizeLimit(kCoreSizeLimit)) {
+                CreateThreadsInChildProcess(num_threads);
+                string proc_dir = GetDirectoryOfProcFilesCopy();
+                if (mkdir(proc_dir.c_str(), 0755) == -1) {
+                    perror("CrashGenerator: Failed to create proc directory");
+                    exit(1);
+                }
+                if (!CopyProcFiles(getpid(), proc_dir.c_str())) {
+                    fprintf(stderr, "CrashGenerator: Failed to copy proc files\n");
+                    exit(1);
+                }
+                // On Android the signal sometimes doesn't seem to get sent even though
+                // tkill returns '0'.  Retry a couple of times if the signal doesn't get
+                // through on the first go:
+                // https://bugs.chromium.org/p/google-breakpad/issues/detail?id=579
+#if defined(__ANDROID__)
+                const int kRetries = 60;
+                const unsigned int kSleepTimeInSeconds = 1;
+#else
+                const int kRetries = 1;
+                const unsigned int kSleepTimeInSeconds = 600;
+#endif
+                for (int i = 0; i < kRetries; i++) {
+                    if (tkill(*GetThreadIdPointer(crash_thread), crash_signal) == -1) {
+                        perror("CrashGenerator: Failed to kill thread by signal");
+                    } else {
+                        // At this point, we've queued the signal for delivery, but there's no
+                        // guarantee when it'll be delivered.  We don't want the main thread to
+                        // race and exit before the thread we signaled is processed.  So sleep
+                        // long enough that we won't flake even under fairly high load.
+                        // TODO: See if we can't be a bit more deterministic.  There doesn't
+                        // seem to be an API to check on signal delivery status, so we can't
+                        // really poll and wait for the kernel to declare the signal has been
+                        // delivered.  If it has, and things worked, we'd be killed, so the
+                        // sleep length doesn't really matter.
+                        sleep(kSleepTimeInSeconds);
+                    }
+                }
+            } else {
+                perror("CrashGenerator: Failed to set core limit");
+            }
+            exit(1);
+        } else if (pid == -1) {
+            perror("CrashGenerator: Failed to create child process");
+            return false;
+        }
+
+        int status;
+        if (HANDLE_EINTR(waitpid(pid, &status, 0)) == -1) {
+            perror("CrashGenerator: Failed to wait for child process");
+            return false;
+        }
+        if (!WIFSIGNALED(status) || WTERMSIG(status) != crash_signal) {
+            fprintf(stderr, "CrashGenerator: Child process not killed by the expected signal\n"
+                            "  exit status=0x%x pid=%u signaled=%s sig=%d expected=%d\n",
                     status, pid, WIFSIGNALED(status) ? "true" : "false",
                     WTERMSIG(status), crash_signal);
-    return false;
-  }
+            return false;
+        }
 
-  if (child_pid)
-    *child_pid = pid;
-  return true;
-}
-
-bool CrashGenerator::CopyProcFiles(pid_t pid, const char* path) const {
-  char from_path[PATH_MAX], to_path[PATH_MAX];
-  for (size_t i = 0; i < kNumProcFilesToCopy; ++i) {
-    int num_chars = snprintf(from_path, PATH_MAX, "/proc/%d/%s",
-                             pid, kProcFilesToCopy[i]);
-    if (num_chars < 0 || num_chars >= PATH_MAX)
-      return false;
-
-    num_chars = snprintf(to_path, PATH_MAX, "%s/%s",
-                         path, kProcFilesToCopy[i]);
-    if (num_chars < 0 || num_chars >= PATH_MAX)
-      return false;
-
-    if (!CopyFile(from_path, to_path))
-      return false;
-  }
-  return true;
-}
-
-void CrashGenerator::CreateThreadsInChildProcess(unsigned num_threads) {
-  *GetThreadIdPointer(0) = getpid();
-
-  if (num_threads <= 1)
-    return;
-
-  // This method does not clean up any pthread resource, as the process
-  // is expected to be killed anyway.
-  ThreadData* thread_data = new ThreadData[num_threads];
-
-  // Create detached threads so that we do not worry about pthread_join()
-  // later being called or not.
-  pthread_attr_t thread_attributes;
-  if (pthread_attr_init(&thread_attributes) != 0 ||
-      pthread_attr_setdetachstate(&thread_attributes,
-                                  PTHREAD_CREATE_DETACHED) != 0) {
-    fprintf(stderr, "CrashGenerator: Failed to initialize thread attribute\n");
-    exit(1);
-  }
-
-  pthread_barrier_t thread_barrier;
-  if (pthread_barrier_init(&thread_barrier, NULL, num_threads) != 0) {
-    fprintf(stderr, "CrashGenerator: Failed to initialize thread barrier\n");
-    exit(1);
-  }
-
-  for (unsigned i = 1; i < num_threads; ++i) {
-    thread_data[i].barrier = &thread_barrier;
-    thread_data[i].thread_id_ptr = GetThreadIdPointer(i);
-    if (pthread_create(&thread_data[i].thread, &thread_attributes,
-                       thread_function, &thread_data[i]) != 0) {
-      fprintf(stderr, "CrashGenerator: Failed to create thread %d\n", i);
-      exit(1);
+        if (child_pid)
+            *child_pid = pid;
+        return true;
     }
-  }
 
-  int result = pthread_barrier_wait(&thread_barrier);
-  if (result != 0 && result != PTHREAD_BARRIER_SERIAL_THREAD) {
-    fprintf(stderr, "CrashGenerator: Failed to wait for thread barrier\n");
-    exit(1);
-  }
+    bool CrashGenerator::CopyProcFiles(pid_t pid, const char *path) const {
+        char from_path[PATH_MAX], to_path[PATH_MAX];
+        for (size_t i = 0; i < kNumProcFilesToCopy; ++i) {
+            int num_chars = snprintf(from_path, PATH_MAX, "/proc/%d/%s",
+                                     pid, kProcFilesToCopy[i]);
+            if (num_chars < 0 || num_chars >= PATH_MAX)
+                return false;
 
-  pthread_barrier_destroy(&thread_barrier);
-  pthread_attr_destroy(&thread_attributes);
-  delete[] thread_data;
-}
+            num_chars = snprintf(to_path, PATH_MAX, "%s/%s",
+                                 path, kProcFilesToCopy[i]);
+            if (num_chars < 0 || num_chars >= PATH_MAX)
+                return false;
+
+            if (!CopyFile(from_path, to_path))
+                return false;
+        }
+        return true;
+    }
+
+    void CrashGenerator::CreateThreadsInChildProcess(unsigned num_threads) {
+        *GetThreadIdPointer(0) = getpid();
+
+        if (num_threads <= 1)
+            return;
+
+        // This method does not clean up any pthread resource, as the process
+        // is expected to be killed anyway.
+        ThreadData *thread_data = new ThreadData[num_threads];
+
+        // Create detached threads so that we do not worry about pthread_join()
+        // later being called or not.
+        pthread_attr_t thread_attributes;
+        if (pthread_attr_init(&thread_attributes) != 0 ||
+            pthread_attr_setdetachstate(&thread_attributes,
+                                        PTHREAD_CREATE_DETACHED) != 0) {
+            fprintf(stderr, "CrashGenerator: Failed to initialize thread attribute\n");
+            exit(1);
+        }
+
+        pthread_barrier_t thread_barrier;
+        if (pthread_barrier_init(&thread_barrier, NULL, num_threads) != 0) {
+            fprintf(stderr, "CrashGenerator: Failed to initialize thread barrier\n");
+            exit(1);
+        }
+
+        for (unsigned i = 1; i < num_threads; ++i) {
+            thread_data[i].barrier = &thread_barrier;
+            thread_data[i].thread_id_ptr = GetThreadIdPointer(i);
+            if (pthread_create(&thread_data[i].thread, &thread_attributes,
+                               thread_function, &thread_data[i]) != 0) {
+                fprintf(stderr, "CrashGenerator: Failed to create thread %d\n", i);
+                exit(1);
+            }
+        }
+
+        int result = pthread_barrier_wait(&thread_barrier);
+        if (result != 0 && result != PTHREAD_BARRIER_SERIAL_THREAD) {
+            fprintf(stderr, "CrashGenerator: Failed to wait for thread barrier\n");
+            exit(1);
+        }
+
+        pthread_barrier_destroy(&thread_barrier);
+        pthread_attr_destroy(&thread_attributes);
+        delete[] thread_data;
+    }
 
 }  // namespace google_breakpad

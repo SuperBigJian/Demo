@@ -48,57 +48,57 @@ namespace google_breakpad {
 // an instance of a subclass of this when we find the CU's language.
 // This class's definitions are appropriate for CUs with no specified
 // language.
-class Language {
- public:
-  // A base class destructor should be either public and virtual,
-  // or protected and nonvirtual.
-  virtual ~Language() {}
+    class Language {
+    public:
+        // A base class destructor should be either public and virtual,
+        // or protected and nonvirtual.
+        virtual ~Language() {}
 
-  // Return true if this language has functions to which we can assign
-  // line numbers. (Debugging info for assembly language, for example,
-  // can have source location information, but does not have functions
-  // recorded using DW_TAG_subprogram DIEs.)
-  virtual bool HasFunctions() const { return true; }
+        // Return true if this language has functions to which we can assign
+        // line numbers. (Debugging info for assembly language, for example,
+        // can have source location information, but does not have functions
+        // recorded using DW_TAG_subprogram DIEs.)
+        virtual bool HasFunctions() const { return true; }
 
-  // Construct a fully-qualified, language-appropriate form of NAME,
-  // given that PARENT_NAME is the name of the construct enclosing
-  // NAME. If PARENT_NAME is the empty string, then NAME is a
-  // top-level name.
-  //
-  // This API sort of assumes that a fully-qualified name is always
-  // some simple textual composition of the unqualified name and its
-  // parent's name, and that we don't need to know anything else about
-  // the parent or the child (say, their DIEs' tags) to do the job.
-  // This is true for the languages we support at the moment, and
-  // keeps things concrete. Perhaps a more refined operation would
-  // take into account the parent and child DIE types, allow languages
-  // to use their own data type for complex parent names, etc. But if
-  // C++ doesn't need all that, who would?
-  virtual string MakeQualifiedName (const string& parent_name,
-                                    const string& name) const = 0;
+        // Construct a fully-qualified, language-appropriate form of NAME,
+        // given that PARENT_NAME is the name of the construct enclosing
+        // NAME. If PARENT_NAME is the empty string, then NAME is a
+        // top-level name.
+        //
+        // This API sort of assumes that a fully-qualified name is always
+        // some simple textual composition of the unqualified name and its
+        // parent's name, and that we don't need to know anything else about
+        // the parent or the child (say, their DIEs' tags) to do the job.
+        // This is true for the languages we support at the moment, and
+        // keeps things concrete. Perhaps a more refined operation would
+        // take into account the parent and child DIE types, allow languages
+        // to use their own data type for complex parent names, etc. But if
+        // C++ doesn't need all that, who would?
+        virtual string MakeQualifiedName(const string &parent_name,
+                                         const string &name) const = 0;
 
-  enum DemangleResult {
-    // Demangling was not performed because it’s not appropriate to attempt.
-    kDontDemangle = -1,
+        enum DemangleResult {
+            // Demangling was not performed because it’s not appropriate to attempt.
+            kDontDemangle = -1,
 
-    kDemangleSuccess,
-    kDemangleFailure,
-  };
+            kDemangleSuccess,
+            kDemangleFailure,
+        };
 
-  // Wraps abi::__cxa_demangle() or similar for languages where appropriate.
-  virtual DemangleResult DemangleName(const string& mangled,
-                                      string* demangled) const {
-    demangled->clear();
-    return kDontDemangle;
-  }
+        // Wraps abi::__cxa_demangle() or similar for languages where appropriate.
+        virtual DemangleResult DemangleName(const string &mangled,
+                                            string *demangled) const {
+            demangled->clear();
+            return kDontDemangle;
+        }
 
-  // Instances for specific languages.
-  static const Language * const CPlusPlus,
-                        * const Java,
-                        * const Swift,
-                        * const Rust,
-                        * const Assembler;
-};
+        // Instances for specific languages.
+        static const Language *const CPlusPlus,
+                *const Java,
+                *const Swift,
+                *const Rust,
+                *const Assembler;
+    };
 
 } // namespace google_breakpad
 

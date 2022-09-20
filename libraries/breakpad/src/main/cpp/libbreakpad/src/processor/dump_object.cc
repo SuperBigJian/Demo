@@ -33,7 +33,7 @@
 
 namespace google_breakpad {
 
-DumpObject::DumpObject() : valid_(false) {
-}
+    DumpObject::DumpObject() : valid_(false) {
+    }
 
 }  // namespace google_breakpad

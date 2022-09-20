@@ -39,35 +39,37 @@
 
 namespace google_breakpad {
 
-class IosExceptionMinidumpGenerator : public MinidumpGenerator {
- public:
-  explicit IosExceptionMinidumpGenerator(NSException* exception);
-  virtual ~IosExceptionMinidumpGenerator();
+    class IosExceptionMinidumpGenerator : public MinidumpGenerator {
+    public:
+        explicit IosExceptionMinidumpGenerator(NSException *exception);
 
- protected:
-  virtual bool WriteExceptionStream(MDRawDirectory* exception_stream);
-  virtual bool WriteThreadStream(mach_port_t thread_id, MDRawThread* thread);
+        virtual ~IosExceptionMinidumpGenerator();
 
- private:
+    protected:
+        virtual bool WriteExceptionStream(MDRawDirectory *exception_stream);
 
-  // Get the crashing program counter from the exception.
-  uintptr_t GetPCFromException();
+        virtual bool WriteThreadStream(mach_port_t thread_id, MDRawThread *thread);
 
-  // Get the crashing link register from the exception.
-  uintptr_t GetLRFromException();
+    private:
 
-  // Write a virtual thread context for the crashing site.
-  bool WriteCrashingContext(MDLocationDescriptor* register_location);
-  // Per-CPU implementations of the above method.
+        // Get the crashing program counter from the exception.
+        uintptr_t GetPCFromException();
+
+        // Get the crashing link register from the exception.
+        uintptr_t GetLRFromException();
+
+        // Write a virtual thread context for the crashing site.
+        bool WriteCrashingContext(MDLocationDescriptor *register_location);
+        // Per-CPU implementations of the above method.
 #ifdef HAS_ARM_SUPPORT
-  bool WriteCrashingContextARM(MDLocationDescriptor* register_location);
+        bool WriteCrashingContextARM(MDLocationDescriptor* register_location);
 #endif
 #ifdef HAS_ARM64_SUPPORT
-  bool WriteCrashingContextARM64(MDLocationDescriptor* register_location);
+        bool WriteCrashingContextARM64(MDLocationDescriptor* register_location);
 #endif
 
-  NSArray* return_addresses_;
-};
+        NSArray *return_addresses_;
+    };
 
 }  // namespace google_breakpad
 

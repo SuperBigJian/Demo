@@ -52,15 +52,15 @@ namespace google_breakpad {
 // metadata.
 // If |force| is set then it will overwrite an existing file with the
 // same |debug_file| and |debug_id| in the store.
-bool SymUploadV2ProtocolSend(const wchar_t* api_url,
-                             const wchar_t* api_key,
-                             int* timeout_ms,
-                             const std::wstring& debug_file,
-                             const std::wstring& debug_id,
-                             const std::wstring& symbol_filename,
-                             const std::wstring& symbol_type,
-                             const std::wstring& product_name,
-                             bool force);
+    bool SymUploadV2ProtocolSend(const wchar_t *api_url,
+                                 const wchar_t *api_key,
+                                 int *timeout_ms,
+                                 const std::wstring &debug_file,
+                                 const std::wstring &debug_id,
+                                 const std::wstring &symbol_filename,
+                                 const std::wstring &symbol_type,
+                                 const std::wstring &product_name,
+                                 bool force);
 
 }  // namespace google_breakpad
 

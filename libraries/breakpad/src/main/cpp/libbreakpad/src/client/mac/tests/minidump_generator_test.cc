@@ -30,9 +30,11 @@
 // minidump_generator_test.cc: Unit tests for google_breakpad::MinidumpGenerator
 
 #include <AvailabilityMacros.h>
+
 #ifndef MAC_OS_X_VERSION_10_6
 #define MAC_OS_X_VERSION_10_6 1060
 #endif
+
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -51,179 +53,277 @@ namespace google_breakpad {
 // This acts as the log sink for INFO logging from the processor
 // logging code. The logging output confuses XCode and makes it think
 // there are unit test failures. testlogging.h handles the overriding.
-std::ostringstream info_log;
+    std::ostringstream info_log;
 }
 
 namespace {
-using std::string;
-using std::vector;
-using google_breakpad::AutoTempDir;
-using google_breakpad::MinidumpGenerator;
-using google_breakpad::MachPortSender;
-using google_breakpad::MachReceiveMessage;
-using google_breakpad::MachSendMessage;
-using google_breakpad::Minidump;
-using google_breakpad::MinidumpContext;
-using google_breakpad::MinidumpException;
-using google_breakpad::MinidumpModule;
-using google_breakpad::MinidumpModuleList;
-using google_breakpad::MinidumpSystemInfo;
-using google_breakpad::MinidumpThread;
-using google_breakpad::MinidumpThreadList;
-using google_breakpad::ReceivePort;
-using testing::Test;
-using namespace google_breakpad_test;
+    using std::string;
+    using std::vector;
+    using google_breakpad::AutoTempDir;
+    using google_breakpad::MinidumpGenerator;
+    using google_breakpad::MachPortSender;
+    using google_breakpad::MachReceiveMessage;
+    using google_breakpad::MachSendMessage;
+    using google_breakpad::Minidump;
+    using google_breakpad::MinidumpContext;
+    using google_breakpad::MinidumpException;
+    using google_breakpad::MinidumpModule;
+    using google_breakpad::MinidumpModuleList;
+    using google_breakpad::MinidumpSystemInfo;
+    using google_breakpad::MinidumpThread;
+    using google_breakpad::MinidumpThreadList;
+    using google_breakpad::ReceivePort;
+    using testing::Test;
+    using namespace google_breakpad_test;
 
-class MinidumpGeneratorTest : public Test {
- public:
-  AutoTempDir tempDir;
-};
+    class MinidumpGeneratorTest : public Test {
+    public:
+        AutoTempDir tempDir;
+    };
 
-static void* Junk(void* data) {
-  bool* wait = reinterpret_cast<bool*>(data);
-  while (!*wait) {
-    usleep(10000);
-  }
-  return NULL;
-}
-
-TEST_F(MinidumpGeneratorTest, InProcess) {
-  MinidumpGenerator generator;
-  string dump_filename =
-      MinidumpGenerator::UniqueNameInDirectory(tempDir.path(), NULL);
-
-  // Run an extra thread since MinidumpGenerator assumes there
-  // are 2 or more threads.
-  pthread_t junk_thread;
-  bool quit = false;
-  ASSERT_EQ(0, pthread_create(&junk_thread, NULL, Junk, &quit));
-
-  ASSERT_TRUE(generator.Write(dump_filename.c_str()));
-  // Ensure that minidump file exists and is > 0 bytes.
-  struct stat st;
-  ASSERT_EQ(0, stat(dump_filename.c_str(), &st));
-  ASSERT_LT(0, st.st_size);
-
-  // join the background thread
-  quit = true;
-  pthread_join(junk_thread, NULL);
-
-  // Read the minidump, sanity check some data.
-  Minidump minidump(dump_filename.c_str());
-  ASSERT_TRUE(minidump.Read());
-
-  MinidumpSystemInfo* system_info = minidump.GetSystemInfo();
-  ASSERT_TRUE(system_info);
-  const MDRawSystemInfo* raw_info = system_info->system_info();
-  ASSERT_TRUE(raw_info);
-  EXPECT_EQ(kNativeArchitecture, raw_info->processor_architecture);
-
-  MinidumpThreadList* thread_list = minidump.GetThreadList();
-  ASSERT_TRUE(thread_list);
-  ASSERT_EQ((unsigned int)1, thread_list->thread_count());
-
-  MinidumpThread* main_thread = thread_list->GetThreadAtIndex(0);
-  ASSERT_TRUE(main_thread);
-  MinidumpContext* context = main_thread->GetContext();
-  ASSERT_TRUE(context);
-  EXPECT_EQ(kNativeContext, context->GetContextCPU());
-
-  MinidumpModuleList* module_list = minidump.GetModuleList();
-  ASSERT_TRUE(module_list);
-  const MinidumpModule* main_module = module_list->GetMainModule();
-  ASSERT_TRUE(main_module);
-  EXPECT_EQ(GetExecutablePath(), main_module->code_file());
-}
-
-TEST_F(MinidumpGeneratorTest, OutOfProcess) {
-  const int kTimeoutMs = 2000;
-  // Create a mach port to receive the child task on.
-  char machPortName[128];
-  sprintf(machPortName, "MinidumpGeneratorTest.OutOfProcess.%d", getpid());
-  ReceivePort parent_recv_port(machPortName);
-
-  // Give the child process a pipe to block on.
-  int fds[2];
-  ASSERT_EQ(0, pipe(fds));
-
-  // Fork off a child process to dump.
-  pid_t pid = fork();
-  if (pid == 0) {
-    // In the child process
-    close(fds[1]);
-
-    // Send parent process the task port.
-    MachSendMessage child_message(0);
-    child_message.AddDescriptor(mach_task_self());
-
-    MachPortSender child_sender(machPortName);
-    if (child_sender.SendMessage(child_message, kTimeoutMs) != KERN_SUCCESS) {
-      fprintf(stderr, "Error sending message from child process!\n");
-      exit(1);
+    static void *Junk(void *data) {
+        bool *wait = reinterpret_cast<bool *>(data);
+        while (!*wait) {
+            usleep(10000);
+        }
+        return NULL;
     }
 
-    // Wait for the parent process.
-    uint8_t data;
-    read(fds[0], &data, 1);
-    exit(0);
-  }
-  // In the parent process.
-  ASSERT_NE(-1, pid);
-  close(fds[0]);
+    TEST_F(MinidumpGeneratorTest, InProcess
+    ) {
+    MinidumpGenerator generator;
+    string dump_filename =
+            MinidumpGenerator::UniqueNameInDirectory(tempDir.path(), NULL);
 
-  // Read the child's task port.
-  MachReceiveMessage child_message;
-  ASSERT_EQ(KERN_SUCCESS,
-	    parent_recv_port.WaitForMessage(&child_message, kTimeoutMs));
-  mach_port_t child_task = child_message.GetTranslatedPort(0);
-  ASSERT_NE((mach_port_t)MACH_PORT_NULL, child_task);
+    // Run an extra thread since MinidumpGenerator assumes there
+    // are 2 or more threads.
+    pthread_t junk_thread;
+    bool quit = false;
+    ASSERT_EQ(0,
+    pthread_create(&junk_thread, NULL, Junk, &quit
+    ));
 
-  // Write a minidump of the child process.
-  MinidumpGenerator generator(child_task, MACH_PORT_NULL);
-  string dump_filename =
-      MinidumpGenerator::UniqueNameInDirectory(tempDir.path(), NULL);
-  ASSERT_TRUE(generator.Write(dump_filename.c_str()));
+    ASSERT_TRUE(generator
+    .
+    Write(dump_filename
+    .
 
-  // Ensure that minidump file exists and is > 0 bytes.
-  struct stat st;
-  ASSERT_EQ(0, stat(dump_filename.c_str(), &st));
-  ASSERT_LT(0, st.st_size);
+    c_str()
 
-  // Unblock child process
-  uint8_t data = 1;
-  IGNORE_RET(write(fds[1], &data, 1));
+    ));
+    // Ensure that minidump file exists and is > 0 bytes.
+    struct stat st;
+    ASSERT_EQ(0,
+    stat(dump_filename
+    .
 
-  // Child process should have exited with a zero status.
-  int ret;
-  ASSERT_EQ(pid, waitpid(pid, &ret, 0));
-  EXPECT_NE(0, WIFEXITED(ret));
-  EXPECT_EQ(0, WEXITSTATUS(ret));
+    c_str(), &st
 
-  // Read the minidump, sanity check some data.
-  Minidump minidump(dump_filename.c_str());
-  ASSERT_TRUE(minidump.Read());
+    ));
+    ASSERT_LT(0, st.st_size);
 
-  MinidumpSystemInfo* system_info = minidump.GetSystemInfo();
-  ASSERT_TRUE(system_info);
-  const MDRawSystemInfo* raw_info = system_info->system_info();
-  ASSERT_TRUE(raw_info);
-  EXPECT_EQ(kNativeArchitecture, raw_info->processor_architecture);
+    // join the background thread
+    quit = true;
+    pthread_join(junk_thread, NULL
+    );
 
-  MinidumpThreadList* thread_list = minidump.GetThreadList();
-  ASSERT_TRUE(thread_list);
-  ASSERT_EQ((unsigned int)1, thread_list->thread_count());
+    // Read the minidump, sanity check some data.
+    Minidump minidump(dump_filename.c_str());
+    ASSERT_TRUE(minidump
+    .
 
-  MinidumpThread* main_thread = thread_list->GetThreadAtIndex(0);
-  ASSERT_TRUE(main_thread);
-  MinidumpContext* context = main_thread->GetContext();
-  ASSERT_TRUE(context);
-  EXPECT_EQ(kNativeContext, context->GetContextCPU());
+    Read()
 
-  MinidumpModuleList* module_list = minidump.GetModuleList();
-  ASSERT_TRUE(module_list);
-  const MinidumpModule* main_module = module_list->GetMainModule();
-  ASSERT_TRUE(main_module);
-  EXPECT_EQ(GetExecutablePath(), main_module->code_file());
+    );
+
+    MinidumpSystemInfo *system_info = minidump.GetSystemInfo();
+    ASSERT_TRUE(system_info);
+    const MDRawSystemInfo *raw_info = system_info->system_info();
+    ASSERT_TRUE(raw_info);
+    EXPECT_EQ(kNativeArchitecture, raw_info
+    ->processor_architecture);
+
+    MinidumpThreadList *thread_list = minidump.GetThreadList();
+    ASSERT_TRUE(thread_list);
+    ASSERT_EQ((unsigned int)1, thread_list->
+
+    thread_count()
+
+    );
+
+    MinidumpThread *main_thread = thread_list->GetThreadAtIndex(0);
+    ASSERT_TRUE(main_thread);
+    MinidumpContext *context = main_thread->GetContext();
+    ASSERT_TRUE(context);
+    EXPECT_EQ(kNativeContext, context
+    ->
+
+    GetContextCPU()
+
+    );
+
+    MinidumpModuleList *module_list = minidump.GetModuleList();
+    ASSERT_TRUE(module_list);
+    const MinidumpModule *main_module = module_list->GetMainModule();
+    ASSERT_TRUE(main_module);
+
+    EXPECT_EQ(GetExecutablePath(), main_module
+
+    ->
+
+    code_file()
+
+    );
+}
+
+TEST_F(MinidumpGeneratorTest, OutOfProcess
+) {
+const int kTimeoutMs = 2000;
+// Create a mach port to receive the child task on.
+char machPortName[128];
+sprintf(machPortName,
+"MinidumpGeneratorTest.OutOfProcess.%d",
+
+getpid()
+
+);
+ReceivePort parent_recv_port(machPortName);
+
+// Give the child process a pipe to block on.
+int fds[2];
+ASSERT_EQ(0,
+pipe(fds)
+);
+
+// Fork off a child process to dump.
+pid_t pid = fork();
+if (pid == 0) {
+// In the child process
+close(fds[1]);
+
+// Send parent process the task port.
+MachSendMessage child_message(0);
+child_message.
+
+AddDescriptor (mach_task_self());
+
+MachPortSender child_sender(machPortName);
+if (child_sender.
+SendMessage(child_message, kTimeoutMs
+) != KERN_SUCCESS) {
+fprintf(stderr,
+"Error sending message from child process!\n");
+exit(1);
+}
+
+// Wait for the parent process.
+uint8_t data;
+read(fds[0], &data,
+1);
+exit(0);
+}
+// In the parent process.
+ASSERT_NE(-1, pid);
+close(fds[0]);
+
+// Read the child's task port.
+MachReceiveMessage child_message;
+ASSERT_EQ(KERN_SUCCESS,
+        parent_recv_port
+.
+WaitForMessage(&child_message, kTimeoutMs
+));
+mach_port_t child_task = child_message.GetTranslatedPort(0);
+ASSERT_NE((mach_port_t)
+MACH_PORT_NULL, child_task);
+
+// Write a minidump of the child process.
+MinidumpGenerator generator(child_task, MACH_PORT_NULL);
+string dump_filename =
+        MinidumpGenerator::UniqueNameInDirectory(tempDir.path(), NULL);
+ASSERT_TRUE(generator
+.
+Write(dump_filename
+.
+
+c_str()
+
+));
+
+// Ensure that minidump file exists and is > 0 bytes.
+struct stat st;
+ASSERT_EQ(0,
+stat(dump_filename
+.
+
+c_str(), &st
+
+));
+ASSERT_LT(0, st.st_size);
+
+// Unblock child process
+uint8_t data = 1;
+IGNORE_RET(write(fds[1], &data, 1)
+);
+
+// Child process should have exited with a zero status.
+int ret;
+ASSERT_EQ(pid, waitpid(pid, &ret, 0)
+);
+EXPECT_NE(0,
+WIFEXITED(ret)
+);
+EXPECT_EQ(0,
+WEXITSTATUS(ret)
+);
+
+// Read the minidump, sanity check some data.
+Minidump minidump(dump_filename.c_str());
+ASSERT_TRUE(minidump
+.
+
+Read()
+
+);
+
+MinidumpSystemInfo *system_info = minidump.GetSystemInfo();
+ASSERT_TRUE(system_info);
+const MDRawSystemInfo *raw_info = system_info->system_info();
+ASSERT_TRUE(raw_info);
+EXPECT_EQ(kNativeArchitecture, raw_info
+->processor_architecture);
+
+MinidumpThreadList *thread_list = minidump.GetThreadList();
+ASSERT_TRUE(thread_list);
+ASSERT_EQ((unsigned int)1, thread_list->
+
+thread_count()
+
+);
+
+MinidumpThread *main_thread = thread_list->GetThreadAtIndex(0);
+ASSERT_TRUE(main_thread);
+MinidumpContext *context = main_thread->GetContext();
+ASSERT_TRUE(context);
+EXPECT_EQ(kNativeContext, context
+->
+
+GetContextCPU()
+
+);
+
+MinidumpModuleList *module_list = minidump.GetModuleList();
+ASSERT_TRUE(module_list);
+const MinidumpModule *main_module = module_list->GetMainModule();
+ASSERT_TRUE(main_module);
+
+EXPECT_EQ(GetExecutablePath(), main_module
+
+->
+
+code_file()
+
+);
 }
 
 // This test fails on 10.5, but I don't have easy access to a 10.5 machine,
@@ -253,7 +353,7 @@ TEST_F(MinidumpGeneratorTest, CrossArchitectureDump) {
   // Read the child's task port.
   MachReceiveMessage child_message;
   ASSERT_EQ(KERN_SUCCESS,
-	    parent_recv_port.WaitForMessage(&child_message, kTimeoutMs));
+        parent_recv_port.WaitForMessage(&child_message, kTimeoutMs));
   mach_port_t child_task = child_message.GetTranslatedPort(0);
   ASSERT_NE((mach_port_t)MACH_PORT_NULL, child_task);
 

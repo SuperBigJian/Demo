@@ -43,42 +43,44 @@
 namespace google_breakpad {
 
 // Forward declarations (for later friend declarations).
-template<class, class> class AddressMapSerializer;
+    template<class, class>
+    class AddressMapSerializer;
 
-template<typename AddressType, typename EntryType>
-class AddressMap {
- public:
-  AddressMap() : map_() {}
+    template<typename AddressType, typename EntryType>
+    class AddressMap {
+    public:
+        AddressMap() : map_() {}
 
-  // Inserts an entry into the map.  Returns false without storing the entry
-  // if an entry is already stored in the map at the same address as specified
-  // by the address argument.
-  bool Store(const AddressType& address, const EntryType& entry);
+        // Inserts an entry into the map.  Returns false without storing the entry
+        // if an entry is already stored in the map at the same address as specified
+        // by the address argument.
+        bool Store(const AddressType &address, const EntryType &entry);
 
-  // Locates the entry stored at the highest address less than or equal to
-  // the address argument.  If there is no such range, returns false.  The
-  // entry is returned in entry, which is a required argument.  If
-  // entry_address is not NULL, it will be set to the address that the entry
-  // was stored at.
-  bool Retrieve(const AddressType& address,
-                EntryType* entry, AddressType* entry_address) const;
+        // Locates the entry stored at the highest address less than or equal to
+        // the address argument.  If there is no such range, returns false.  The
+        // entry is returned in entry, which is a required argument.  If
+        // entry_address is not NULL, it will be set to the address that the entry
+        // was stored at.
+        bool Retrieve(const AddressType &address,
+                      EntryType *entry, AddressType *entry_address) const;
 
-  // Empties the address map, restoring it to the same state as when it was
-  // initially created.
-  void Clear();
+        // Empties the address map, restoring it to the same state as when it was
+        // initially created.
+        void Clear();
 
- private:
-  friend class AddressMapSerializer<AddressType, EntryType>;
-  friend class ModuleComparer;
+    private:
+        friend class AddressMapSerializer<AddressType, EntryType>;
 
-  // Convenience types.
-  typedef std::map<AddressType, EntryType> AddressToEntryMap;
-  typedef typename AddressToEntryMap::const_iterator MapConstIterator;
-  typedef typename AddressToEntryMap::value_type MapValue;
+        friend class ModuleComparer;
 
-  // Maps the address of each entry to an EntryType.
-  AddressToEntryMap map_;
-};
+        // Convenience types.
+        typedef std::map <AddressType, EntryType> AddressToEntryMap;
+        typedef typename AddressToEntryMap::const_iterator MapConstIterator;
+        typedef typename AddressToEntryMap::value_type MapValue;
+
+        // Maps the address of each entry to an EntryType.
+        AddressToEntryMap map_;
+    };
 
 }  // namespace google_breakpad
 

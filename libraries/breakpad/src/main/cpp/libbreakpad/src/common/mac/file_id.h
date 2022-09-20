@@ -39,54 +39,55 @@
 #include <stddef.h>
 
 namespace google_breakpad {
-namespace mach_o {
+    namespace mach_o {
 
-class FileID {
- public:
-  // Constructs a FileID given a path to a file
-  FileID(const char* path);
+        class FileID {
+        public:
+            // Constructs a FileID given a path to a file
+            FileID(const char *path);
 
-  // Constructs a FileID given the contents of a file and its size.
-  FileID(void* memory, size_t size);
-  ~FileID() {}
+            // Constructs a FileID given the contents of a file and its size.
+            FileID(void *memory, size_t size);
 
-  // Treat the file as a mach-o file that will contain one or more archicture.
-  // Accepted values for |cpu_type| and |cpu_subtype| (e.g., CPU_TYPE_X86 or
-  // CPU_TYPE_POWERPC) are listed in /usr/include/mach/machine.h.
-  // If |cpu_type| is 0, then the native cpu type is used. If |cpu_subtype| is
-  // CPU_SUBTYPE_MULTIPLE, the match is only done on |cpu_type|.
-  // Returns false if opening the file failed or if the |cpu_type|/|cpu_subtype|
-  // is not present in the file.
-  // Return the unique identifier in |identifier|.
-  // The current implementation will look for the (in order of priority):
-  // LC_UUID, LC_ID_DYLIB, or MD5 hash of the given |cpu_type|.
-  bool MachoIdentifier(cpu_type_t cpu_type,
-                       cpu_subtype_t cpu_subtype,
-                       unsigned char identifier[16]);
+            ~FileID() {}
 
-  // Convert the |identifier| data to a NULL terminated string.  The string will
-  // be formatted as a UUID (e.g., 22F065BB-FC9C-49F7-80FE-26A7CEBD7BCE).
-  // The |buffer| should be at least 37 bytes long to receive all of the data
-  // and termination.  Shorter buffers will contain truncated data.
-  static void ConvertIdentifierToString(const unsigned char identifier[16],
-                                        char *buffer, int buffer_length);
+            // Treat the file as a mach-o file that will contain one or more archicture.
+            // Accepted values for |cpu_type| and |cpu_subtype| (e.g., CPU_TYPE_X86 or
+            // CPU_TYPE_POWERPC) are listed in /usr/include/mach/machine.h.
+            // If |cpu_type| is 0, then the native cpu type is used. If |cpu_subtype| is
+            // CPU_SUBTYPE_MULTIPLE, the match is only done on |cpu_type|.
+            // Returns false if opening the file failed or if the |cpu_type|/|cpu_subtype|
+            // is not present in the file.
+            // Return the unique identifier in |identifier|.
+            // The current implementation will look for the (in order of priority):
+            // LC_UUID, LC_ID_DYLIB, or MD5 hash of the given |cpu_type|.
+            bool MachoIdentifier(cpu_type_t cpu_type,
+                                 cpu_subtype_t cpu_subtype,
+                                 unsigned char identifier[16]);
 
- private:
-  // Storage for the path specified
-  char path_[PATH_MAX];
+            // Convert the |identifier| data to a NULL terminated string.  The string will
+            // be formatted as a UUID (e.g., 22F065BB-FC9C-49F7-80FE-26A7CEBD7BCE).
+            // The |buffer| should be at least 37 bytes long to receive all of the data
+            // and termination.  Shorter buffers will contain truncated data.
+            static void ConvertIdentifierToString(const unsigned char identifier[16],
+                                                  char *buffer, int buffer_length);
 
-  // Storage for contents of a file if this instance is used to operate on in
-  // memory file data rather than directly from a filesystem. If memory_ is
-  // null, the file represented by path_ will be opened/read. If memory_ is
-  // non-null, it is assumed to contain valid data, and no file operations will
-  // occur.
-  void* memory_;
+        private:
+            // Storage for the path specified
+            char path_[PATH_MAX];
 
-  // Size of memory_
-  size_t size_;
-};
+            // Storage for contents of a file if this instance is used to operate on in
+            // memory file data rather than directly from a filesystem. If memory_ is
+            // null, the file represented by path_ will be opened/read. If memory_ is
+            // non-null, it is assumed to contain valid data, and no file operations will
+            // occur.
+            void *memory_;
 
-}  // namespace mach_o
+            // Size of memory_
+            size_t size_;
+        };
+
+    }  // namespace mach_o
 }  // namespace google_breakpad
 
 #endif  // COMMON_MAC_FILE_ID_H__

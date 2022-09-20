@@ -40,51 +40,51 @@
 namespace google_breakpad {
 
 #if defined(__i386) || defined(__x86_64)
-typedef __typeof__(((struct user*) 0)->u_debugreg[0]) debugreg_t;
+    typedef __typeof__(((struct user*) 0)->u_debugreg[0]) debugreg_t;
 #endif
 
 // We produce one of these structures for each thread in the crashed process.
-struct ThreadInfo {
-  pid_t tgid;   // thread group id
-  pid_t ppid;   // parent process
+    struct ThreadInfo {
+        pid_t tgid;   // thread group id
+        pid_t ppid;   // parent process
 
-  uintptr_t stack_pointer;  // thread stack pointer
+        uintptr_t stack_pointer;  // thread stack pointer
 
 
 #if defined(__i386) || defined(__x86_64)
-  user_regs_struct regs;
-  user_fpregs_struct fpregs;
-  static const unsigned kNumDebugRegisters = 8;
-  debugreg_t dregs[8];
+        user_regs_struct regs;
+        user_fpregs_struct fpregs;
+        static const unsigned kNumDebugRegisters = 8;
+        debugreg_t dregs[8];
 #if defined(__i386)
-  user_fpxregs_struct fpxregs;
+        user_fpxregs_struct fpxregs;
 #endif  // defined(__i386)
 
 #elif defined(__ARM_EABI__)
-  // Mimicking how strace does this(see syscall.c, search for GETREGS)
-  struct user_regs regs;
-  struct user_fpregs fpregs;
+        // Mimicking how strace does this(see syscall.c, search for GETREGS)
+        struct user_regs regs;
+        struct user_fpregs fpregs;
 #elif defined(__aarch64__)
-  // Use the structures defined in <sys/user.h>
-  struct user_regs_struct regs;
-  struct user_fpsimd_struct fpregs;
+        // Use the structures defined in <sys/user.h>
+        struct user_regs_struct regs;
+        struct user_fpsimd_struct fpregs;
 #elif defined(__mips__)
-  // Use the structure defined in <sys/ucontext.h>.
-  mcontext_t mcontext;
+        // Use the structure defined in <sys/ucontext.h>.
+        mcontext_t mcontext;
 #endif
 
-  // Returns the instruction pointer (platform-dependent impl.).
-  uintptr_t GetInstructionPointer() const;
+        // Returns the instruction pointer (platform-dependent impl.).
+        uintptr_t GetInstructionPointer() const;
 
-  // Fills a RawContextCPU using the context in the ThreadInfo object.
-  void FillCPUContext(RawContextCPU* out) const;
+        // Fills a RawContextCPU using the context in the ThreadInfo object.
+        void FillCPUContext(RawContextCPU *out) const;
 
-  // Returns the pointer and size of general purpose register area.
-  void GetGeneralPurposeRegisters(void** gp_regs, size_t* size);
+        // Returns the pointer and size of general purpose register area.
+        void GetGeneralPurposeRegisters(void **gp_regs, size_t *size);
 
-  // Returns the pointer and size of float point register area.
-  void GetFloatingPointRegisters(void** fp_regs, size_t* size);
-};
+        // Returns the pointer and size of float point register area.
+        void GetFloatingPointRegisters(void **fp_regs, size_t *size);
+    };
 
 }  // namespace google_breakpad
 

@@ -32,8 +32,8 @@
 @implementation HTTPGetRequest
 
 //=============================================================================
-- (NSString*)HTTPMethod {
-  return @"GET";
+- (NSString *)HTTPMethod {
+    return @"GET";
 }
 
 @end

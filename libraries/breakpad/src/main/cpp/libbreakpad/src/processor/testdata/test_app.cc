@@ -38,32 +38,32 @@
 
 namespace {
 
-static bool callback(const wchar_t* dump_path, const wchar_t* id,
-                     void* context, EXCEPTION_POINTERS* exinfo,
-                     MDRawAssertionInfo* assertion,
-                     bool succeeded) {
-  if (succeeded) {
-    printf("dump guid is %ws\n", id);
-  } else {
-    printf("dump failed\n");
-  }
-  fflush(stdout);
+    static bool callback(const wchar_t *dump_path, const wchar_t *id,
+                         void *context, EXCEPTION_POINTERS *exinfo,
+                         MDRawAssertionInfo *assertion,
+                         bool succeeded) {
+        if (succeeded) {
+            printf("dump guid is %ws\n", id);
+        } else {
+            printf("dump failed\n");
+        }
+        fflush(stdout);
 
-  return succeeded;
-}
+        return succeeded;
+    }
 
-static void CrashFunction() {
-  int* i = reinterpret_cast<int*>(0x45);
-  *i = 5;  // crash!
-}
+    static void CrashFunction() {
+        int *i = reinterpret_cast<int *>(0x45);
+        *i = 5;  // crash!
+    }
 
 }  // namespace
 
-int main(int argc, char** argv) {
-  google_breakpad::ExceptionHandler eh(
-      L".", NULL, callback, NULL,
-      google_breakpad::ExceptionHandler::HANDLER_ALL);
-  CrashFunction();
-  printf("did not crash?\n");
-  return 0;
+int main(int argc, char **argv) {
+    google_breakpad::ExceptionHandler eh(
+            L".", NULL, callback, NULL,
+            google_breakpad::ExceptionHandler::HANDLER_ALL);
+    CrashFunction();
+    printf("did not crash?\n");
+    return 0;
 }

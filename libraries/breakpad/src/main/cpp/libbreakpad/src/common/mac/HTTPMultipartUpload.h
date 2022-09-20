@@ -30,34 +30,37 @@
 #import <Foundation/Foundation.h>
 
 #import "HTTPRequest.h"
+
 /**
  Represents a multipart/form-data HTTP upload (POST request).
  Each parameter pair is sent as a boundary.
  Each file is sent with a name field in addition to the filename and data.
  */
 @interface HTTPMultipartUpload : HTTPRequest {
- @protected
-  NSDictionary* parameters_;    // The key/value pairs for sending data (STRONG)
-  NSMutableDictionary* files_;  // Dictionary of name/file-path (STRONG)
-  NSString* boundary_;          // The boundary string (STRONG)
+@protected
+    NSDictionary *parameters_;    // The key/value pairs for sending data (STRONG)
+    NSMutableDictionary *files_;  // Dictionary of name/file-path (STRONG)
+    NSString *boundary_;          // The boundary string (STRONG)
 }
 
 /**
  Sets the parameters that will be sent in the multipart POST request.
  */
-- (void)setParameters:(NSDictionary*)parameters;
-- (NSDictionary*)parameters;
+- (void)setParameters:(NSDictionary *)parameters;
+
+- (NSDictionary *)parameters;
 
 /**
  Adds a file to be uploaded in the multipart POST request, by its file path.
  */
-- (void)addFileAtPath:(NSString*)path name:(NSString*)name;
+- (void)addFileAtPath:(NSString *)path name:(NSString *)name;
 
 /**
  Adds a file to be uploaded in the multipart POST request, by its name and
  contents.
  */
-- (void)addFileContents:(NSData*)data name:(NSString*)name;
-- (NSDictionary*)files;
+- (void)addFileContents:(NSData *)data name:(NSString *)name;
+
+- (NSDictionary *)files;
 
 @end

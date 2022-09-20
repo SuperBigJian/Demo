@@ -39,72 +39,75 @@
 
 namespace google_breakpad {
 
-using std::map;
-using std::string;
-class MinidumpModule;
+    using std::map;
+    using std::string;
 
-class OnDemandSymbolSupplier : public SymbolSupplier {
- public:
-  // |search_dir| is the directory to search for alternative symbols with
-  // the same name as the module in the minidump
-  OnDemandSymbolSupplier(const string& search_dir,
-                         const string& symbol_search_dir);
-  virtual ~OnDemandSymbolSupplier() {}
+    class MinidumpModule;
 
-  // Returns the path to the symbol file for the given module.
-  virtual SymbolResult GetSymbolFile(const CodeModule* module,
-                                     const SystemInfo* system_info,
-                                     string* symbol_file);
+    class OnDemandSymbolSupplier : public SymbolSupplier {
+    public:
+        // |search_dir| is the directory to search for alternative symbols with
+        // the same name as the module in the minidump
+        OnDemandSymbolSupplier(const string &search_dir,
+                               const string &symbol_search_dir);
 
-  // Returns the path to the symbol file for the given module.
-  virtual SymbolResult GetSymbolFile(const CodeModule* module,
-                                     const SystemInfo* system_info,
-                                     string* symbol_file,
-                                     string* symbol_data);
-  // Allocates data buffer on heap, and takes the ownership of
-  // the data buffer.
-  virtual SymbolResult GetCStringSymbolData(const CodeModule* module,
-                                            const SystemInfo* system_info,
-                                            string* symbol_file,
-                                            char** symbol_data,
-                                            size_t* symbol_data_size);
+        virtual ~OnDemandSymbolSupplier() {}
 
-  // Delete the data buffer allocated for module in GetCStringSymbolData().
-  virtual void FreeSymbolData(const CodeModule* module);
+        // Returns the path to the symbol file for the given module.
+        virtual SymbolResult GetSymbolFile(const CodeModule *module,
+                                           const SystemInfo *system_info,
+                                           string *symbol_file);
 
- protected:
-  // Search directory
-  string search_dir_;
-  string symbol_search_dir_;
+        // Returns the path to the symbol file for the given module.
+        virtual SymbolResult GetSymbolFile(const CodeModule *module,
+                                           const SystemInfo *system_info,
+                                           string *symbol_file,
+                                           string *symbol_data);
 
-  // When we create a symbol file for a module, save the name of the module
-  // and the path to that module's symbol file.
-  map<string, string> module_file_map_;
+        // Allocates data buffer on heap, and takes the ownership of
+        // the data buffer.
+        virtual SymbolResult GetCStringSymbolData(const CodeModule *module,
+                                                  const SystemInfo *system_info,
+                                                  string *symbol_file,
+                                                  char **symbol_data,
+                                                  size_t *symbol_data_size);
 
-  // Map of allocated data buffers, keyed by module->code_file().
-  map<string, char*> memory_buffers_;
+        // Delete the data buffer allocated for module in GetCStringSymbolData().
+        virtual void FreeSymbolData(const CodeModule *module);
 
-  // Return the name for |module|  This will be the value used as the key
-  // to the |module_file_map_|.
-  string GetNameForModule(const CodeModule* module);
+    protected:
+        // Search directory
+        string search_dir_;
+        string symbol_search_dir_;
 
-  // Find the module on local system.  If the module resides in a different
-  // location than the full path in the minidump, this will be the location
-  // used.
-  string GetLocalModulePath(const CodeModule* module);
+        // When we create a symbol file for a module, save the name of the module
+        // and the path to that module's symbol file.
+        map <string, string> module_file_map_;
 
-  // Return the full path for |module|.
-  string GetModulePath(const CodeModule* module);
+        // Map of allocated data buffers, keyed by module->code_file().
+        map<string, char *> memory_buffers_;
 
-  // Return the path to the symbol file for |module|.  If an empty string is
-  // returned, then |module| doesn't have a symbol file.
-  string GetModuleSymbolFile(const CodeModule* module);
+        // Return the name for |module|  This will be the value used as the key
+        // to the |module_file_map_|.
+        string GetNameForModule(const CodeModule *module);
 
-  // Generate the breakpad symbol file for |module|.  Return true if successful.
-  // File is generated in /tmp.
-  bool GenerateSymbolFile(const CodeModule* module,
-                          const SystemInfo* system_info);
-};
+        // Find the module on local system.  If the module resides in a different
+        // location than the full path in the minidump, this will be the location
+        // used.
+        string GetLocalModulePath(const CodeModule *module);
+
+        // Return the full path for |module|.
+        string GetModulePath(const CodeModule *module);
+
+        // Return the path to the symbol file for |module|.  If an empty string is
+        // returned, then |module| doesn't have a symbol file.
+        string GetModuleSymbolFile(const CodeModule *module);
+
+        // Generate the breakpad symbol file for |module|.  Return true if successful.
+        // File is generated in /tmp.
+        bool GenerateSymbolFile(const CodeModule *module,
+                                const SystemInfo *system_info);
+    };
 
 }  // namespace google_breakpad
 

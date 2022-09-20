@@ -45,40 +45,41 @@
 
 namespace google_breakpad {
 
-class CodeModules;
+    class CodeModules;
 
-class StackwalkerMIPS : public Stackwalker {
- public:
-  // Context is a MIPS context object that gives access to mips-specific
-  // register state corresponding to the innermost called frame to be
-  // included in the stack.  The other arguments are passed directly
-  // through to the base Stackwalker constructor.
-  StackwalkerMIPS(const SystemInfo* system_info,
-                  const MDRawContextMIPS* context,
-                  MemoryRegion* memory,
-                  const CodeModules* modules,
-                  StackFrameSymbolizer* frame_symbolizer);
+    class StackwalkerMIPS : public Stackwalker {
+    public:
+        // Context is a MIPS context object that gives access to mips-specific
+        // register state corresponding to the innermost called frame to be
+        // included in the stack.  The other arguments are passed directly
+        // through to the base Stackwalker constructor.
+        StackwalkerMIPS(const SystemInfo *system_info,
+                        const MDRawContextMIPS *context,
+                        MemoryRegion *memory,
+                        const CodeModules *modules,
+                        StackFrameSymbolizer *frame_symbolizer);
 
- private:
-  // Implementation of Stackwalker, using mips context and stack conventions.
-  virtual StackFrame* GetContextFrame();
-  virtual StackFrame* GetCallerFrame(const CallStack* stack,
-                                     bool stack_scan_allowed);
+    private:
+        // Implementation of Stackwalker, using mips context and stack conventions.
+        virtual StackFrame *GetContextFrame();
 
-  // Use cfi_frame_info (derived from STACK CFI records) to construct
-  // the frame that called frames.back(). The caller takes ownership
-  // of the returned frame. Return NULL on failure.
-  StackFrameMIPS* GetCallerByCFIFrameInfo(const vector<StackFrame*>& frames,
-                                          CFIFrameInfo* cfi_frame_info);
+        virtual StackFrame *GetCallerFrame(const CallStack *stack,
+                                           bool stack_scan_allowed);
 
-  // Scan the stack for plausible return address and frame pointer pair. 
-  // The caller takes ownership of the returned frame. Return NULL on failure.
-  StackFrameMIPS* GetCallerByStackScan(const vector<StackFrame*>& frames);
+        // Use cfi_frame_info (derived from STACK CFI records) to construct
+        // the frame that called frames.back(). The caller takes ownership
+        // of the returned frame. Return NULL on failure.
+        StackFrameMIPS *GetCallerByCFIFrameInfo(const vector<StackFrame *> &frames,
+                                                CFIFrameInfo *cfi_frame_info);
 
-  // Stores the CPU context corresponding to the innermost stack frame to
-  // be returned by GetContextFrame.
-  const MDRawContextMIPS* context_;
-};
+        // Scan the stack for plausible return address and frame pointer pair.
+        // The caller takes ownership of the returned frame. Return NULL on failure.
+        StackFrameMIPS *GetCallerByStackScan(const vector<StackFrame *> &frames);
+
+        // Stores the CPU context corresponding to the innermost stack frame to
+        // be returned by GetContextFrame.
+        const MDRawContextMIPS *context_;
+    };
 
 }  // namespace google_breakpad
 

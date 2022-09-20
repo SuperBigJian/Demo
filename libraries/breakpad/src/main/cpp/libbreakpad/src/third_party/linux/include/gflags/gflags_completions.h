@@ -114,7 +114,7 @@ $ complete -o bashdefault -o default -o nospace -C                        \
 
 namespace google {
 
-void HandleCommandLineCompletions(void);
+    void HandleCommandLineCompletions(void);
 
 }
 

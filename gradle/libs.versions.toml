@@ -10,6 +10,8 @@ okhttp = "4.10.0"
 arouter = "1.5.2"
 room = "2.4.3"
 androidxCompose = "1.2.0"
+permissionsDispatcher = "4.9.2"
+
 
 [libraries]
 appcompat = "androidx.appcompat:appcompat:1.4.2"
@@ -54,6 +56,9 @@ retrofit2-kotlinx-serialization-converter = "com.jakewharton.retrofit:retrofit2-
 arouter = { module = "com.alibaba:arouter-api", version.ref = "arouter" }
 arouter-compiler = { module = "com.alibaba:arouter-compiler", version.ref = "arouter" }
 
+permissions-dispatcher = { module = "com.github.permissions-dispatcher:permissionsdispatcher", version.ref = "permissionsDispatcher" }
+permissions-dispatcher-compiler = { module = "com.github.permissions-dispatcher:permissionsdispatcher-processor", version.ref = "permissionsDispatcher" }
+
 log-timber = "com.jakewharton.timber:timber:5.0.1"
 utils = "com.blankj:utilcodex:1.31.0"
 
@@ -62,7 +67,7 @@ android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", ver
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 
 [bundles]
-commonLibs = ["appcompat", "material3", "androidx-core-ktx", "activity-ktx", "androidx-work", "fragment-ktx", "collection-ktx", "lifecycle-runtime-ktx", "lifecycle-livedata-ktx", "lifecycle-viewmodel-ktx", "kotlinx-coroutines-android", "kotlinx-serialization-json", "gson"]
+commonLibs = ["appcompat", "material3", "activity-ktx", "androidx-work", "fragment-ktx", "collection-ktx", "lifecycle-runtime-ktx", "lifecycle-livedata-ktx", "lifecycle-viewmodel-ktx", "kotlinx-coroutines-android", "kotlinx-serialization-json", "gson"]
 composeLibs = ["activity-compose", "lifecycle-viewmodel-compose", "compose-material", "compose-animation", "compose-ui-tooling"]
 hiltLibs = ["hilt-android", "hilt-gradlePlugin", "hilt-ext-compiler", "hilt-ext-work"]
 roomLibs = ["room-runtime", "room-ktx", "room-paging"]

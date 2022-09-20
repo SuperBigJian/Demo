@@ -45,9 +45,9 @@ namespace breakpad {
 // bootstrap_check_in for a new service name on 10.5 will result in
 // BOOTSTRAP_UNKNOWN_SERVICE being returned rather than registration of the
 // new service name.
-kern_return_t BootstrapRegister(mach_port_t bp,
-                                name_t service_name,
-                                mach_port_t sp);
+    kern_return_t BootstrapRegister(mach_port_t bp,
+                                    name_t service_name,
+                                    mach_port_t sp);
 
 }  // namespace breakpad
 

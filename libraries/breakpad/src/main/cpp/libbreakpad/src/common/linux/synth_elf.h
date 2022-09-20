@@ -47,151 +47,151 @@
 #include "common/using_std_string.h"
 
 namespace google_breakpad {
-namespace synth_elf {
+    namespace synth_elf {
 
-using std::list;
-using std::vector;
-using std::map;
-using std::pair;
-using test_assembler::Endianness;
-using test_assembler::kLittleEndian;
-using test_assembler::kUnsetEndian;
-using test_assembler::Label;
-using test_assembler::Section;
+        using std::list;
+        using std::vector;
+        using std::map;
+        using std::pair;
+        using test_assembler::Endianness;
+        using test_assembler::kLittleEndian;
+        using test_assembler::kUnsetEndian;
+        using test_assembler::Label;
+        using test_assembler::Section;
 
 // String tables are common in ELF headers, so subclass Section
 // to make them easy to generate.
-class StringTable : public Section {
-public:
-  StringTable(Endianness endianness = kUnsetEndian)
-  : Section(endianness) {
-    start() = 0;
-    empty_string = Add("");
-  }
+        class StringTable : public Section {
+        public:
+            StringTable(Endianness endianness = kUnsetEndian)
+                    : Section(endianness) {
+                start() = 0;
+                empty_string = Add("");
+            }
 
-  // Add the string s to the string table, and return
-  // a label containing the offset into the string table
-  // at which it was added.
-  Label Add(const string& s) {
-    if (strings_.find(s) != strings_.end())
-      return strings_[s];
+            // Add the string s to the string table, and return
+            // a label containing the offset into the string table
+            // at which it was added.
+            Label Add(const string &s) {
+                if (strings_.find(s) != strings_.end())
+                    return strings_[s];
 
-    Label string_label(Here());
-    AppendCString(s);
-    strings_[s] = string_label;
-    return string_label;
-  }
+                Label string_label(Here());
+                AppendCString(s);
+                strings_[s] = string_label;
+                return string_label;
+            }
 
-  // All StringTables contain an empty string as their first
-  // entry.
-  Label empty_string;
+            // All StringTables contain an empty string as their first
+            // entry.
+            Label empty_string;
 
-  // Avoid inserting duplicate strings.
-  map<string,Label> strings_;
-};
+            // Avoid inserting duplicate strings.
+            map <string, Label> strings_;
+        };
 
 // A Section representing an entire ELF file.
-class ELF : public Section {
- public:
-  ELF(uint16_t machine,    // EM_386, etc
-      uint8_t file_class,  // ELFCLASS{32,64}
-      Endianness endianness = kLittleEndian);
+        class ELF : public Section {
+        public:
+            ELF(uint16_t machine,    // EM_386, etc
+                uint8_t file_class,  // ELFCLASS{32,64}
+                Endianness endianness = kLittleEndian);
 
-  // Add the Section section to the section header table and append it
-  // to the file. Returns the index of the section in the section
-  // header table.
-  int AddSection(const string& name, const Section& section,
-                 uint32_t type, uint32_t flags = 0, uint64_t addr = 0,
-                 uint32_t link = 0, uint64_t entsize = 0, uint64_t offset = 0);
-                  
-  // Add a segment containing from section index start to section index end.
-  // The indexes must have been gotten from AddSection.
-  void AddSegment(int start, int end, uint32_t type, uint32_t flags = 0);
+            // Add the Section section to the section header table and append it
+            // to the file. Returns the index of the section in the section
+            // header table.
+            int AddSection(const string &name, const Section &section,
+                           uint32_t type, uint32_t flags = 0, uint64_t addr = 0,
+                           uint32_t link = 0, uint64_t entsize = 0, uint64_t offset = 0);
 
-  // Write out all data. GetContents may be used after this.
-  void Finish();
+            // Add a segment containing from section index start to section index end.
+            // The indexes must have been gotten from AddSection.
+            void AddSegment(int start, int end, uint32_t type, uint32_t flags = 0);
 
- private:
-  // Size of an address, in bytes.
-  const size_t addr_size_;
+            // Write out all data. GetContents may be used after this.
+            void Finish();
 
-  // Offset to the program header table.
-  Label program_header_label_;
-  // Number of entries in the program header table.
-  int program_count_;
-  Label program_count_label_;
-  // The program header table itself.
-  Section program_header_table_;
+        private:
+            // Size of an address, in bytes.
+            const size_t addr_size_;
 
-  // Offset to the section header table.
-  Label section_header_label_;
-  // Number of entries in the section header table.
-  int section_count_;
-  Label section_count_label_;
-  // The section header table itself.
-  Section section_header_table_;
+            // Offset to the program header table.
+            Label program_header_label_;
+            // Number of entries in the program header table.
+            int program_count_;
+            Label program_count_label_;
+            // The program header table itself.
+            Section program_header_table_;
 
-  // Index of the section header string table in the section
-  // header table.
-  Label section_header_string_index_;
-  // Section containing the names of section header table entries.
-  StringTable section_header_strings_;
+            // Offset to the section header table.
+            Label section_header_label_;
+            // Number of entries in the section header table.
+            int section_count_;
+            Label section_count_label_;
+            // The section header table itself.
+            Section section_header_table_;
 
-  // Record of an added section
-  struct ElfSection : public Section {
-    ElfSection(const Section& section, uint32_t type, uint32_t addr,
-               uint32_t offset, Label offset_label, uint32_t size)
-    : Section(section), type_(type), addr_(addr), offset_(offset)
-    , offset_label_(offset_label), size_(size) {
-    }
+            // Index of the section header string table in the section
+            // header table.
+            Label section_header_string_index_;
+            // Section containing the names of section header table entries.
+            StringTable section_header_strings_;
 
-    uint32_t type_;
-    uint32_t addr_;
-    uint32_t offset_;
-    Label offset_label_;
-    uint32_t size_;
-  };
+            // Record of an added section
+            struct ElfSection : public Section {
+                ElfSection(const Section &section, uint32_t type, uint32_t addr,
+                           uint32_t offset, Label offset_label, uint32_t size)
+                        : Section(section), type_(type), addr_(addr), offset_(offset), offset_label_(offset_label), size_(size) {
+                }
 
-  vector<ElfSection> sections_;
+                uint32_t type_;
+                uint32_t addr_;
+                uint32_t offset_;
+                Label offset_label_;
+                uint32_t size_;
+            };
 
-  void AppendSection(ElfSection& section);
-};
+            vector <ElfSection> sections_;
+
+            void AppendSection(ElfSection &section);
+        };
 
 // A class to build .symtab or .dynsym sections.
-class SymbolTable : public Section {
- public:
-  // table is the StringTable that contains symbol names. The caller
-  // must ensure that it remains alive for the life of the
-  // SymbolTable.
-  SymbolTable(Endianness endianness, size_t addr_size, StringTable& table);
+        class SymbolTable : public Section {
+        public:
+            // table is the StringTable that contains symbol names. The caller
+            // must ensure that it remains alive for the life of the
+            // SymbolTable.
+            SymbolTable(Endianness endianness, size_t addr_size, StringTable &table);
 
-  // Add an Elf32_Sym.
-  void AddSymbol(const string& name, uint32_t value,
-                 uint32_t size, unsigned info, uint16_t shndx);
-  // Add an Elf64_Sym.
-  void AddSymbol(const string& name, uint64_t value,
-                 uint64_t size, unsigned info, uint16_t shndx);
+            // Add an Elf32_Sym.
+            void AddSymbol(const string &name, uint32_t value,
+                           uint32_t size, unsigned info, uint16_t shndx);
 
- private:
+            // Add an Elf64_Sym.
+            void AddSymbol(const string &name, uint64_t value,
+                           uint64_t size, unsigned info, uint16_t shndx);
+
+        private:
 #ifndef NDEBUG
-  size_t addr_size_;
+            size_t addr_size_;
 #endif
-  StringTable& table_;
-};
+            StringTable &table_;
+        };
 
 // A class for note sections
-class Notes : public Section {
-public:
-  Notes(Endianness endianness)
-  : Section(endianness) {
-  }
+        class Notes : public Section {
+        public:
+            Notes(Endianness endianness)
+                    : Section(endianness) {
+            }
 
-  // Add a note.
-  void AddNote(int type, const string& name, const uint8_t* desc_bytes,
-               size_t desc_size);
-};
+            // Add a note.
+            void AddNote(int type, const string &name, const uint8_t *desc_bytes,
+                         size_t desc_size);
+        };
 
-}  // namespace synth_elf
+    }  // namespace synth_elf
 }  // namespace google_breakpad
 
 #endif  // COMMON_LINUX_SYNTH_ELF_H_

@@ -33,29 +33,29 @@
 namespace crash {
 
 // static
-void Tokenizer::Tokenize(const string& delimiters, const string& input,
-                        vector<string>* output) {
-  assert(output);
-  output->clear();
+    void Tokenizer::Tokenize(const string &delimiters, const string &input,
+                             vector <string> *output) {
+        assert(output);
+        output->clear();
 
-  string::size_type position = 0;  // Where to begin looking for a delimiter
-  string::size_type new_position;  // Position of found delimiter
-  string token;
+        string::size_type position = 0;  // Where to begin looking for a delimiter
+        string::size_type new_position;  // Position of found delimiter
+        string token;
 
-  while ((new_position = input.find_first_of(delimiters, position)) !=
-         string::npos) {
-    token = input.substr(position, new_position - position);
-    output->push_back(token);
+        while ((new_position = input.find_first_of(delimiters, position)) !=
+               string::npos) {
+            token = input.substr(position, new_position - position);
+            output->push_back(token);
 
-    // Next time, begin looking right after this delimiter.
-    position = new_position + 1;
-  }
+            // Next time, begin looking right after this delimiter.
+            position = new_position + 1;
+        }
 
-  // There are no more delimiters in the string.  Take everything from the
-  // final delimiter up to the end of the string as a token.  This may be
-  // an empty string.
-  token = input.substr(position);
-  output->push_back(token);
-}
+        // There are no more delimiters in the string.  Take everything from the
+        // final delimiter up to the end of the string as a token.  This may be
+        // an empty string.
+        token = input.substr(position);
+        output->push_back(token);
+    }
 
 }  // namespace crash

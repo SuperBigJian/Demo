@@ -14,34 +14,19 @@
  *   limitations under the License.
  */
 
-import com.android.build.gradle.LibraryExtension
-import com.android.builder.model.ViewBindingOptions
-import com.cyaan.common.configureFlavors
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.configure
+import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.kotlin.dsl.dependencies
-import org.gradle.kotlin.dsl.project
+import org.gradle.kotlin.dsl.getByType
 
-class AndroidModuleConventionPlugin : Plugin<Project> {
+class AndroidPermissionsConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            with(pluginManager) {
-                apply("common.android.library")
-                apply("common.android.hilt")
-                apply("common.android.compose")
-            }
-
-            ViewBindingOptions {
-                true
-            }
-
-            extensions.configure<LibraryExtension> {
-                configureFlavors(this)
-            }
-
+            val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
             dependencies {
-                add("implementation", project(":base:commonUI"))
+                add("implementation", libs.findLibrary("permissions.dispatcher").get())
+                add("kapt", libs.findLibrary("permissions.dispatcher.compiler").get())
             }
         }
     }

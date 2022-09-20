@@ -33,24 +33,24 @@
 
 //=============================================================================
 - (void)dealloc {
-  [file_ release];
+    [file_ release];
 
-  [super dealloc];
+    [super dealloc];
 }
 
 //=============================================================================
-- (void)setFile:(NSString*)file {
-  file_ = [file copy];
+- (void)setFile:(NSString *)file {
+    file_ = [file copy];
 }
 
 //=============================================================================
-- (NSString*)HTTPMethod {
-  return @"PUT";
+- (NSString *)HTTPMethod {
+    return @"PUT";
 }
 
 //=============================================================================
-- (NSData*)bodyData {
-  return [NSData dataWithContentsOfFile:file_];
+- (NSData *)bodyData {
+    return [NSData dataWithContentsOfFile:file_];
 }
 
 @end

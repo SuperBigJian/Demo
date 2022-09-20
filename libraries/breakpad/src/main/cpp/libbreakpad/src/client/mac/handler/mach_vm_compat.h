@@ -42,7 +42,9 @@
 #define mach_vm_region_recurse vm_region_recurse_64
 #define mach_vm_size_t vm_size_t
 #else
+
 #include <mach/mach_vm.h>
+
 #endif  // TARGET_OS_IPHONE
 
 #endif  // CLIENT_MAC_GENERATOR_MACH_VM_COMPAT_H_

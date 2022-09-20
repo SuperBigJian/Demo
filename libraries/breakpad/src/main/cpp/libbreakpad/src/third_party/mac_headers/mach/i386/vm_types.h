@@ -64,10 +64,10 @@
  *	Header file for VM data types.  I386 version.
  */
 
-#ifndef	_MACH_I386_VM_TYPES_H_
+#ifndef    _MACH_I386_VM_TYPES_H_
 #define _MACH_I386_VM_TYPES_H_
 
-#ifndef	ASSEMBLER
+#ifndef    ASSEMBLER
 
 #include <i386/_types.h>
 #include <mach/i386/vm_param.h>
@@ -90,8 +90,8 @@
  *
  * New use of these types is discouraged.
  */
-typedef __darwin_natural_t	natural_t;
-typedef int			integer_t;
+typedef __darwin_natural_t natural_t;
+typedef int integer_t;
 
 /*
  * A vm_offset_t is a type-neutral pointer,
@@ -100,8 +100,8 @@ typedef int			integer_t;
 #ifdef __LP64__
 typedef uintptr_t		vm_offset_t;
 #else	/* __LP64__ */
-typedef	natural_t		vm_offset_t;
-#endif	/* __LP64__ */
+typedef natural_t vm_offset_t;
+#endif    /* __LP64__ */
 
 /*
  * A vm_size_t is the proper type for e.g.
@@ -111,8 +111,8 @@ typedef	natural_t		vm_offset_t;
 #ifdef __LP64__
 typedef uintptr_t		vm_size_t;
 #else	/* __LP64__ */
-typedef	natural_t		vm_size_t;
-#endif	/* __LP64__ */
+typedef natural_t vm_size_t;
+#endif    /* __LP64__ */
 
 /*
  * This new type is independent of a particular vm map's
@@ -121,20 +121,20 @@ typedef	natural_t		vm_size_t;
  * where the size of the map is not known - or we don't
  * want to have to distinguish.
  */
-typedef uint64_t		mach_vm_address_t;
-typedef uint64_t		mach_vm_offset_t;
-typedef uint64_t		mach_vm_size_t;
+typedef uint64_t mach_vm_address_t;
+typedef uint64_t mach_vm_offset_t;
+typedef uint64_t mach_vm_size_t;
 
-typedef uint64_t		vm_map_offset_t;
-typedef uint64_t		vm_map_address_t;
-typedef uint64_t		vm_map_size_t;
+typedef uint64_t vm_map_offset_t;
+typedef uint64_t vm_map_address_t;
+typedef uint64_t vm_map_size_t;
 
 
-#endif	/* ASSEMBLER */
+#endif    /* ASSEMBLER */
 
 /*
  * If composing messages by hand (please do not)
  */
-#define	MACH_MSG_TYPE_INTEGER_T	MACH_MSG_TYPE_INTEGER_32
+#define    MACH_MSG_TYPE_INTEGER_T    MACH_MSG_TYPE_INTEGER_32
 
-#endif	/* _MACH_I386_VM_TYPES_H_ */
+#endif    /* _MACH_I386_VM_TYPES_H_ */

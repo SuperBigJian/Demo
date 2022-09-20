@@ -45,41 +45,42 @@
 
 //
 class ProtectedMemoryAllocator {
- public:
-  ProtectedMemoryAllocator(vm_size_t pool_size);  
-  ~ProtectedMemoryAllocator();
-  
-  // Returns a pointer to an allocation of size n within the pool.
-  // Fails by returning NULL is no more space is available.
-  // Please note that the pointers returned from this method should not
-  // be freed in any way (for example by calling free() on them ).
-  char *         Allocate(vm_size_t n);
-  
-  // Returns the base address of the allocation pool.
-  char *         GetBaseAddress() { return (char*)base_address_; }
+public:
+    ProtectedMemoryAllocator(vm_size_t pool_size);
 
-  // Returns the size of the allocation pool, including allocated
-  // plus free space.
-  vm_size_t      GetTotalSize() { return pool_size_; }
+    ~ProtectedMemoryAllocator();
 
-  // Returns the number of bytes already allocated in the pool.
-  vm_size_t      GetAllocatedSize() { return next_alloc_offset_; }
+    // Returns a pointer to an allocation of size n within the pool.
+    // Fails by returning NULL is no more space is available.
+    // Please note that the pointers returned from this method should not
+    // be freed in any way (for example by calling free() on them ).
+    char *Allocate(vm_size_t n);
 
-  // Returns the number of bytes available for allocation.
-  vm_size_t      GetFreeSize() { return pool_size_ - next_alloc_offset_; }
-  
-  // Makes the entire allocation pool read-only including, of course,
-  // all allocations made from the pool.
-  kern_return_t  Protect();  
+    // Returns the base address of the allocation pool.
+    char *GetBaseAddress() { return (char *) base_address_; }
 
-  // Makes the entire allocation pool read/write.
-  kern_return_t  Unprotect();  
-  
- private:
-  vm_size_t      pool_size_;
-  vm_address_t   base_address_;
-  vm_size_t      next_alloc_offset_;
-  bool           valid_;
+    // Returns the size of the allocation pool, including allocated
+    // plus free space.
+    vm_size_t GetTotalSize() { return pool_size_; }
+
+    // Returns the number of bytes already allocated in the pool.
+    vm_size_t GetAllocatedSize() { return next_alloc_offset_; }
+
+    // Returns the number of bytes available for allocation.
+    vm_size_t GetFreeSize() { return pool_size_ - next_alloc_offset_; }
+
+    // Makes the entire allocation pool read-only including, of course,
+    // all allocations made from the pool.
+    kern_return_t Protect();
+
+    // Makes the entire allocation pool read/write.
+    kern_return_t Unprotect();
+
+private:
+    vm_size_t pool_size_;
+    vm_address_t base_address_;
+    vm_size_t next_alloc_offset_;
+    bool valid_;
 };
 
 #endif // PROTECTED_MEMORY_ALLOCATOR_H__

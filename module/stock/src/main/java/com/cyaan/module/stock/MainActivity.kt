@@ -3,10 +3,8 @@ package com.cyaan.module.stock
 import android.os.Bundle
 import android.os.Debug
 import androidx.activity.viewModels
-import com.cyaan.core.common.network.KResult
 import com.cyaan.core.ui.app.BaseActivity
 import dagger.hilt.android.AndroidEntryPoint
-import timber.log.Timber
 
 @AndroidEntryPoint
 class MainActivity : BaseActivity() {

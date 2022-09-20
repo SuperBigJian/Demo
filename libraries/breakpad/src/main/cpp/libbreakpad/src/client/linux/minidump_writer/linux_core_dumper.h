@@ -40,85 +40,85 @@
 
 namespace google_breakpad {
 
-class LinuxCoreDumper : public LinuxDumper {
- public:
-  // Constructs a dumper for extracting information of a given process
-  // with a process ID of |pid| via its core dump file at |core_path| and
-  // its proc files at |procfs_path|. If |procfs_path| is a copy of
-  // /proc/<pid>, it should contain the following files:
-  //     auxv, cmdline, environ, exe, maps, status
-  // See LinuxDumper for the purpose of |root_prefix|.
-  LinuxCoreDumper(pid_t pid, const char* core_path, const char* procfs_path,
-                  const char* root_prefix = "");
+    class LinuxCoreDumper : public LinuxDumper {
+    public:
+        // Constructs a dumper for extracting information of a given process
+        // with a process ID of |pid| via its core dump file at |core_path| and
+        // its proc files at |procfs_path|. If |procfs_path| is a copy of
+        // /proc/<pid>, it should contain the following files:
+        //     auxv, cmdline, environ, exe, maps, status
+        // See LinuxDumper for the purpose of |root_prefix|.
+        LinuxCoreDumper(pid_t pid, const char *core_path, const char *procfs_path,
+                        const char *root_prefix = "");
 
-  // Implements LinuxDumper::BuildProcPath().
-  // Builds a proc path for a certain pid for a node (/proc/<pid>/<node>).
-  // |path| is a character array of at least NAME_MAX bytes to return the
-  // result.|node| is the final node without any slashes. Return true on
-  // success.
-  //
-  // As this dumper performs a post-mortem dump and makes use of a copy
-  // of the proc files of the crashed process, this derived method does
-  // not actually make use of |pid| and always returns a subpath of
-  // |procfs_path_| regardless of whether |pid| corresponds to the main
-  // process or a thread of the process, i.e. assuming both the main process
-  // and its threads have the following proc files with the same content:
-  //     auxv, cmdline, environ, exe, maps, status
-  virtual bool BuildProcPath(char* path, pid_t pid, const char* node) const;
+        // Implements LinuxDumper::BuildProcPath().
+        // Builds a proc path for a certain pid for a node (/proc/<pid>/<node>).
+        // |path| is a character array of at least NAME_MAX bytes to return the
+        // result.|node| is the final node without any slashes. Return true on
+        // success.
+        //
+        // As this dumper performs a post-mortem dump and makes use of a copy
+        // of the proc files of the crashed process, this derived method does
+        // not actually make use of |pid| and always returns a subpath of
+        // |procfs_path_| regardless of whether |pid| corresponds to the main
+        // process or a thread of the process, i.e. assuming both the main process
+        // and its threads have the following proc files with the same content:
+        //     auxv, cmdline, environ, exe, maps, status
+        virtual bool BuildProcPath(char *path, pid_t pid, const char *node) const;
 
-  // Implements LinuxDumper::CopyFromProcess().
-  // Copies content of |length| bytes from a given process |child|,
-  // starting from |src|, into |dest|. This method extracts the content
-  // the core dump and fills |dest| with a sequence of marker bytes
-  // if the expected data is not found in the core dump. Returns true if
-  // the expected data is found in the core dump.
-  virtual bool CopyFromProcess(void* dest, pid_t child, const void* src,
-                               size_t length);
+        // Implements LinuxDumper::CopyFromProcess().
+        // Copies content of |length| bytes from a given process |child|,
+        // starting from |src|, into |dest|. This method extracts the content
+        // the core dump and fills |dest| with a sequence of marker bytes
+        // if the expected data is not found in the core dump. Returns true if
+        // the expected data is found in the core dump.
+        virtual bool CopyFromProcess(void *dest, pid_t child, const void *src,
+                                     size_t length);
 
-  // Implements LinuxDumper::GetThreadInfoByIndex().
-  // Reads information about the |index|-th thread of |threads_|.
-  // Returns true on success. One must have called |ThreadsSuspend| first.
-  virtual bool GetThreadInfoByIndex(size_t index, ThreadInfo* info);
+        // Implements LinuxDumper::GetThreadInfoByIndex().
+        // Reads information about the |index|-th thread of |threads_|.
+        // Returns true on success. One must have called |ThreadsSuspend| first.
+        virtual bool GetThreadInfoByIndex(size_t index, ThreadInfo *info);
 
-  // Implements LinuxDumper::IsPostMortem().
-  // Always returns true to indicate that this dumper performs a
-  // post-mortem dump of a crashed process via a core dump file.
-  virtual bool IsPostMortem() const;
+        // Implements LinuxDumper::IsPostMortem().
+        // Always returns true to indicate that this dumper performs a
+        // post-mortem dump of a crashed process via a core dump file.
+        virtual bool IsPostMortem() const;
 
-  // Implements LinuxDumper::ThreadsSuspend().
-  // As the dumper performs a post-mortem dump via a core dump file,
-  // there is no threads to suspend. This method does nothing and
-  // always returns true.
-  virtual bool ThreadsSuspend();
+        // Implements LinuxDumper::ThreadsSuspend().
+        // As the dumper performs a post-mortem dump via a core dump file,
+        // there is no threads to suspend. This method does nothing and
+        // always returns true.
+        virtual bool ThreadsSuspend();
 
-  // Implements LinuxDumper::ThreadsResume().
-  // As the dumper performs a post-mortem dump via a core dump file,
-  // there is no threads to resume. This method does nothing and
-  // always returns true.
-  virtual bool ThreadsResume();
+        // Implements LinuxDumper::ThreadsResume().
+        // As the dumper performs a post-mortem dump via a core dump file,
+        // there is no threads to resume. This method does nothing and
+        // always returns true.
+        virtual bool ThreadsResume();
 
- protected:
-  // Implements LinuxDumper::EnumerateThreads().
-  // Enumerates all threads of the given process into |threads_|.
-  virtual bool EnumerateThreads();
+    protected:
+        // Implements LinuxDumper::EnumerateThreads().
+        // Enumerates all threads of the given process into |threads_|.
+        virtual bool EnumerateThreads();
 
- private:
-  // Path of the core dump file.
-  const char* core_path_;
+    private:
+        // Path of the core dump file.
+        const char *core_path_;
 
-  // Path of the directory containing the proc files of the given process,
-  // which is usually a copy of /proc/<pid>.
-  const char* procfs_path_;
+        // Path of the directory containing the proc files of the given process,
+        // which is usually a copy of /proc/<pid>.
+        const char *procfs_path_;
 
-  // Memory-mapped core dump file at |core_path_|.
-  MemoryMappedFile mapped_core_file_;
+        // Memory-mapped core dump file at |core_path_|.
+        MemoryMappedFile mapped_core_file_;
 
-  // Content of the core dump file.
-  ElfCoreDump core_;
+        // Content of the core dump file.
+        ElfCoreDump core_;
 
-  // Thread info found in the core dump file.
-  wasteful_vector<ThreadInfo> thread_infos_;
-};
+        // Thread info found in the core dump file.
+        wasteful_vector <ThreadInfo> thread_infos_;
+    };
 
 }  // namespace google_breakpad
 

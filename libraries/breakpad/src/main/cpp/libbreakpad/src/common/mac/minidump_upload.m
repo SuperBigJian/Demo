@@ -40,96 +40,96 @@
 #import "common/mac/HTTPMultipartUpload.h"
 
 typedef struct {
-  NSString* minidumpPath;
-  NSString* uploadURLStr;
-  NSString* product;
-  NSString* version;
-  BOOL success;
+    NSString *minidumpPath;
+    NSString *uploadURLStr;
+    NSString *product;
+    NSString *version;
+    BOOL success;
 } Options;
 
 //=============================================================================
-static void Start(Options* options) {
-  NSURL* url = [NSURL URLWithString:options->uploadURLStr];
-  HTTPMultipartUpload* ul = [[HTTPMultipartUpload alloc] initWithURL:url];
-  NSMutableDictionary* parameters = [NSMutableDictionary dictionary];
+static void Start(Options *options) {
+    NSURL *url = [NSURL URLWithString:options->uploadURLStr];
+    HTTPMultipartUpload *ul = [[HTTPMultipartUpload alloc] initWithURL:url];
+    NSMutableDictionary *parameters = [NSMutableDictionary dictionary];
 
-  // Add parameters
-  [parameters setObject:options->product forKey:@"prod"];
-  [parameters setObject:options->version forKey:@"ver"];
-  [ul setParameters:parameters];
+    // Add parameters
+    [parameters setObject:options->product forKey:@"prod"];
+    [parameters setObject:options->version forKey:@"ver"];
+    [ul setParameters:parameters];
 
-  // Add file
-  [ul addFileAtPath:options->minidumpPath name:@"upload_file_minidump"];
+    // Add file
+    [ul addFileAtPath:options->minidumpPath name:@"upload_file_minidump"];
 
-  // Send it
-  NSError* error = nil;
-  NSData* data = [ul send:&error];
-  NSString* result = [[NSString alloc] initWithData:data
-                                           encoding:NSUTF8StringEncoding];
+    // Send it
+    NSError *error = nil;
+    NSData *data = [ul send:&error];
+    NSString *result = [[NSString alloc] initWithData:data
+                                             encoding:NSUTF8StringEncoding];
 
-  NSLog(@"Send: %@", error ? [error description] : @"No Error");
-  NSLog(@"Response: %ld", (long)[[ul response] statusCode]);
-  NSLog(@"Result: %lu bytes\n%@", (unsigned long)[data length], result);
+    NSLog(@"Send: %@", error ? [error description] : @"No Error");
+    NSLog(@"Response: %ld", (long) [[ul response] statusCode]);
+    NSLog(@"Result: %lu bytes\n%@", (unsigned long) [data length], result);
 
-  [result release];
-  [ul release];
-  options->success = !error;
+    [result release];
+    [ul release];
+    options->success = !error;
 }
 
 //=============================================================================
-static void Usage(int argc, const char* argv[]) {
-  fprintf(stderr, "Submit minidump information.\n");
-  fprintf(stderr,
-          "Usage: %s -p <product> -v <version> <minidump> "
-          "<upload-URL>\n",
-          argv[0]);
-  fprintf(stderr, "<minidump> should be a minidump.\n");
-  fprintf(stderr, "<upload-URL> is the destination for the upload\n");
+static void Usage(int argc, const char *argv[]) {
+    fprintf(stderr, "Submit minidump information.\n");
+    fprintf(stderr,
+            "Usage: %s -p <product> -v <version> <minidump> "
+            "<upload-URL>\n",
+            argv[0]);
+    fprintf(stderr, "<minidump> should be a minidump.\n");
+    fprintf(stderr, "<upload-URL> is the destination for the upload\n");
 
-  fprintf(stderr, "\t-h: Usage\n");
-  fprintf(stderr, "\t-?: Usage\n");
+    fprintf(stderr, "\t-h: Usage\n");
+    fprintf(stderr, "\t-?: Usage\n");
 }
 
 //=============================================================================
-static void SetupOptions(int argc, const char* argv[], Options* options) {
-  extern int optind;
-  char ch;
+static void SetupOptions(int argc, const char *argv[], Options *options) {
+    extern int optind;
+    char ch;
 
-  while ((ch = getopt(argc, (char* const*)argv, "p:v:h?")) != -1) {
-    switch (ch) {
-      case 'p':
-        options->product = [NSString stringWithUTF8String:optarg];
-        break;
-      case 'v':
-        options->version = [NSString stringWithUTF8String:optarg];
-        break;
+    while ((ch = getopt(argc, (char *const *) argv, "p:v:h?")) != -1) {
+        switch (ch) {
+            case 'p':
+                options->product = [NSString stringWithUTF8String:optarg];
+                break;
+            case 'v':
+                options->version = [NSString stringWithUTF8String:optarg];
+                break;
 
-      default:
-        Usage(argc, argv);
-        exit(0);
-        break;
+            default:
+                Usage(argc, argv);
+                exit(0);
+                break;
+        }
     }
-  }
 
-  if ((argc - optind) != 2) {
-    fprintf(stderr, "%s: Missing symbols file and/or upload-URL\n", argv[0]);
-    Usage(argc, argv);
-    exit(1);
-  }
+    if ((argc - optind) != 2) {
+        fprintf(stderr, "%s: Missing symbols file and/or upload-URL\n", argv[0]);
+        Usage(argc, argv);
+        exit(1);
+    }
 
-  options->minidumpPath = [NSString stringWithUTF8String:argv[optind]];
-  options->uploadURLStr = [NSString stringWithUTF8String:argv[optind + 1]];
+    options->minidumpPath = [NSString stringWithUTF8String:argv[optind]];
+    options->uploadURLStr = [NSString stringWithUTF8String:argv[optind + 1]];
 }
 
 //=============================================================================
-int main(int argc, const char* argv[]) {
-  NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-  Options options;
+int main(int argc, const char *argv[]) {
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    Options options;
 
-  bzero(&options, sizeof(Options));
-  SetupOptions(argc, argv, &options);
-  Start(&options);
+    bzero(&options, sizeof(Options));
+    SetupOptions(argc, argv, &options);
+    Start(&options);
 
-  [pool release];
-  return options.success ? 0 : 1;
+    [pool release];
+    return options.success ? 0 : 1;
 }

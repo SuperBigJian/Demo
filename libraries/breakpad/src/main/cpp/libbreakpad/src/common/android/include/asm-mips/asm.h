@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <asm/sgidefs.h>
+
 #ifndef CAT
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
 #ifdef __STDC__
@@ -53,7 +54,7 @@
 #define EXPORT(symbol)   .globl symbol;  symbol:
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
 #define FEXPORT(symbol)   .globl symbol;   .type symbol, @function;  symbol:
-#define ABS(symbol,value)   .globl symbol;  symbol = value
+#define ABS(symbol, value)   .globl symbol;  symbol = value
 #define PANIC(msg)   .set push;   .set reorder;   PTR_LA a0, 8f;   jal panic;  9: b 9b;   .set pop;   TEXT(msg)
 #define PRINT(string)
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */

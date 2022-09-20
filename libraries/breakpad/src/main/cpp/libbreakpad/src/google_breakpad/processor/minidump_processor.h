@@ -39,108 +39,114 @@
 
 namespace google_breakpad {
 
-class Minidump;
-class ProcessState;
-class StackFrameSymbolizer;
-class SourceLineResolverInterface;
-class SymbolSupplier;
-struct SystemInfo;
+    class Minidump;
 
-class MinidumpProcessor {
- public:
-  // Initializes this MinidumpProcessor.  supplier should be an
-  // implementation of the SymbolSupplier abstract base class.
-  MinidumpProcessor(SymbolSupplier* supplier,
-                    SourceLineResolverInterface* resolver);
+    class ProcessState;
 
-  // Initializes the MinidumpProcessor with the option of
-  // enabling the exploitability framework to analyze dumps
-  // for probable security relevance.
-  MinidumpProcessor(SymbolSupplier* supplier,
-                    SourceLineResolverInterface* resolver,
-                    bool enable_exploitability);
+    class StackFrameSymbolizer;
 
-  // Initializes the MinidumpProcessor with source line resolver helper, and
-  // the option of enabling the exploitability framework to analyze dumps
-  // for probable security relevance.
-  // Does not take ownership of resolver_helper, which must NOT be NULL.
-  MinidumpProcessor(StackFrameSymbolizer* stack_frame_symbolizer,
-                    bool enable_exploitability);
+    class SourceLineResolverInterface;
 
-  ~MinidumpProcessor();
+    class SymbolSupplier;
 
-  // Processes the minidump file and fills process_state with the result.
-  ProcessResult Process(const string& minidump_file,
-                        ProcessState* process_state);
+    struct SystemInfo;
 
-  // Processes the minidump structure and fills process_state with the
-  // result.
-  ProcessResult Process(Minidump* minidump,
-                        ProcessState* process_state);
-  // Populates the cpu_* fields of the |info| parameter with textual
-  // representations of the CPU type that the minidump in |dump| was
-  // produced on.  Returns false if this information is not available in
-  // the minidump.
-  static bool GetCPUInfo(Minidump* dump, SystemInfo* info);
+    class MinidumpProcessor {
+    public:
+        // Initializes this MinidumpProcessor.  supplier should be an
+        // implementation of the SymbolSupplier abstract base class.
+        MinidumpProcessor(SymbolSupplier *supplier,
+                          SourceLineResolverInterface *resolver);
 
-  // Populates the os_* fields of the |info| parameter with textual
-  // representations of the operating system that the minidump in |dump|
-  // was produced on.  Returns false if this information is not available in
-  // the minidump.
-  static bool GetOSInfo(Minidump* dump, SystemInfo* info);
+        // Initializes the MinidumpProcessor with the option of
+        // enabling the exploitability framework to analyze dumps
+        // for probable security relevance.
+        MinidumpProcessor(SymbolSupplier *supplier,
+                          SourceLineResolverInterface *resolver,
+                          bool enable_exploitability);
 
-  // Populates the |process_create_time| parameter with the create time of the
-  // crashed process.  Returns false if this information is not available in
-  // the minidump |dump|.
-  static bool GetProcessCreateTime(Minidump* dump,
-                                   uint32_t* process_create_time);
+        // Initializes the MinidumpProcessor with source line resolver helper, and
+        // the option of enabling the exploitability framework to analyze dumps
+        // for probable security relevance.
+        // Does not take ownership of resolver_helper, which must NOT be NULL.
+        MinidumpProcessor(StackFrameSymbolizer *stack_frame_symbolizer,
+                          bool enable_exploitability);
 
-  // Returns a textual representation of the reason that a crash occurred,
-  // if the minidump in dump was produced as a result of a crash.  Returns
-  // an empty string if this information cannot be determined.  If address
-  // is non-NULL, it will be set to contain the address that caused the
-  // exception, if this information is available.  This will be a code
-  // address when the crash was caused by problems such as illegal
-  // instructions or divisions by zero, or a data address when the crash
-  // was caused by a memory access violation.
-  static string GetCrashReason(Minidump* dump, uint64_t* address);
+        ~MinidumpProcessor();
 
-  // This function returns true if the passed-in error code is
-  // something unrecoverable(i.e. retry should not happen).  For
-  // instance, if the minidump is corrupt, then it makes no sense to
-  // retry as we won't be able to glean additional information.
-  // However, as an example of the other case, the symbol supplier can
-  // return an error code indicating it was 'interrupted', which can
-  // happen of the symbols are fetched from a remote store, and a
-  // retry might be successful later on.
-  // You should not call this method with PROCESS_OK! Test for
-  // that separately before calling this.
-  static bool IsErrorUnrecoverable(ProcessResult p) {
-    assert(p !=  PROCESS_OK);
-    return (p != PROCESS_SYMBOL_SUPPLIER_INTERRUPTED);
-  }
+        // Processes the minidump file and fills process_state with the result.
+        ProcessResult Process(const string &minidump_file,
+                              ProcessState *process_state);
 
-  // Returns a textual representation of an assertion included
-  // in the minidump.  Returns an empty string if this information
-  // does not exist or cannot be determined.
-  static string GetAssertion(Minidump* dump);
+        // Processes the minidump structure and fills process_state with the
+        // result.
+        ProcessResult Process(Minidump *minidump,
+                              ProcessState *process_state);
 
-  void set_enable_objdump(bool enabled) { enable_objdump_ = enabled; }
+        // Populates the cpu_* fields of the |info| parameter with textual
+        // representations of the CPU type that the minidump in |dump| was
+        // produced on.  Returns false if this information is not available in
+        // the minidump.
+        static bool GetCPUInfo(Minidump *dump, SystemInfo *info);
 
- private:
-  StackFrameSymbolizer* frame_symbolizer_;
-  // Indicate whether resolver_helper_ is owned by this instance.
-  bool own_frame_symbolizer_;
+        // Populates the os_* fields of the |info| parameter with textual
+        // representations of the operating system that the minidump in |dump|
+        // was produced on.  Returns false if this information is not available in
+        // the minidump.
+        static bool GetOSInfo(Minidump *dump, SystemInfo *info);
 
-  // This flag enables the exploitability scanner which attempts to
-  // guess how likely it is that the crash represents an exploitable
-  // memory corruption issue.
-  bool enable_exploitability_;
+        // Populates the |process_create_time| parameter with the create time of the
+        // crashed process.  Returns false if this information is not available in
+        // the minidump |dump|.
+        static bool GetProcessCreateTime(Minidump *dump,
+                                         uint32_t *process_create_time);
 
-  // This flag permits the exploitability scanner to shell out to objdump
-  // for purposes of disassembly.
-  bool enable_objdump_;
-};
+        // Returns a textual representation of the reason that a crash occurred,
+        // if the minidump in dump was produced as a result of a crash.  Returns
+        // an empty string if this information cannot be determined.  If address
+        // is non-NULL, it will be set to contain the address that caused the
+        // exception, if this information is available.  This will be a code
+        // address when the crash was caused by problems such as illegal
+        // instructions or divisions by zero, or a data address when the crash
+        // was caused by a memory access violation.
+        static string GetCrashReason(Minidump *dump, uint64_t *address);
+
+        // This function returns true if the passed-in error code is
+        // something unrecoverable(i.e. retry should not happen).  For
+        // instance, if the minidump is corrupt, then it makes no sense to
+        // retry as we won't be able to glean additional information.
+        // However, as an example of the other case, the symbol supplier can
+        // return an error code indicating it was 'interrupted', which can
+        // happen of the symbols are fetched from a remote store, and a
+        // retry might be successful later on.
+        // You should not call this method with PROCESS_OK! Test for
+        // that separately before calling this.
+        static bool IsErrorUnrecoverable(ProcessResult p) {
+            assert(p != PROCESS_OK);
+            return (p != PROCESS_SYMBOL_SUPPLIER_INTERRUPTED);
+        }
+
+        // Returns a textual representation of an assertion included
+        // in the minidump.  Returns an empty string if this information
+        // does not exist or cannot be determined.
+        static string GetAssertion(Minidump *dump);
+
+        void set_enable_objdump(bool enabled) { enable_objdump_ = enabled; }
+
+    private:
+        StackFrameSymbolizer *frame_symbolizer_;
+        // Indicate whether resolver_helper_ is owned by this instance.
+        bool own_frame_symbolizer_;
+
+        // This flag enables the exploitability scanner which attempts to
+        // guess how likely it is that the crash represents an exploitable
+        // memory corruption issue.
+        bool enable_exploitability_;
+
+        // This flag permits the exploitability scanner to shell out to objdump
+        // for purposes of disassembly.
+        bool enable_objdump_;
+    };
 
 }  // namespace google_breakpad
 
