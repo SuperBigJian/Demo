@@ -35,18 +35,18 @@
 namespace google_breakpad {
 
 // DumpObject is the base of various mini/micro dump's objects.
-    class DumpObject {
-    public:
-        DumpObject();
+class DumpObject {
+ public:
+  DumpObject();
 
-        bool valid() const { return valid_; }
+  bool valid() const { return valid_; }
 
-    protected:
-        // DumpObjects are not valid when created.  When a subclass populates its own
-        // fields, it can set valid_ to true.  Accessors and mutators may wish to
-        // consider or alter the valid_ state as they interact with objects.
-        bool valid_;
-    };
+ protected:
+  // DumpObjects are not valid when created.  When a subclass populates its own
+  // fields, it can set valid_ to true.  Accessors and mutators may wish to
+  // consider or alter the valid_ state as they interact with objects.
+  bool valid_;
+};
 
 }  // namespace google_breakpad
 

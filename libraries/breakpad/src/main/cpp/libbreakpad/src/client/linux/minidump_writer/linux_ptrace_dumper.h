@@ -39,62 +39,62 @@
 
 namespace google_breakpad {
 
-    class LinuxPtraceDumper : public LinuxDumper {
-    public:
-        // Constructs a dumper for extracting information of a given process
-        // with a process ID of |pid|.
-        explicit LinuxPtraceDumper(pid_t pid);
+class LinuxPtraceDumper : public LinuxDumper {
+ public:
+  // Constructs a dumper for extracting information of a given process
+  // with a process ID of |pid|.
+  explicit LinuxPtraceDumper(pid_t pid);
 
-        // Implements LinuxDumper::BuildProcPath().
-        // Builds a proc path for a certain pid for a node (/proc/<pid>/<node>).
-        // |path| is a character array of at least NAME_MAX bytes to return the
-        // result. |node| is the final node without any slashes. Returns true on
-        // success.
-        virtual bool BuildProcPath(char *path, pid_t pid, const char *node) const;
+  // Implements LinuxDumper::BuildProcPath().
+  // Builds a proc path for a certain pid for a node (/proc/<pid>/<node>).
+  // |path| is a character array of at least NAME_MAX bytes to return the
+  // result. |node| is the final node without any slashes. Returns true on
+  // success.
+  virtual bool BuildProcPath(char* path, pid_t pid, const char* node) const;
 
-        // Implements LinuxDumper::CopyFromProcess().
-        // Copies content of |length| bytes from a given process |child|,
-        // starting from |src|, into |dest|. This method uses ptrace to extract
-        // the content from the target process. Always returns true.
-        virtual bool CopyFromProcess(void *dest, pid_t child, const void *src,
-                                     size_t length);
+  // Implements LinuxDumper::CopyFromProcess().
+  // Copies content of |length| bytes from a given process |child|,
+  // starting from |src|, into |dest|. This method uses ptrace to extract
+  // the content from the target process. Always returns true.
+  virtual bool CopyFromProcess(void* dest, pid_t child, const void* src,
+                               size_t length);
 
-        // Implements LinuxDumper::GetThreadInfoByIndex().
-        // Reads information about the |index|-th thread of |threads_|.
-        // Returns true on success. One must have called |ThreadsSuspend| first.
-        virtual bool GetThreadInfoByIndex(size_t index, ThreadInfo *info);
+  // Implements LinuxDumper::GetThreadInfoByIndex().
+  // Reads information about the |index|-th thread of |threads_|.
+  // Returns true on success. One must have called |ThreadsSuspend| first.
+  virtual bool GetThreadInfoByIndex(size_t index, ThreadInfo* info);
 
-        // Implements LinuxDumper::IsPostMortem().
-        // Always returns false to indicate this dumper performs a dump of
-        // a crashed process via ptrace.
-        virtual bool IsPostMortem() const;
+  // Implements LinuxDumper::IsPostMortem().
+  // Always returns false to indicate this dumper performs a dump of
+  // a crashed process via ptrace.
+  virtual bool IsPostMortem() const;
 
-        // Implements LinuxDumper::ThreadsSuspend().
-        // Suspends all threads in the given process. Returns true on success.
-        virtual bool ThreadsSuspend();
+  // Implements LinuxDumper::ThreadsSuspend().
+  // Suspends all threads in the given process. Returns true on success.
+  virtual bool ThreadsSuspend();
 
-        // Implements LinuxDumper::ThreadsResume().
-        // Resumes all threads in the given process. Returns true on success.
-        virtual bool ThreadsResume();
+  // Implements LinuxDumper::ThreadsResume().
+  // Resumes all threads in the given process. Returns true on success.
+  virtual bool ThreadsResume();
 
-    protected:
-        // Implements LinuxDumper::EnumerateThreads().
-        // Enumerates all threads of the given process into |threads_|.
-        virtual bool EnumerateThreads();
+ protected:
+  // Implements LinuxDumper::EnumerateThreads().
+  // Enumerates all threads of the given process into |threads_|.
+  virtual bool EnumerateThreads();
 
-    private:
-        // Set to true if all threads of the crashed process are suspended.
-        bool threads_suspended_;
+ private:
+  // Set to true if all threads of the crashed process are suspended.
+  bool threads_suspended_;
 
-        // Read the tracee's registers on kernel with PTRACE_GETREGSET support.
-        // Returns false if PTRACE_GETREGSET is not defined.
-        // Returns true on success.
-        bool ReadRegisterSet(ThreadInfo *info, pid_t tid);
+  // Read the tracee's registers on kernel with PTRACE_GETREGSET support.
+  // Returns false if PTRACE_GETREGSET is not defined.
+  // Returns true on success.
+  bool ReadRegisterSet(ThreadInfo* info, pid_t tid);
 
-        // Read the tracee's registers on kernel with PTRACE_GETREGS support.
-        // Returns true on success.
-        bool ReadRegisters(ThreadInfo *info, pid_t tid);
-    };
+  // Read the tracee's registers on kernel with PTRACE_GETREGS support.
+  // Returns true on success.
+  bool ReadRegisters(ThreadInfo* info, pid_t tid);
+};
 
 }  // namespace google_breakpad
 

@@ -47,15 +47,14 @@ namespace testing {
 //  ...
 //  ASSERT_DEATH( ... some crash ...);
 //
-    class DisableExceptionHandlerInScope {
-    public:
-        DisableExceptionHandlerInScope();
+class DisableExceptionHandlerInScope {
+ public:
+  DisableExceptionHandlerInScope();
+  ~DisableExceptionHandlerInScope();
 
-        ~DisableExceptionHandlerInScope();
-
-    private:
-        bool catch_exceptions_;
-    };
+ private:
+  bool catch_exceptions_;
+};
 
 }  // namespace testing
 

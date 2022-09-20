@@ -49,120 +49,119 @@ namespace google_breakpad {
 
 // StdMapSerializer allocates memory and serializes an std::map instance into a
 // chunk of memory data.
-    template<typename Key, typename Value>
-    class StdMapSerializer {
-    public:
-        // Calculate the memory size of serialized data.
-        size_t SizeOf(const std::map <Key, Value> &m) const;
+template<typename Key, typename Value>
+class StdMapSerializer {
+ public:
+  // Calculate the memory size of serialized data.
+  size_t SizeOf(const std::map<Key, Value>& m) const;
 
-        // Writes the serialized data to memory with start address = dest,
-        // and returns the "end" of data, i.e., return the address follow the final
-        // byte of data.
-        // NOTE: caller has to allocate enough memory before invoke Write() method.
-        char *Write(const std::map <Key, Value> &m, char *dest) const;
+  // Writes the serialized data to memory with start address = dest,
+  // and returns the "end" of data, i.e., return the address follow the final
+  // byte of data.
+  // NOTE: caller has to allocate enough memory before invoke Write() method.
+  char* Write(const std::map<Key, Value>& m, char* dest) const;
 
-        // Serializes a std::map object into a chunk of memory data with format
-        // described in "StaticMap.h" comment.
-        // Returns a pointer to the serialized data.  If size != NULL, *size is set
-        // to the size of serialized data, i.e., SizeOf(m).
-        // Caller has the ownership of memory allocated as "new char[]".
-        char *Serialize(const std::map <Key, Value> &m, unsigned int *size) const;
+  // Serializes a std::map object into a chunk of memory data with format
+  // described in "StaticMap.h" comment.
+  // Returns a pointer to the serialized data.  If size != NULL, *size is set
+  // to the size of serialized data, i.e., SizeOf(m).
+  // Caller has the ownership of memory allocated as "new char[]".
+  char* Serialize(const std::map<Key, Value>& m, unsigned int* size) const;
 
-    private:
-        SimpleSerializer <Key> key_serializer_;
-        SimpleSerializer <Value> value_serializer_;
-    };
+ private:
+  SimpleSerializer<Key> key_serializer_;
+  SimpleSerializer<Value> value_serializer_;
+};
 
 // AddressMapSerializer allocates memory and serializes an AddressMap into a
 // chunk of memory data.
-    template<typename Addr, typename Entry>
-    class AddressMapSerializer {
-    public:
-        // Calculate the memory size of serialized data.
-        size_t SizeOf(const AddressMap <Addr, Entry> &m) const {
-            return std_map_serializer_.SizeOf(m.map_);
-        }
+template<typename Addr, typename Entry>
+class AddressMapSerializer {
+ public:
+  // Calculate the memory size of serialized data.
+  size_t SizeOf(const AddressMap<Addr, Entry>& m) const {
+    return std_map_serializer_.SizeOf(m.map_);
+  }
 
-        // Write the serialized data to specified memory location.  Return the "end"
-        // of data, i.e., return the address after the final byte of data.
-        // NOTE: caller has to allocate enough memory before invoke Write() method.
-        char *Write(const AddressMap <Addr, Entry> &m, char *dest) const {
-            return std_map_serializer_.Write(m.map_, dest);
-        }
+  // Write the serialized data to specified memory location.  Return the "end"
+  // of data, i.e., return the address after the final byte of data.
+  // NOTE: caller has to allocate enough memory before invoke Write() method.
+  char* Write(const AddressMap<Addr, Entry>& m, char* dest) const {
+    return std_map_serializer_.Write(m.map_, dest);
+  }
 
-        // Serializes an AddressMap object into a chunk of memory data.
-        // Returns a pointer to the serialized data.  If size != NULL, *size is set
-        // to the size of serialized data, i.e., SizeOf(m).
-        // Caller has the ownership of memory allocated as "new char[]".
-        char *Serialize(const AddressMap <Addr, Entry> &m, unsigned int *size) const {
-            return std_map_serializer_.Serialize(m.map_, size);
-        }
+  // Serializes an AddressMap object into a chunk of memory data.
+  // Returns a pointer to the serialized data.  If size != NULL, *size is set
+  // to the size of serialized data, i.e., SizeOf(m).
+  // Caller has the ownership of memory allocated as "new char[]".
+  char* Serialize(const AddressMap<Addr, Entry>& m, unsigned int* size) const {
+    return std_map_serializer_.Serialize(m.map_, size);
+  }
 
-    private:
-        // AddressMapSerializer is a simple wrapper of StdMapSerializer, just as
-        // AddressMap is a simple wrapper of std::map.
-        StdMapSerializer<Addr, Entry> std_map_serializer_;
-    };
+ private:
+  // AddressMapSerializer is a simple wrapper of StdMapSerializer, just as
+  // AddressMap is a simple wrapper of std::map.
+  StdMapSerializer<Addr, Entry> std_map_serializer_;
+};
 
 // RangeMapSerializer allocates memory and serializes a RangeMap instance into a
 // chunk of memory data.
-    template<typename Address, typename Entry>
-    class RangeMapSerializer {
-    public:
-        // Calculate the memory size of serialized data.
-        size_t SizeOf(const RangeMap <Address, Entry> &m) const;
+template<typename Address, typename Entry>
+class RangeMapSerializer {
+ public:
+  // Calculate the memory size of serialized data.
+  size_t SizeOf(const RangeMap<Address, Entry>& m) const;
 
-        // Write the serialized data to specified memory location.  Return the "end"
-        // of data, i.e., return the address after the final byte of data.
-        // NOTE: caller has to allocate enough memory before invoke Write() method.
-        char *Write(const RangeMap <Address, Entry> &m, char *dest) const;
+  // Write the serialized data to specified memory location.  Return the "end"
+  // of data, i.e., return the address after the final byte of data.
+  // NOTE: caller has to allocate enough memory before invoke Write() method.
+  char* Write(const RangeMap<Address, Entry>& m, char* dest) const;
 
-        // Serializes a RangeMap object into a chunk of memory data.
-        // Returns a pointer to the serialized data.  If size != NULL, *size is set
-        // to the size of serialized data, i.e., SizeOf(m).
-        // Caller has the ownership of memory allocated as "new char[]".
-        char *Serialize(const RangeMap <Address, Entry> &m, unsigned int *size) const;
+  // Serializes a RangeMap object into a chunk of memory data.
+  // Returns a pointer to the serialized data.  If size != NULL, *size is set
+  // to the size of serialized data, i.e., SizeOf(m).
+  // Caller has the ownership of memory allocated as "new char[]".
+  char* Serialize(const RangeMap<Address, Entry>& m, unsigned int* size) const;
 
-    private:
-        // Convenient type name for Range.
-        typedef typename RangeMap<Address, Entry>::Range Range;
+ private:
+  // Convenient type name for Range.
+  typedef typename RangeMap<Address, Entry>::Range Range;
 
-        // Serializer for RangeMap's key and Range::base_.
-        SimpleSerializer <Address> address_serializer_;
-        // Serializer for RangeMap::Range::entry_.
-        SimpleSerializer <Entry> entry_serializer_;
-    };
+  // Serializer for RangeMap's key and Range::base_.
+  SimpleSerializer<Address> address_serializer_;
+  // Serializer for RangeMap::Range::entry_.
+  SimpleSerializer<Entry> entry_serializer_;
+};
 
 // ContainedRangeMapSerializer allocates memory and serializes a
 // ContainedRangeMap instance into a chunk of memory data.
-    template<class AddrType, class EntryType>
-    class ContainedRangeMapSerializer {
-    public:
-        // Calculate the memory size of serialized data.
-        size_t SizeOf(const ContainedRangeMap <AddrType, EntryType> *m) const;
+template<class AddrType, class EntryType>
+class ContainedRangeMapSerializer {
+ public:
+  // Calculate the memory size of serialized data.
+  size_t SizeOf(const ContainedRangeMap<AddrType, EntryType>* m) const;
 
-        // Write the serialized data to specified memory location.  Return the "end"
-        // of data, i.e., return the address after the final byte of data.
-        // NOTE: caller has to allocate enough memory before invoke Write() method.
-        char *Write(const ContainedRangeMap <AddrType, EntryType> *m,
-                    char *dest) const;
+  // Write the serialized data to specified memory location.  Return the "end"
+  // of data, i.e., return the address after the final byte of data.
+  // NOTE: caller has to allocate enough memory before invoke Write() method.
+  char* Write(const ContainedRangeMap<AddrType, EntryType>* m,
+              char* dest) const;
 
-        // Serializes a ContainedRangeMap object into a chunk of memory data.
-        // Returns a pointer to the serialized data.  If size != NULL, *size is set
-        // to the size of serialized data, i.e., SizeOf(m).
-        // Caller has the ownership of memory allocated as "new char[]".
-        char *Serialize(const ContainedRangeMap <AddrType, EntryType> *m,
-                        unsigned int *size) const;
+  // Serializes a ContainedRangeMap object into a chunk of memory data.
+  // Returns a pointer to the serialized data.  If size != NULL, *size is set
+  // to the size of serialized data, i.e., SizeOf(m).
+  // Caller has the ownership of memory allocated as "new char[]".
+  char* Serialize(const ContainedRangeMap<AddrType, EntryType>* m,
+                  unsigned int* size) const;
 
-    private:
-        // Convenient type name for the underlying map type.
-        typedef std::map<AddrType, ContainedRangeMap < AddrType, EntryType>*>
-        Map;
+ private:
+  // Convenient type name for the underlying map type.
+  typedef std::map<AddrType, ContainedRangeMap<AddrType, EntryType>*> Map;
 
-        // Serializer for addresses and entries stored in ContainedRangeMap.
-        SimpleSerializer <AddrType> addr_serializer_;
-        SimpleSerializer <EntryType> entry_serializer_;
-    };
+  // Serializer for addresses and entries stored in ContainedRangeMap.
+  SimpleSerializer<AddrType> addr_serializer_;
+  SimpleSerializer<EntryType> entry_serializer_;
+};
 
 }  // namespace google_breakpad
 

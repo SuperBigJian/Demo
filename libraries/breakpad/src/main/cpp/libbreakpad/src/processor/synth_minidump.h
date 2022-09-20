@@ -120,284 +120,278 @@
 
 namespace google_breakpad {
 
-    namespace SynthMinidump {
+namespace SynthMinidump {
 
-        using test_assembler::Endianness;
-        using test_assembler::kBigEndian;
-        using test_assembler::kLittleEndian;
-        using test_assembler::kUnsetEndian;
-        using test_assembler::Label;
+using test_assembler::Endianness;
+using test_assembler::kBigEndian;
+using test_assembler::kLittleEndian;
+using test_assembler::kUnsetEndian;
+using test_assembler::Label;
 
-        class Dump;
-
-        class Memory;
-
-        class String;
+class Dump;
+class Memory;
+class String;
 
 // A test_assembler::Section which will be appended to a minidump.
-        class Section : public test_assembler::Section {
-        public:
-            explicit Section(const Dump &dump);
+class Section: public test_assembler::Section {
+ public:
+  explicit Section(const Dump& dump);
 
-            // Append an MDLocationDescriptor referring to this section to SECTION.
-            // If 'this' is NULL, append a descriptor with a zero length and MDRVA.
-            //
-            // (I couldn't find the language in the C++ standard that says that
-            // invoking member functions of a NULL pointer to a class type is
-            // bad, if such language exists. Having this function handle NULL
-            // 'this' is convenient, but if it causes trouble, it's not hard to
-            // do differently.)
-            void CiteLocationIn(test_assembler::Section *section) const;
+  // Append an MDLocationDescriptor referring to this section to SECTION.
+  // If 'this' is NULL, append a descriptor with a zero length and MDRVA.
+  //
+  // (I couldn't find the language in the C++ standard that says that
+  // invoking member functions of a NULL pointer to a class type is
+  // bad, if such language exists. Having this function handle NULL
+  // 'this' is convenient, but if it causes trouble, it's not hard to
+  // do differently.)
+  void CiteLocationIn(test_assembler::Section* section) const;
 
-            // Note that this section's contents are complete, and that it has
-            // been placed in the minidump file at OFFSET. The 'Add' member
-            // functions call the Finish member function of the object being
-            // added for you; if you are 'Add'ing this section, you needn't Finish it.
-            virtual void Finish(const Label &offset) {
-                file_offset_ = offset;
-                size_ = Size();
-            }
+  // Note that this section's contents are complete, and that it has
+  // been placed in the minidump file at OFFSET. The 'Add' member
+  // functions call the Finish member function of the object being
+  // added for you; if you are 'Add'ing this section, you needn't Finish it.
+  virtual void Finish(const Label& offset) { 
+    file_offset_ = offset; size_ = Size();
+  }
 
-        protected:
-            // This section's size and offset within the minidump file.
-            Label file_offset_, size_;
-        };
+ protected:
+  // This section's size and offset within the minidump file.
+  Label file_offset_, size_;
+};
 
 // A stream within a minidump file. 'Add'ing a stream to a minidump
 // creates an entry for it in the minidump's stream directory.
-        class Stream : public Section {
-        public:
-            // Create a stream of type TYPE.  You can append whatever contents
-            // you like to this stream using the test_assembler::Section methods.
-            Stream(const Dump &dump, uint32_t type) : Section(dump), type_(type) {}
+class Stream: public Section {
+ public:
+  // Create a stream of type TYPE.  You can append whatever contents
+  // you like to this stream using the test_assembler::Section methods.
+  Stream(const Dump& dump, uint32_t type) : Section(dump), type_(type) { }
 
-            // Append an MDRawDirectory referring to this stream to SECTION.
-            void CiteStreamIn(test_assembler::Section *section) const;
+  // Append an MDRawDirectory referring to this stream to SECTION.
+  void CiteStreamIn(test_assembler::Section* section) const;
 
-        private:
-            // The type of this stream.
-            uint32_t type_;
-        };
+ private:
+  // The type of this stream.
+  uint32_t type_;
+};
 
-        class SystemInfo : public Stream {
-        public:
-            // Create an MD_SYSTEM_INFO_STREAM stream belonging to DUMP holding
-            // an MDRawSystem info structure initialized with the values from
-            // SYSTEM_INFO, except that the csd_version field is replaced with
-            // the file offset of the string CSD_VERSION, which can be 'Add'ed
-            // to the dump at the desired location.
-            //
-            // Remember that you are still responsible for 'Add'ing CSD_VERSION
-            // to the dump yourself.
-            SystemInfo(const Dump &dump,
-                       const MDRawSystemInfo &system_info,
-                       const String &csd_version);
+class SystemInfo: public Stream {
+ public:
+  // Create an MD_SYSTEM_INFO_STREAM stream belonging to DUMP holding
+  // an MDRawSystem info structure initialized with the values from
+  // SYSTEM_INFO, except that the csd_version field is replaced with
+  // the file offset of the string CSD_VERSION, which can be 'Add'ed
+  // to the dump at the desired location.
+  // 
+  // Remember that you are still responsible for 'Add'ing CSD_VERSION
+  // to the dump yourself.
+  SystemInfo(const Dump& dump,
+             const MDRawSystemInfo& system_info,
+             const String& csd_version);
 
-            // Stock MDRawSystemInfo information and associated strings, for
-            // writing tests.
-            static const MDRawSystemInfo windows_x86;
-            static const string windows_x86_csd_version;
-        };
+  // Stock MDRawSystemInfo information and associated strings, for
+  // writing tests.
+  static const MDRawSystemInfo windows_x86;
+  static const string windows_x86_csd_version;
+};
 
 // An MDString: a string preceded by a 32-bit length.
-        class String : public Section {
-        public:
-            String(const Dump &dump, const string &value);
+class String: public Section {
+ public:
+  String(const Dump& dump, const string& value);
 
-            // Append an MDRVA referring to this string to SECTION.
-            void CiteStringIn(test_assembler::Section *section) const;
-        };
+  // Append an MDRVA referring to this string to SECTION.
+  void CiteStringIn(test_assembler::Section* section) const;
+};
 
 // A range of memory contents. 'Add'ing a memory range to a minidump
 // creates n entry for it in the minidump's memory list. By
 // convention, the 'start', 'Here', and 'Mark' member functions refer
 // to memory addresses.
-        class Memory : public Section {
-        public:
-            Memory(const Dump &dump, uint64_t address)
-                    : Section(dump), address_(address) { start() = address; }
+class Memory: public Section {
+ public:
+  Memory(const Dump& dump, uint64_t address)
+      : Section(dump), address_(address) { start() = address; }
 
-            // Append an MDMemoryDescriptor referring to this memory range to SECTION.
-            void CiteMemoryIn(test_assembler::Section *section) const;
+  // Append an MDMemoryDescriptor referring to this memory range to SECTION.
+  void CiteMemoryIn(test_assembler::Section* section) const;
 
-        private:
-            // The process address from which these memory contents were taken.
-            // Shouldn't this be a Label?
-            uint64_t address_;
-        };
+ private:
+  // The process address from which these memory contents were taken.
+  // Shouldn't this be a Label?
+  uint64_t address_;
+};
 
-        class Context : public Section {
-        public:
-            // Create a context belonging to DUMP whose contents are a copy of CONTEXT.
-            Context(const Dump &dump, const MDRawContextX86 &context);
+class Context: public Section {
+ public:
+  // Create a context belonging to DUMP whose contents are a copy of CONTEXT.
+  Context(const Dump& dump, const MDRawContextX86& context);
+  Context(const Dump& dump, const MDRawContextARM& context);
+  Context(const Dump& dump, const MDRawContextMIPS& context);
+  // Add an empty context to the dump.
+  Context(const Dump& dump) : Section(dump) {}
+  // Add constructors for other architectures here. Remember to byteswap.
+};
 
-            Context(const Dump &dump, const MDRawContextARM &context);
+class Thread: public Section {
+ public:
+  // Create a thread belonging to DUMP with the given values, citing
+  // STACK and CONTEXT (which you must Add to the dump separately).
+  Thread(const Dump& dump,
+         uint32_t thread_id,
+         const Memory& stack,
+         const Context& context,
+         uint32_t suspend_count = 0,
+         uint32_t priority_class = 0,
+         uint32_t priority = 0,
+         uint64_t teb = 0);
+};
 
-            Context(const Dump &dump, const MDRawContextMIPS &context);
+class Module: public Section {
+ public:
+  // Create a module with the given values. Note that CV_RECORD and
+  // MISC_RECORD can be NULL, in which case the corresponding location
+  // descriptior in the minidump will have a length of zero.
+  Module(const Dump& dump,
+         uint64_t base_of_image,
+         uint32_t size_of_image,
+         const String& name,
+         uint32_t time_date_stamp = 1262805309,
+         uint32_t checksum = 0,
+         const MDVSFixedFileInfo& version_info = Module::stock_version_info,
+         const Section* cv_record = NULL,
+         const Section* misc_record = NULL);
 
-            // Add an empty context to the dump.
-            Context(const Dump &dump) : Section(dump) {}
-            // Add constructors for other architectures here. Remember to byteswap.
-        };
+ private:
+  // A standard MDVSFixedFileInfo structure to use as a default for
+  // minidumps.  There's no reason to make users write out all this crap
+  // over and over.
+  static const MDVSFixedFileInfo stock_version_info;
+};
 
-        class Thread : public Section {
-        public:
-            // Create a thread belonging to DUMP with the given values, citing
-            // STACK and CONTEXT (which you must Add to the dump separately).
-            Thread(const Dump &dump,
-                   uint32_t thread_id,
-                   const Memory &stack,
-                   const Context &context,
-                   uint32_t suspend_count = 0,
-                   uint32_t priority_class = 0,
-                   uint32_t priority = 0,
-                   uint64_t teb = 0);
-        };
+class UnloadedModule: public Section {
+ public:
+  UnloadedModule(const Dump& dump,
+                 uint64_t base_of_image,
+                 uint32_t size_of_image,
+                 const String& name,
+                 uint32_t checksum = 0,
+                 uint32_t time_date_stamp = 1262805309);
+};
 
-        class Module : public Section {
-        public:
-            // Create a module with the given values. Note that CV_RECORD and
-            // MISC_RECORD can be NULL, in which case the corresponding location
-            // descriptior in the minidump will have a length of zero.
-            Module(const Dump &dump,
-                   uint64_t base_of_image,
-                   uint32_t size_of_image,
-                   const String &name,
-                   uint32_t time_date_stamp = 1262805309,
-                   uint32_t checksum = 0,
-                   const MDVSFixedFileInfo &version_info = Module::stock_version_info,
-                   const Section *cv_record = NULL,
-                   const Section *misc_record = NULL);
-
-        private:
-            // A standard MDVSFixedFileInfo structure to use as a default for
-            // minidumps.  There's no reason to make users write out all this crap
-            // over and over.
-            static const MDVSFixedFileInfo stock_version_info;
-        };
-
-        class UnloadedModule : public Section {
-        public:
-            UnloadedModule(const Dump &dump,
-                           uint64_t base_of_image,
-                           uint32_t size_of_image,
-                           const String &name,
-                           uint32_t checksum = 0,
-                           uint32_t time_date_stamp = 1262805309);
-        };
-
-        class Exception : public Stream {
-        public:
-            Exception(const Dump &dump,
-                      const Context &context,
-                      uint32_t thread_id = 0,
-                      uint32_t exception_code = 0,
-                      uint32_t exception_flags = 0,
-                      uint64_t exception_address = 0);
-        };
+class Exception : public Stream {
+public:
+  Exception(const Dump& dump,
+            const Context& context,
+            uint32_t thread_id = 0,
+            uint32_t exception_code = 0,
+            uint32_t exception_flags = 0,
+            uint64_t exception_address = 0);
+};
 
 // A list of entries starting with a 32-bit count, like a memory list
 // or a thread list.
-        template<typename Element>
-        class List : public Stream {
-        public:
-            List(const Dump &dump, uint32_t type) : Stream(dump, type), count_(0) {
-                D32(count_label_);
-            }
+template<typename Element>
+class List: public Stream {
+ public:
+  List(const Dump& dump, uint32_t type) : Stream(dump, type), count_(0) {
+    D32(count_label_);
+  }
 
-            // Add ELEMENT to this list.
-            void Add(Element *element) {
-                element->Finish(file_offset_ + Size());
-                Append(*element);
-                count_++;
-            }
+  // Add ELEMENT to this list.
+  void Add(Element* element) {
+    element->Finish(file_offset_ + Size());
+    Append(*element);
+    count_++;
+  }
 
-            // Return true if this List is empty, false otherwise.
-            bool Empty() { return count_ == 0; }
+  // Return true if this List is empty, false otherwise.
+  bool Empty() { return count_ == 0; }
 
-            // Finish up the contents of this section, mark it as having been
-            // placed at OFFSET.
-            virtual void Finish(const Label &offset) {
-                Stream::Finish(offset);
-                count_label_ = count_;
-            }
+  // Finish up the contents of this section, mark it as having been
+  // placed at OFFSET.
+  virtual void Finish(const Label& offset) {
+    Stream::Finish(offset);
+    count_label_ = count_;
+  }
 
-        private:
-            size_t count_;
+ private:
+  size_t count_;
 
-        protected:
-            // This constructor allows derived lists to specify their own layout
-            // rather than starting with count as specified in the public constructor.
-            List(const Dump &dump, uint32_t type, bool) : Stream(dump, type), count_(0) {}
+ protected:
+  // This constructor allows derived lists to specify their own layout
+  // rather than starting with count as specified in the public constructor.
+  List(const Dump& dump, uint32_t type, bool) : Stream(dump, type), count_(0) {}
 
-            Label count_label_;
-        };
+  Label count_label_;
+};
 
-        class UnloadedModuleList : public List<UnloadedModule> {
-        public:
-            UnloadedModuleList(const Dump &dump, uint32_t type);
-        };
+class UnloadedModuleList : public List<UnloadedModule> {
+ public:
+  UnloadedModuleList(const Dump& dump, uint32_t type);
+};
 
-        class Dump : public test_assembler::Section {
-        public:
+class Dump: public test_assembler::Section {
+ public:
 
-            // Create a test_assembler::Section containing a minidump file whose
-            // header uses the given values. ENDIANNESS determines the
-            // endianness of the signature; we set this section's default
-            // endianness by this.
-            Dump(uint64_t flags,
-                 Endianness endianness = kLittleEndian,
-                 uint32_t version = MD_HEADER_VERSION,
-                 uint32_t date_time_stamp = 1262805309);
+  // Create a test_assembler::Section containing a minidump file whose
+  // header uses the given values. ENDIANNESS determines the
+  // endianness of the signature; we set this section's default
+  // endianness by this.
+  Dump(uint64_t flags,
+       Endianness endianness = kLittleEndian,
+       uint32_t version = MD_HEADER_VERSION,
+       uint32_t date_time_stamp = 1262805309);
 
-            // The following functions call OBJECT->Finish(), and append the
-            // contents of OBJECT to this minidump. They also record OBJECT in
-            // whatever directory or list is appropriate for its type. The
-            // stream directory, memory list, thread list, and module list are
-            // accumulated this way.
-            Dump &Add(SynthMinidump::Section *object); // simply append data
-            Dump &Add(Stream *object); // append, record in stream directory
-            Dump &Add(Memory *object); // append, record in memory list
-            Dump &Add(Thread *object); // append, record in thread list
-            Dump &Add(Module *object); // append, record in module list
-            Dump &Add(UnloadedModule *object); // append, record in unloaded module list
+  // The following functions call OBJECT->Finish(), and append the
+  // contents of OBJECT to this minidump. They also record OBJECT in
+  // whatever directory or list is appropriate for its type. The
+  // stream directory, memory list, thread list, and module list are
+  // accumulated this way.
+  Dump& Add(SynthMinidump::Section* object); // simply append data
+  Dump& Add(Stream* object); // append, record in stream directory
+  Dump& Add(Memory* object); // append, record in memory list
+  Dump& Add(Thread* object); // append, record in thread list
+  Dump& Add(Module* object); // append, record in module list
+  Dump& Add(UnloadedModule* object); // append, record in unloaded module list
 
-            // Complete the construction of the minidump, given the Add calls
-            // we've seen up to this point. After this call, this Dump's
-            // contents are complete, all labels should be defined if everything
-            // Cited has been Added, and you may call GetContents on it.
-            void Finish();
+  // Complete the construction of the minidump, given the Add calls
+  // we've seen up to this point. After this call, this Dump's
+  // contents are complete, all labels should be defined if everything
+  // Cited has been Added, and you may call GetContents on it.
+  void Finish();
 
-        private:
-            // A label representing the start of the minidump file.
-            Label file_start_;
+ private:
+  // A label representing the start of the minidump file.
+  Label file_start_;
 
-            // The stream directory.  We construct this incrementally from
-            // Add(Stream*) calls.
-            SynthMinidump::Section stream_directory_; // The directory's contents.
-            size_t stream_count_;                 // The number of streams so far.
-            Label stream_count_label_;            // Cited in file header.
-            Label stream_directory_rva_;          // The directory's file offset.
+  // The stream directory.  We construct this incrementally from
+  // Add(Stream*) calls.
+  SynthMinidump::Section stream_directory_; // The directory's contents.
+  size_t stream_count_;                 // The number of streams so far.
+  Label stream_count_label_;            // Cited in file header.
+  Label stream_directory_rva_;          // The directory's file offset.
 
-            // This minidump's thread list. We construct this incrementally from
-            // Add(Thread*) calls.
-            List<Thread> thread_list_;
+  // This minidump's thread list. We construct this incrementally from
+  // Add(Thread*) calls.
+  List<Thread> thread_list_;
 
-            // This minidump's module list. We construct this incrementally from
-            // Add(Module*) calls.
-            List<Module> module_list_;
+  // This minidump's module list. We construct this incrementally from
+  // Add(Module*) calls.
+  List<Module> module_list_;
 
-            // This minidump's unloaded module list. We construct this incrementally from
-            // Add(UnloadedModule*) calls.
-            UnloadedModuleList unloaded_module_list_;
+  // This minidump's unloaded module list. We construct this incrementally from
+  // Add(UnloadedModule*) calls.
+  UnloadedModuleList unloaded_module_list_;
 
-            // This minidump's memory list. We construct this incrementally from
-            // Add(Memory*) calls. This is actually a list of MDMemoryDescriptors,
-            // not memory ranges --- thus the odd type.
-            List<SynthMinidump::Section> memory_list_;
-        };
+  // This minidump's memory list. We construct this incrementally from
+  // Add(Memory*) calls. This is actually a list of MDMemoryDescriptors,
+  // not memory ranges --- thus the odd type.
+  List<SynthMinidump::Section> memory_list_;
+};
 
-    } // namespace SynthMinidump
+} // namespace SynthMinidump
 
 } // namespace google_breakpad
 

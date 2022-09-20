@@ -78,43 +78,43 @@
  * are not exactly minidumps.
  */
 typedef struct {
-    /* 32 64-bit floating point registers, f0..f31 */
-    uint64_t regs[MD_FLOATINGSAVEAREA_MIPS_FPR_COUNT];
+  /* 32 64-bit floating point registers, f0..f31 */
+  uint64_t regs[MD_FLOATINGSAVEAREA_MIPS_FPR_COUNT];
 
-    uint32_t fpcsr; /* FPU status register. */
-    uint32_t fir; /* FPU implementation register. */
+  uint32_t fpcsr; /* FPU status register. */
+  uint32_t fir; /* FPU implementation register. */
 } MDFloatingSaveAreaMIPS;
 
 typedef struct {
-    /* The next field determines the layout of the structure, and which parts
-     * of it are populated.
-     */
-    uint32_t context_flags;
-    uint32_t _pad0;
+  /* The next field determines the layout of the structure, and which parts
+   * of it are populated.
+   */
+  uint32_t context_flags;
+  uint32_t _pad0;
 
-    /* 32 64-bit integer registers, r0..r31.
-     * Note the following fixed uses:
-     *   r29 is the stack pointer.
-     *   r31 is the return address.
-     */
-    uint64_t iregs[MD_CONTEXT_MIPS_GPR_COUNT];
+  /* 32 64-bit integer registers, r0..r31.
+   * Note the following fixed uses:
+   *   r29 is the stack pointer.
+   *   r31 is the return address.
+   */
+  uint64_t iregs[MD_CONTEXT_MIPS_GPR_COUNT];
 
-    /* multiply/divide result. */
-    uint64_t mdhi, mdlo;
+  /* multiply/divide result. */
+  uint64_t mdhi, mdlo;
 
-    /* DSP accumulators. */
-    uint32_t hi[MD_CONTEXT_MIPS_DSP_COUNT];
-    uint32_t lo[MD_CONTEXT_MIPS_DSP_COUNT];
-    uint32_t dsp_control;
-    uint32_t _pad1;
+  /* DSP accumulators. */
+  uint32_t hi[MD_CONTEXT_MIPS_DSP_COUNT];
+  uint32_t lo[MD_CONTEXT_MIPS_DSP_COUNT];
+  uint32_t dsp_control;
+  uint32_t _pad1;
 
-    uint64_t epc;
-    uint64_t badvaddr;
-    uint32_t status;
-    uint32_t cause;
+  uint64_t epc;
+  uint64_t badvaddr;
+  uint32_t status;
+  uint32_t cause;
 
-    /* The next field is included with MD_CONTEXT_MIPS_FLOATING_POINT. */
-    MDFloatingSaveAreaMIPS float_save;
+  /* The next field is included with MD_CONTEXT_MIPS_FLOATING_POINT. */
+  MDFloatingSaveAreaMIPS float_save;
 
 } MDRawContextMIPS;
 
@@ -122,18 +122,18 @@ typedef struct {
  * purpose.
  */
 enum MDMIPSRegisterNumbers {
-    MD_CONTEXT_MIPS_REG_S0 = 16,
-    MD_CONTEXT_MIPS_REG_S1 = 17,
-    MD_CONTEXT_MIPS_REG_S2 = 18,
-    MD_CONTEXT_MIPS_REG_S3 = 19,
-    MD_CONTEXT_MIPS_REG_S4 = 20,
-    MD_CONTEXT_MIPS_REG_S5 = 21,
-    MD_CONTEXT_MIPS_REG_S6 = 22,
-    MD_CONTEXT_MIPS_REG_S7 = 23,
-    MD_CONTEXT_MIPS_REG_GP = 28,
-    MD_CONTEXT_MIPS_REG_SP = 29,
-    MD_CONTEXT_MIPS_REG_FP = 30,
-    MD_CONTEXT_MIPS_REG_RA = 31,
+  MD_CONTEXT_MIPS_REG_S0     = 16,
+  MD_CONTEXT_MIPS_REG_S1     = 17,
+  MD_CONTEXT_MIPS_REG_S2     = 18,
+  MD_CONTEXT_MIPS_REG_S3     = 19,
+  MD_CONTEXT_MIPS_REG_S4     = 20,
+  MD_CONTEXT_MIPS_REG_S5     = 21,
+  MD_CONTEXT_MIPS_REG_S6     = 22,
+  MD_CONTEXT_MIPS_REG_S7     = 23,
+  MD_CONTEXT_MIPS_REG_GP     = 28,
+  MD_CONTEXT_MIPS_REG_SP     = 29,
+  MD_CONTEXT_MIPS_REG_FP     = 30,
+  MD_CONTEXT_MIPS_REG_RA     = 31,
 };
 
 /* For (MDRawContextMIPS).context_flags.  These values indicate the type of

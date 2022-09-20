@@ -77,42 +77,42 @@
  * are not exactly minidumps.
  */
 typedef struct {
-    uint64_t fpscr;      /* FPU status register */
+  uint64_t      fpscr;      /* FPU status register */
 
-    /* 32 64-bit floating point registers, d0 .. d31. */
-    uint64_t regs[MD_FLOATINGSAVEAREA_ARM_FPR_COUNT];
+  /* 32 64-bit floating point registers, d0 .. d31. */
+  uint64_t      regs[MD_FLOATINGSAVEAREA_ARM_FPR_COUNT];
 
-    /* Miscellaneous control words */
-    uint32_t extra[MD_FLOATINGSAVEAREA_ARM_FPEXTRA_COUNT];
+  /* Miscellaneous control words */
+  uint32_t     extra[MD_FLOATINGSAVEAREA_ARM_FPEXTRA_COUNT];
 } MDFloatingSaveAreaARM;
 
 #define MD_CONTEXT_ARM_GPR_COUNT 16
 
 typedef struct {
-    /* The next field determines the layout of the structure, and which parts
-     * of it are populated
-     */
-    uint32_t context_flags;
+  /* The next field determines the layout of the structure, and which parts
+   * of it are populated
+   */
+  uint32_t      context_flags;
 
-    /* 16 32-bit integer registers, r0 .. r15
-     * Note the following fixed uses:
-     *   r13 is the stack pointer
-     *   r14 is the link register
-     *   r15 is the program counter
-     */
-    uint32_t iregs[MD_CONTEXT_ARM_GPR_COUNT];
+  /* 16 32-bit integer registers, r0 .. r15
+   * Note the following fixed uses:
+   *   r13 is the stack pointer
+   *   r14 is the link register
+   *   r15 is the program counter
+   */
+  uint32_t     iregs[MD_CONTEXT_ARM_GPR_COUNT];
 
-    /* CPSR (flags, basically): 32 bits:
-          bit 31 - N (negative)
-          bit 30 - Z (zero)
-          bit 29 - C (carry)
-          bit 28 - V (overflow)
-          bit 27 - Q (saturation flag, sticky)
-       All other fields -- ignore */
-    uint32_t cpsr;
+  /* CPSR (flags, basically): 32 bits:
+        bit 31 - N (negative)
+        bit 30 - Z (zero)
+        bit 29 - C (carry)
+        bit 28 - V (overflow)
+        bit 27 - Q (saturation flag, sticky)
+     All other fields -- ignore */
+  uint32_t    cpsr;
 
-    /* The next field is included with MD_CONTEXT_ARM_FLOATING_POINT */
-    MDFloatingSaveAreaARM float_save;
+  /* The next field is included with MD_CONTEXT_ARM_FLOATING_POINT */
+  MDFloatingSaveAreaARM float_save;
 
 } MDRawContextARM;
 
@@ -120,11 +120,11 @@ typedef struct {
  * purpose.
  */
 enum MDARMRegisterNumbers {
-    MD_CONTEXT_ARM_REG_IOS_FP = 7,
-    MD_CONTEXT_ARM_REG_FP = 11,
-    MD_CONTEXT_ARM_REG_SP = 13,
-    MD_CONTEXT_ARM_REG_LR = 14,
-    MD_CONTEXT_ARM_REG_PC = 15
+  MD_CONTEXT_ARM_REG_IOS_FP = 7,
+  MD_CONTEXT_ARM_REG_FP     = 11,
+  MD_CONTEXT_ARM_REG_SP     = 13,
+  MD_CONTEXT_ARM_REG_LR     = 14,
+  MD_CONTEXT_ARM_REG_PC     = 15
 };
 
 /* For (MDRawContextARM).context_flags.  These values indicate the type of

@@ -42,33 +42,30 @@
 
 namespace google_breakpad {
 
-    class ModuleFactory {
-    public:
-        virtual ~ModuleFactory() {};
+class ModuleFactory {
+ public:
+  virtual ~ModuleFactory() { };
+  virtual SourceLineResolverBase::Module* CreateModule(
+      const string& name) const = 0;
+};
 
-        virtual SourceLineResolverBase::Module *CreateModule(
-                const string &name) const = 0;
-    };
+class BasicModuleFactory : public ModuleFactory {
+ public:
+  virtual ~BasicModuleFactory() { }
+  virtual BasicSourceLineResolver::Module* CreateModule(
+      const string& name) const {
+    return new BasicSourceLineResolver::Module(name);
+  }
+};
 
-    class BasicModuleFactory : public ModuleFactory {
-    public:
-        virtual ~BasicModuleFactory() {}
-
-        virtual BasicSourceLineResolver::Module *CreateModule(
-                const string &name) const {
-            return new BasicSourceLineResolver::Module(name);
-        }
-    };
-
-    class FastModuleFactory : public ModuleFactory {
-    public:
-        virtual ~FastModuleFactory() {}
-
-        virtual FastSourceLineResolver::Module *CreateModule(
-                const string &name) const {
-            return new FastSourceLineResolver::Module(name);
-        }
-    };
+class FastModuleFactory : public ModuleFactory {
+ public:
+  virtual ~FastModuleFactory() { }
+  virtual FastSourceLineResolver::Module* CreateModule(
+      const string& name) const {
+    return new FastSourceLineResolver::Module(name);
+  }
+};
 
 }  // namespace google_breakpad
 

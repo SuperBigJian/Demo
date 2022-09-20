@@ -54,9 +54,7 @@
 #import "GTMDefines.h"
 
 #if (!GTM_IPHONE_SDK) || (GTM_IPHONE_USE_SENTEST)
-
 #import <SenTestingKit/SenTestingKit.h>
-
 #else
 #import <Foundation/Foundation.h>
 #ifdef __cplusplus
@@ -543,12 +541,12 @@ do { \
 
 // SENTE_BEGIN
 /*" Generates a failure when !{ [a1 isEqualTo:a2] } is false
-    (or one is nil and the other is not).
-    _{a1    The object on the left.}
-    _{a2    The object on the right.}
-    _{description A format string as in the printf() function. Can be nil or
-        an empty string but must be present.}
-    _{... A variable number of arguments to the format string. Can be absent.}
+	(or one is nil and the other is not).
+	_{a1    The object on the left.}
+	_{a2    The object on the right.}
+	_{description A format string as in the printf() function. Can be nil or
+		an empty string but must be present.}
+	_{... A variable number of arguments to the format string. Can be absent.}
 "*/
 #define STAssertEqualObjects(a1, a2, description, ...) \
 do { \
@@ -1085,9 +1083,7 @@ GTM_EXTERN NSString *const SenTestLineNumberKey;
 // All unittest cases in GTM should inherit from GTMTestCase. It makes sure
 // to set up our logging system correctly to verify logging calls.
 // See GTMUnitTestDevLog.h for details
-@
-interface GTMTestCase
-: SenTestCase
+@interface GTMTestCase : SenTestCase
 
 // Returns YES if this is an abstract testCase class as opposed to a concrete
 // testCase class that you want tests run against. SenTestCase is not designed
@@ -1109,7 +1105,6 @@ interface GTMTestCase
 // don't want them run against ExtensionAbstractTestCase. The default
 // implementation checks to see if the name of the class contains the word
 // "AbstractTest" (case sensitive).
-+ (BOOL)
-isAbstractTestCase;
++ (BOOL)isAbstractTestCase;
 
 @end

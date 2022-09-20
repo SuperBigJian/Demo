@@ -37,25 +37,25 @@ namespace google_breakpad {
 // This is the format of a DWARF2/3 line state machine that we process
 // opcodes using.  There is no need for anything outside the lineinfo
 // processor to know how this works.
-    struct LineStateMachine {
-        void Reset(bool default_is_stmt) {
-            file_num = 1;
-            address = 0;
-            line_num = 1;
-            column_num = 0;
-            is_stmt = default_is_stmt;
-            basic_block = false;
-            end_sequence = false;
-        }
+struct LineStateMachine {
+  void Reset(bool default_is_stmt) {
+    file_num = 1;
+    address = 0;
+    line_num = 1;
+    column_num = 0;
+    is_stmt = default_is_stmt;
+    basic_block = false;
+    end_sequence = false;
+  }
 
-        uint32_t file_num;
-        uint64_t address;
-        uint32_t line_num;
-        uint32_t column_num;
-        bool is_stmt;  // stmt means statement.
-        bool basic_block;
-        bool end_sequence;
-    };
+  uint32_t file_num;
+  uint64_t address;
+  uint32_t line_num;
+  uint32_t column_num;
+  bool is_stmt;  // stmt means statement.
+  bool basic_block;
+  bool end_sequence;
+};
 
 }  // namespace google_breakpad
 

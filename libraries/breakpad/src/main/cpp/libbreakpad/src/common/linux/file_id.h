@@ -41,51 +41,50 @@
 #include "common/using_std_string.h"
 
 namespace google_breakpad {
-    namespace elf {
+namespace elf {
 
 // GNU binutils' ld defaults to 'sha1', which is 160 bits == 20 bytes,
 // so this is enough to fit that, which most binaries will use.
 // This is just a sensible default for auto_wasteful_vector so most
 // callers can get away with stack allocation.
-        static const size_t kDefaultBuildIdSize = 20;
+static const size_t kDefaultBuildIdSize = 20;
 
-        class FileID {
-        public:
-            explicit FileID(const char *path);
+class FileID {
+ public:
+  explicit FileID(const char* path);
+  ~FileID() {}
 
-            ~FileID() {}
+  // Load the identifier for the elf file path specified in the constructor into
+  // |identifier|.
+  //
+  // The current implementation will look for a .note.gnu.build-id
+  // section and use that as the file id, otherwise it falls back to
+  // XORing the first 4096 bytes of the .text section to generate an identifier.
+  bool ElfFileIdentifier(wasteful_vector<uint8_t>& identifier);
 
-            // Load the identifier for the elf file path specified in the constructor into
-            // |identifier|.
-            //
-            // The current implementation will look for a .note.gnu.build-id
-            // section and use that as the file id, otherwise it falls back to
-            // XORing the first 4096 bytes of the .text section to generate an identifier.
-            bool ElfFileIdentifier(wasteful_vector<uint8_t> &identifier);
+  // Load the identifier for the elf file mapped into memory at |base| into
+  // |identifier|. Return false if the identifier could not be created for this
+  // file.
+  static bool ElfFileIdentifierFromMappedFile(
+      const void* base,
+      wasteful_vector<uint8_t>& identifier);
 
-            // Load the identifier for the elf file mapped into memory at |base| into
-            // |identifier|. Return false if the identifier could not be created for this
-            // file.
-            static bool ElfFileIdentifierFromMappedFile(
-                    const void *base,
-                    wasteful_vector<uint8_t> &identifier);
+  // Convert the |identifier| data to a string.  The string will
+  // be formatted as a UUID in all uppercase without dashes.
+  // (e.g., 22F065BBFC9C49F780FE26A7CEBD7BCE).
+  static string ConvertIdentifierToUUIDString(
+      const wasteful_vector<uint8_t>& identifier);
 
-            // Convert the |identifier| data to a string.  The string will
-            // be formatted as a UUID in all uppercase without dashes.
-            // (e.g., 22F065BBFC9C49F780FE26A7CEBD7BCE).
-            static string ConvertIdentifierToUUIDString(
-                    const wasteful_vector<uint8_t> &identifier);
+  // Convert the entire |identifier| data to a hex string.
+  static string ConvertIdentifierToString(
+      const wasteful_vector<uint8_t>& identifier);
 
-            // Convert the entire |identifier| data to a hex string.
-            static string ConvertIdentifierToString(
-                    const wasteful_vector<uint8_t> &identifier);
+ private:
+  // Storage for the path specified
+  string path_;
+};
 
-        private:
-            // Storage for the path specified
-            string path_;
-        };
-
-    }  // namespace elf
+}  // namespace elf
 }  // namespace google_breakpad
 
 #endif  // COMMON_LINUX_FILE_ID_H__

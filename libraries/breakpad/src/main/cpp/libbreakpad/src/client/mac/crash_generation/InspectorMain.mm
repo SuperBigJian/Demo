@@ -35,31 +35,31 @@
 namespace google_breakpad {
 
 //=============================================================================
-    extern "C" {
+extern "C" {
 
-    int main(int argc, char *const argv[]) {
+int main(int argc, char *const argv[]) {
 #if DEBUG
-        // Since we're launched on-demand, this is necessary to see debugging
-        // output in the console window.
-        freopen("/dev/console", "w", stdout);
-        freopen("/dev/console", "w", stderr);
+  // Since we're launched on-demand, this is necessary to see debugging
+  // output in the console window.
+  freopen("/dev/console", "w", stdout);
+  freopen("/dev/console", "w", stderr);
 #endif
 
-        NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+  NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
-        if (argc != 2) {
-            exit(0);
-        }
-        // Our first command-line argument contains the name of the service
-        // that we're providing.
-        google_breakpad::Inspector inspector;
-        inspector.Inspect(argv[1]);
+  if (argc != 2) {
+    exit(0);
+  }
+  // Our first command-line argument contains the name of the service
+  // that we're providing.
+  google_breakpad::Inspector inspector;
+  inspector.Inspect(argv[1]);
 
-        [pool release];
+  [pool release];
 
-        return 0;
-    }
+  return 0;
+}
 
-    } // extern "C"
+} // extern "C"
 
 } // namespace google_breakpad

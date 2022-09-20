@@ -39,28 +39,28 @@
 
 namespace google_breakpad {
 
-    string GetHelperBinary() {
-        string helper_path;
-        char *bindir = getenv("bindir");
-        if (bindir) {
-            helper_path = string(bindir) + "/";
-        } else {
-            // Locate helper binary next to the current binary.
-            char self_path[PATH_MAX];
-            if (!SafeReadLink("/proc/self/exe", self_path)) {
-                return "";
-            }
-            helper_path = string(self_path);
-            size_t pos = helper_path.rfind('/');
-            if (pos == string::npos) {
-                return "";
-            }
-            helper_path.erase(pos + 1);
-        }
-
-        helper_path += "linux_dumper_unittest_helper";
-
-        return helper_path;
+string GetHelperBinary() {
+  string helper_path;
+  char* bindir = getenv("bindir");
+  if (bindir) {
+    helper_path = string(bindir) + "/";
+  } else {
+    // Locate helper binary next to the current binary.
+    char self_path[PATH_MAX];
+    if (!SafeReadLink("/proc/self/exe", self_path)) {
+      return "";
     }
+    helper_path = string(self_path);
+    size_t pos = helper_path.rfind('/');
+    if (pos == string::npos) {
+      return "";
+    }
+    helper_path.erase(pos + 1);
+  }
+
+  helper_path += "linux_dumper_unittest_helper";
+
+  return helper_path;
+}
 
 }  // namespace google_breakpad

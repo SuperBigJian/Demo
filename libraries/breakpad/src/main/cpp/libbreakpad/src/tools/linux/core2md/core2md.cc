@@ -39,36 +39,36 @@ using google_breakpad::AppMemoryList;
 using google_breakpad::MappingList;
 using google_breakpad::LinuxCoreDumper;
 
-static int ShowUsage(const char *argv0) {
-    fprintf(stderr, "Usage: %s <core file> <procfs dir> <output>\n",
-            google_breakpad::BaseName(argv0).c_str());
-    return 1;
+static int ShowUsage(const char* argv0) {
+  fprintf(stderr, "Usage: %s <core file> <procfs dir> <output>\n",
+          google_breakpad::BaseName(argv0).c_str());
+  return 1;
 }
 
-bool WriteMinidumpFromCore(const char *filename,
-                           const char *core_path,
-                           const char *procfs_override) {
-    MappingList mappings;
-    AppMemoryList memory_list;
-    LinuxCoreDumper dumper(0, core_path, procfs_override);
-    return google_breakpad::WriteMinidump(filename, mappings, memory_list,
-                                          &dumper);
+bool WriteMinidumpFromCore(const char* filename,
+                           const char* core_path,
+                           const char* procfs_override) {
+  MappingList mappings;
+  AppMemoryList memory_list;
+  LinuxCoreDumper dumper(0, core_path, procfs_override);
+  return google_breakpad::WriteMinidump(filename, mappings, memory_list,
+                                        &dumper);
 }
 
 int main(int argc, char *argv[]) {
-    if (argc != 4) {
-        return ShowUsage(argv[0]);
-    }
+  if (argc != 4) {
+    return ShowUsage(argv[0]);
+  }
 
-    const char *core_file = argv[1];
-    const char *procfs_dir = argv[2];
-    const char *minidump_file = argv[3];
-    if (!WriteMinidumpFromCore(minidump_file,
-                               core_file,
-                               procfs_dir)) {
-        perror("core2md: Unable to generate minidump");
-        return 1;
-    }
+  const char* core_file = argv[1];
+  const char* procfs_dir = argv[2];
+  const char* minidump_file = argv[3];
+  if (!WriteMinidumpFromCore(minidump_file,
+                             core_file,
+                             procfs_dir)) {
+    perror("core2md: Unable to generate minidump");
+    return 1;
+  }
 
-    return 0;
+  return 0;
 }

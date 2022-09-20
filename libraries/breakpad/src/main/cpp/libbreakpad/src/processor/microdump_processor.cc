@@ -47,51 +47,51 @@
 
 namespace google_breakpad {
 
-    MicrodumpProcessor::MicrodumpProcessor(StackFrameSymbolizer *frame_symbolizer)
-            : frame_symbolizer_(frame_symbolizer) {
-        assert(frame_symbolizer);
+MicrodumpProcessor::MicrodumpProcessor(StackFrameSymbolizer* frame_symbolizer)
+    : frame_symbolizer_(frame_symbolizer) {
+  assert(frame_symbolizer);
+}
+
+MicrodumpProcessor::~MicrodumpProcessor() {}
+
+ProcessResult MicrodumpProcessor::Process(Microdump *microdump,
+                                          ProcessState* process_state) {
+  assert(process_state);
+
+  process_state->Clear();
+
+  process_state->modules_ = microdump->GetModules()->Copy();
+  scoped_ptr<Stackwalker> stackwalker(
+      Stackwalker::StackwalkerForCPU(
+                            &process_state->system_info_,
+                            microdump->GetContext(),
+                            microdump->GetMemory(),
+                            process_state->modules_,
+                            /* unloaded_modules= */ NULL,
+                            frame_symbolizer_));
+
+  scoped_ptr<CallStack> stack(new CallStack());
+  if (stackwalker.get()) {
+    if (!stackwalker->Walk(stack.get(),
+                           &process_state->modules_without_symbols_,
+                           &process_state->modules_with_corrupt_symbols_)) {
+      BPLOG(INFO) << "Processing was interrupted.";
+      return PROCESS_SYMBOL_SUPPLIER_INTERRUPTED;
     }
+  } else {
+    BPLOG(ERROR) << "No stackwalker found for microdump.";
+    return PROCESS_ERROR_NO_THREAD_LIST;
+  }
 
-    MicrodumpProcessor::~MicrodumpProcessor() {}
+  process_state->threads_.push_back(stack.release());
+  process_state->thread_memory_regions_.push_back(microdump->GetMemory());
+  process_state->crashed_ = true;
+  process_state->requesting_thread_ = 0;
+  process_state->system_info_ = *microdump->GetSystemInfo();
+  process_state->crash_reason_ = microdump->GetCrashReason();
+  process_state->crash_address_ = microdump->GetCrashAddress();
 
-    ProcessResult MicrodumpProcessor::Process(Microdump *microdump,
-                                              ProcessState *process_state) {
-        assert(process_state);
-
-        process_state->Clear();
-
-        process_state->modules_ = microdump->GetModules()->Copy();
-        scoped_ptr < Stackwalker > stackwalker(
-                Stackwalker::StackwalkerForCPU(
-                        &process_state->system_info_,
-                        microdump->GetContext(),
-                        microdump->GetMemory(),
-                        process_state->modules_,
-                        /* unloaded_modules= */ NULL,
-                        frame_symbolizer_));
-
-        scoped_ptr <CallStack> stack(new CallStack());
-        if (stackwalker.get()) {
-            if (!stackwalker->Walk(stack.get(),
-                                   &process_state->modules_without_symbols_,
-                                   &process_state->modules_with_corrupt_symbols_)) {
-                BPLOG(INFO) << "Processing was interrupted.";
-                return PROCESS_SYMBOL_SUPPLIER_INTERRUPTED;
-            }
-        } else {
-            BPLOG(ERROR) << "No stackwalker found for microdump.";
-            return PROCESS_ERROR_NO_THREAD_LIST;
-        }
-
-        process_state->threads_.push_back(stack.release());
-        process_state->thread_memory_regions_.push_back(microdump->GetMemory());
-        process_state->crashed_ = true;
-        process_state->requesting_thread_ = 0;
-        process_state->system_info_ = *microdump->GetSystemInfo();
-        process_state->crash_reason_ = microdump->GetCrashReason();
-        process_state->crash_address_ = microdump->GetCrashAddress();
-
-        return PROCESS_OK;
-    }
+  return PROCESS_OK;
+}
 
 }  // namespace google_breakpad

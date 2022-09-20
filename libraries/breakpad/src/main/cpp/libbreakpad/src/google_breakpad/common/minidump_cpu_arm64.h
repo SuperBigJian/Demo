@@ -72,11 +72,11 @@
 #define MD_CONTEXT_ARM64_GPR_COUNT 33
 
 typedef struct {
-    /* 32 128-bit floating point registers, d0 .. d31. */
-    uint128_struct regs[MD_FLOATINGSAVEAREA_ARM64_FPR_COUNT];
+  /* 32 128-bit floating point registers, d0 .. d31. */
+  uint128_struct regs[MD_FLOATINGSAVEAREA_ARM64_FPR_COUNT];
 
-    uint32_t fpcr;       /* FPU control register */
-    uint32_t fpsr;       /* FPU status register */
+  uint32_t fpcr;       /* FPU control register */
+  uint32_t fpsr;       /* FPU status register */
 } MDFloatingSaveAreaARM64;
 
 /* For (MDRawContextARM64).context_flags.  These values indicate the type of
@@ -92,42 +92,42 @@ typedef struct {
 #define MD_CONTEXT_ARM64_ALL (MD_CONTEXT_ARM64_FULL | MD_CONTEXT_ARM64_DEBUG)
 
 typedef struct {
-    /* Determines which fields of this struct are populated */
-    uint32_t context_flags;
+  /* Determines which fields of this struct are populated */
+  uint32_t context_flags;
 
-    /* CPSR (flags, basically): 32 bits:
-          bit 31 - N (negative)
-          bit 30 - Z (zero)
-          bit 29 - C (carry)
-          bit 28 - V (overflow)
-          bit 27 - Q (saturation flag, sticky)
-       All other fields -- ignore */
-    uint32_t cpsr;
+  /* CPSR (flags, basically): 32 bits:
+        bit 31 - N (negative)
+        bit 30 - Z (zero)
+        bit 29 - C (carry)
+        bit 28 - V (overflow)
+        bit 27 - Q (saturation flag, sticky)
+     All other fields -- ignore */
+  uint32_t cpsr;
 
-    /* 33 64-bit integer registers, x0 .. x31 + the PC
-     * Note the following fixed uses:
-     *   x29 is the frame pointer
-     *   x30 is the link register
-     *   x31 is the stack pointer
-     *   The PC is effectively x32.
-     */
-    uint64_t iregs[MD_CONTEXT_ARM64_GPR_COUNT];
+  /* 33 64-bit integer registers, x0 .. x31 + the PC
+   * Note the following fixed uses:
+   *   x29 is the frame pointer
+   *   x30 is the link register
+   *   x31 is the stack pointer
+   *   The PC is effectively x32.
+   */
+  uint64_t iregs[MD_CONTEXT_ARM64_GPR_COUNT];
 
-    /* The next field is included with MD_CONTEXT64_ARM_FLOATING_POINT */
-    MDFloatingSaveAreaARM64 float_save;
+  /* The next field is included with MD_CONTEXT64_ARM_FLOATING_POINT */
+  MDFloatingSaveAreaARM64 float_save;
 
-    uint32_t bcr[8];
-    uint64_t bvr[8];
-    uint32_t wcr[2];
-    uint64_t wvr[2];
+  uint32_t bcr[8];
+  uint64_t bvr[8];
+  uint32_t wcr[2];
+  uint64_t wvr[2];
 } MDRawContextARM64;
 
 typedef struct {
-    uint32_t fpsr;      /* FPU status register */
-    uint32_t fpcr;      /* FPU control register */
+  uint32_t       fpsr;      /* FPU status register */
+  uint32_t       fpcr;      /* FPU control register */
 
-    /* 32 128-bit floating point registers, d0 .. d31. */
-    uint128_struct regs[MD_FLOATINGSAVEAREA_ARM64_FPR_COUNT];
+  /* 32 128-bit floating point registers, d0 .. d31. */
+  uint128_struct regs[MD_FLOATINGSAVEAREA_ARM64_FPR_COUNT];
 } MDFloatingSaveAreaARM64_Old;
 
 /* Use the same 32-bit alignment when accessing this structure from 64-bit code
@@ -135,31 +135,31 @@ typedef struct {
 #pragma pack(push, 4)
 
 typedef struct {
-    /* The next field determines the layout of the structure, and which parts
-     * of it are populated
-     */
-    uint64_t context_flags;
+  /* The next field determines the layout of the structure, and which parts
+   * of it are populated
+   */
+  uint64_t      context_flags;
 
-    /* 33 64-bit integer registers, x0 .. x31 + the PC
-     * Note the following fixed uses:
-     *   x29 is the frame pointer
-     *   x30 is the link register
-     *   x31 is the stack pointer
-     *   The PC is effectively x32.
-     */
-    uint64_t iregs[MD_CONTEXT_ARM64_GPR_COUNT];
+  /* 33 64-bit integer registers, x0 .. x31 + the PC
+   * Note the following fixed uses:
+   *   x29 is the frame pointer
+   *   x30 is the link register
+   *   x31 is the stack pointer
+   *   The PC is effectively x32.
+   */
+  uint64_t     iregs[MD_CONTEXT_ARM64_GPR_COUNT];
 
-    /* CPSR (flags, basically): 32 bits:
-          bit 31 - N (negative)
-          bit 30 - Z (zero)
-          bit 29 - C (carry)
-          bit 28 - V (overflow)
-          bit 27 - Q (saturation flag, sticky)
-       All other fields -- ignore */
-    uint32_t cpsr;
+  /* CPSR (flags, basically): 32 bits:
+        bit 31 - N (negative)
+        bit 30 - Z (zero)
+        bit 29 - C (carry)
+        bit 28 - V (overflow)
+        bit 27 - Q (saturation flag, sticky)
+     All other fields -- ignore */
+  uint32_t    cpsr;
 
-    /* The next field is included with MD_CONTEXT64_ARM_FLOATING_POINT */
-    MDFloatingSaveAreaARM64_Old float_save;
+  /* The next field is included with MD_CONTEXT64_ARM_FLOATING_POINT */
+  MDFloatingSaveAreaARM64_Old float_save;
 
 } MDRawContextARM64_Old;
 
@@ -169,10 +169,10 @@ typedef struct {
  * purpose.
  */
 enum MDARM64RegisterNumbers {
-    MD_CONTEXT_ARM64_REG_FP = 29,
-    MD_CONTEXT_ARM64_REG_LR = 30,
-    MD_CONTEXT_ARM64_REG_SP = 31,
-    MD_CONTEXT_ARM64_REG_PC = 32
+  MD_CONTEXT_ARM64_REG_FP     = 29,
+  MD_CONTEXT_ARM64_REG_LR     = 30,
+  MD_CONTEXT_ARM64_REG_SP     = 31,
+  MD_CONTEXT_ARM64_REG_PC     = 32
 };
 
 /* For (MDRawContextARM64_Old).context_flags.  These values indicate the type of

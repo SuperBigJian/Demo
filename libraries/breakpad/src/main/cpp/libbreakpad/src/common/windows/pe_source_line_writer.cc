@@ -32,46 +32,46 @@
 #include "common/windows/pe_util.h"
 
 namespace google_breakpad {
-    PESourceLineWriter::PESourceLineWriter(const wstring &pe_file) :
-            pe_file_(pe_file) {
-    }
+PESourceLineWriter::PESourceLineWriter(const wstring& pe_file) :
+  pe_file_(pe_file) {
+}
 
-    PESourceLineWriter::~PESourceLineWriter() {
-    }
+PESourceLineWriter::~PESourceLineWriter() {
+}
 
-    bool PESourceLineWriter::WriteSymbols(FILE *symbol_file) {
-        PDBModuleInfo module_info;
-        if (!GetModuleInfo(&module_info)) {
-            return false;
-        }
-        // Hard-code "windows" for the OS because that's the only thing that makes
-        // sense for PDB files.  (This might not be strictly correct for Windows CE
-        // support, but we don't care about that at the moment.)
-        fprintf(symbol_file, "MODULE windows %ws %ws %ws\n",
-                module_info.cpu.c_str(), module_info.debug_identifier.c_str(),
-                module_info.debug_file.c_str());
+bool PESourceLineWriter::WriteSymbols(FILE* symbol_file) {
+  PDBModuleInfo module_info;
+  if (!GetModuleInfo(&module_info)) {
+    return false;
+  }
+  // Hard-code "windows" for the OS because that's the only thing that makes
+  // sense for PDB files.  (This might not be strictly correct for Windows CE
+  // support, but we don't care about that at the moment.)
+  fprintf(symbol_file, "MODULE windows %ws %ws %ws\n",
+    module_info.cpu.c_str(), module_info.debug_identifier.c_str(),
+    module_info.debug_file.c_str());
 
-        PEModuleInfo pe_info;
-        if (!GetPEInfo(&pe_info)) {
-            return false;
-        }
-        fprintf(symbol_file, "INFO CODE_ID %ws %ws\n",
-                pe_info.code_identifier.c_str(),
-                pe_info.code_file.c_str());
+  PEModuleInfo pe_info;
+  if (!GetPEInfo(&pe_info)) {
+    return false;
+  }
+  fprintf(symbol_file, "INFO CODE_ID %ws %ws\n",
+    pe_info.code_identifier.c_str(),
+    pe_info.code_file.c_str());
 
-        if (!PrintPEFrameData(pe_file_, symbol_file)) {
-            return false;
-        }
+  if (!PrintPEFrameData(pe_file_, symbol_file)) {
+    return false;
+  }
 
-        return true;
-    }
+  return true;
+}
 
-    bool PESourceLineWriter::GetModuleInfo(PDBModuleInfo *info) {
-        return ReadModuleInfo(pe_file_, info);
-    }
+bool PESourceLineWriter::GetModuleInfo(PDBModuleInfo* info) {
+  return ReadModuleInfo(pe_file_, info);
+}
 
-    bool PESourceLineWriter::GetPEInfo(PEModuleInfo *info) {
-        return ReadPEInfo(pe_file_, info);
-    }
+bool PESourceLineWriter::GetPEInfo(PEModuleInfo* info) {
+  return ReadPEInfo(pe_file_, info);
+}
 
 }  // namespace google_breakpad

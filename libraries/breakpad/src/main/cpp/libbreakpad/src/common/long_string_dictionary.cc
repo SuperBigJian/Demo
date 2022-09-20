@@ -41,138 +41,138 @@
 
 namespace {
 // Suffixes for segment keys.
-    const char *const kSuffixes[] = {"__1", "__2", "__3", "__4", "__5", "__6",
-                                     "__7", "__8", "__9", "__10"};
+const char* const kSuffixes[] = {"__1", "__2", "__3", "__4", "__5", "__6",
+    "__7", "__8", "__9", "__10"};
 #if !defined(NDEBUG)
 // The maximum suffix string length.
-    const size_t kMaxSuffixLength = 4;
+const size_t kMaxSuffixLength = 4;
 #endif
 } // namespace
 
 namespace google_breakpad {
 
-    using std::string;
+using std::string;
 
-    void LongStringDictionary::SetKeyValue(const char *key, const char *value) {
-        assert(key);
-        if (!key)
-            return;
+void LongStringDictionary::SetKeyValue(const char* key, const char* value) {
+  assert(key);
+  if (!key)
+    return;
 
-        RemoveKey(key);
+  RemoveKey(key);
 
-        if (!value) {
-            return;
-        }
+  if (!value) {
+    return;
+  }
 
-        // Key must not be an empty string.
-        assert(key[0] != '\0');
-        if (key[0] == '\0')
-            return;
+  // Key must not be an empty string.
+  assert(key[0] != '\0');
+  if (key[0] == '\0')
+    return;
 
-        // If the value is not valid for segmentation, forwards the key and the value
-        // to SetKeyValue of SimpleStringDictionary and returns.
-        size_t value_length = strlen(value);
-        if (value_length <= (value_size - 1)) {
-            SimpleStringDictionary::SetKeyValue(key, value);
-            return;
-        }
+  // If the value is not valid for segmentation, forwards the key and the value
+  // to SetKeyValue of SimpleStringDictionary and returns.
+  size_t value_length = strlen(value);
+  if (value_length <= (value_size - 1)) {
+    SimpleStringDictionary::SetKeyValue(key, value);
+    return;
+  }
 
-        size_t key_length = strlen(key);
-        assert(key_length + kMaxSuffixLength <= (key_size - 1));
+  size_t key_length = strlen(key);
+  assert(key_length + kMaxSuffixLength <= (key_size - 1));
 
-        char segment_key[key_size];
-        char segment_value[value_size];
+  char segment_key[key_size];
+  char segment_value[value_size];
 
-        strcpy(segment_key, key);
+  strcpy(segment_key, key);
 
-        const char *remain_value = value;
-        size_t remain_value_length = strlen(value);
+  const char* remain_value = value;
+  size_t remain_value_length = strlen(value);
 
-        for (unsigned long i = 0; i < arraysize(kSuffixes); i++) {
-            if (remain_value_length == 0) {
-                return;
-            }
-
-            strcpy(segment_key + key_length, kSuffixes[i]);
-
-            size_t segment_value_length =
-                    std::min(remain_value_length, value_size - 1);
-
-            strncpy(segment_value, remain_value, segment_value_length);
-            segment_value[segment_value_length] = '\0';
-
-            remain_value += segment_value_length;
-            remain_value_length -= segment_value_length;
-
-            SimpleStringDictionary::SetKeyValue(segment_key, segment_value);
-        }
+  for (unsigned long i = 0; i < arraysize(kSuffixes); i++) {
+    if (remain_value_length == 0) {
+      return;
     }
 
-    bool LongStringDictionary::RemoveKey(const char *key) {
-        assert(key);
-        if (!key)
-            return false;
+    strcpy(segment_key + key_length, kSuffixes[i]);
 
-        if (SimpleStringDictionary::RemoveKey(key)) {
-            return true;
-        }
+    size_t segment_value_length =
+        std::min(remain_value_length, value_size - 1);
 
-        size_t key_length = strlen(key);
-        assert(key_length + kMaxSuffixLength <= (key_size - 1));
+    strncpy(segment_value, remain_value, segment_value_length);
+    segment_value[segment_value_length] = '\0';
 
-        char segment_key[key_size];
-        strcpy(segment_key, key);
+    remain_value += segment_value_length;
+    remain_value_length -= segment_value_length;
 
-        unsigned long i = 0;
-        for (; i < arraysize(kSuffixes); i++) {
-            strcpy(segment_key + key_length, kSuffixes[i]);
-            if (!SimpleStringDictionary::RemoveKey(segment_key)) {
-                break;
-            }
-        }
-        return i != 0;
+    SimpleStringDictionary::SetKeyValue(segment_key, segment_value);
+  }
+}
+
+bool LongStringDictionary::RemoveKey(const char* key) {
+  assert(key);
+  if (!key)
+    return false;
+
+  if (SimpleStringDictionary::RemoveKey(key)) {
+    return true;
+  }
+
+  size_t key_length = strlen(key);
+  assert(key_length + kMaxSuffixLength <= (key_size - 1));
+
+  char segment_key[key_size];
+  strcpy(segment_key, key);
+
+  unsigned long i = 0;
+  for (; i < arraysize(kSuffixes); i++) {
+    strcpy(segment_key + key_length, kSuffixes[i]);
+    if (!SimpleStringDictionary::RemoveKey(segment_key)) {
+      break;
     }
+  }
+  return i != 0;
+}
 
-    const string LongStringDictionary::GetValueForKey(const char *key) const {
-        assert(key);
-        if (!key)
-            return "";
+const string LongStringDictionary::GetValueForKey(const char* key) const {
+  assert(key);
+  if (!key)
+    return "";
 
-        // Key must not be an empty string.
-        assert(key[0] != '\0');
-        if (key[0] == '\0')
-            return "";
+  // Key must not be an empty string.
+  assert(key[0] != '\0');
+  if (key[0] == '\0')
+    return "";
 
-        const char *value = SimpleStringDictionary::GetValueForKey(key);
-        if (value)
-            return string(value);
+  const char* value = SimpleStringDictionary::GetValueForKey(key);
+  if (value)
+    return string(value);
 
-        size_t key_length = strlen(key);
-        assert(key_length + kMaxSuffixLength <= (key_size - 1));
+  size_t key_length = strlen(key);
+  assert(key_length + kMaxSuffixLength <= (key_size - 1));
 
-        bool found_segment = false;
-        char segment_key[key_size];
-        string return_value;
+  bool found_segment = false;
+  char segment_key[key_size];
+  string return_value;
 
-        strcpy(segment_key, key);
-        for (unsigned long i = 0; i < arraysize(kSuffixes); i++) {
-            strcpy(segment_key + key_length, kSuffixes[i]);
+  strcpy(segment_key, key);
+  for (unsigned long i = 0; i < arraysize(kSuffixes); i++) {
+    strcpy(segment_key + key_length, kSuffixes[i]);
 
-            const char *segment_value =
-                    SimpleStringDictionary::GetValueForKey(segment_key);
+    const char* segment_value =
+        SimpleStringDictionary::GetValueForKey(segment_key);
 
-            if (segment_value != NULL) {
-                found_segment = true;
-                return_value.append(segment_value);
-            } else {
-                break;
-            }
-        }
-
-        if (found_segment) {
-            return return_value;
-        }
-        return "";
+    if (segment_value != NULL) {
+      found_segment = true;
+      return_value.append(segment_value);
+    } else {
+      break;
     }
+  }
+
+  if (found_segment) {
+    return return_value;
+  }
+  return "";
+}
 
 }  // namespace google_breakpad

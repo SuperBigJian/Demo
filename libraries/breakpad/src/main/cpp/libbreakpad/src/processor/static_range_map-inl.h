@@ -41,88 +41,88 @@
 
 namespace google_breakpad {
 
-    template<typename AddressType, typename EntryType>
-    bool StaticRangeMap<AddressType, EntryType>::RetrieveRange(
-            const AddressType &address, const EntryType *&entry,
-            AddressType *entry_base, AddressType *entry_size) const {
-        MapConstIterator iterator = map_.lower_bound(address);
-        if (iterator == map_.end())
-            return false;
+template<typename AddressType, typename EntryType>
+bool StaticRangeMap<AddressType, EntryType>::RetrieveRange(
+    const AddressType& address, const EntryType*& entry,
+    AddressType* entry_base, AddressType* entry_size) const {
+  MapConstIterator iterator = map_.lower_bound(address);
+  if (iterator == map_.end())
+    return false;
 
-        // The map is keyed by the high address of each range, so |address| is
-        // guaranteed to be lower than the range's high address.  If |range| is
-        // not directly preceded by another range, it's possible for address to
-        // be below the range's low address, though.  When that happens, address
-        // references something not within any range, so return false.
+  // The map is keyed by the high address of each range, so |address| is
+  // guaranteed to be lower than the range's high address.  If |range| is
+  // not directly preceded by another range, it's possible for address to
+  // be below the range's low address, though.  When that happens, address
+  // references something not within any range, so return false.
 
-        const Range *range = iterator.GetValuePtr();
+  const Range* range = iterator.GetValuePtr();
 
-        // Make sure AddressType and EntryType are copyable basic types
-        // e.g.: integer types, pointers etc
-        if (address < range->base())
-            return false;
+  // Make sure AddressType and EntryType are copyable basic types
+  // e.g.: integer types, pointers etc
+  if (address < range->base())
+    return false;
 
-        entry = range->entryptr();
-        if (entry_base)
-            *entry_base = range->base();
-        if (entry_size)
-            *entry_size = iterator.GetKey() - range->base() + 1;
+  entry = range->entryptr();
+  if (entry_base)
+    *entry_base = range->base();
+  if (entry_size)
+    *entry_size = iterator.GetKey() - range->base() + 1;
 
-        return true;
-    }
+  return true;
+}
 
 
-    template<typename AddressType, typename EntryType>
-    bool StaticRangeMap<AddressType, EntryType>::RetrieveNearestRange(
-            const AddressType &address, const EntryType *&entry,
-            AddressType *entry_base, AddressType *entry_size) const {
-        // If address is within a range, RetrieveRange can handle it.
-        if (RetrieveRange(address, entry, entry_base, entry_size))
-            return true;
+template<typename AddressType, typename EntryType>
+bool StaticRangeMap<AddressType, EntryType>::RetrieveNearestRange(
+    const AddressType& address, const EntryType*& entry,
+    AddressType* entry_base, AddressType* entry_size) const {
+  // If address is within a range, RetrieveRange can handle it.
+  if (RetrieveRange(address, entry, entry_base, entry_size))
+    return true;
 
-        // upper_bound gives the first element whose key is greater than address,
-        // but we want the first element whose key is less than or equal to address.
-        // Decrement the iterator to get there, but not if the upper_bound already
-        // points to the beginning of the map - in that case, address is lower than
-        // the lowest stored key, so return false.
+  // upper_bound gives the first element whose key is greater than address,
+  // but we want the first element whose key is less than or equal to address.
+  // Decrement the iterator to get there, but not if the upper_bound already
+  // points to the beginning of the map - in that case, address is lower than
+  // the lowest stored key, so return false.
 
-        MapConstIterator iterator = map_.upper_bound(address);
-        if (iterator == map_.begin())
-            return false;
-        --iterator;
+  MapConstIterator iterator = map_.upper_bound(address);
+  if (iterator == map_.begin())
+    return false;
+  --iterator;
 
-        const Range *range = iterator.GetValuePtr();
-        entry = range->entryptr();
-        if (entry_base)
-            *entry_base = range->base();
-        if (entry_size)
-            *entry_size = iterator.GetKey() - range->base() + 1;
+  const Range* range = iterator.GetValuePtr();
+  entry = range->entryptr();
+  if (entry_base)
+    *entry_base = range->base();
+  if (entry_size)
+    *entry_size = iterator.GetKey() - range->base() + 1;
 
-        return true;
-    }
+  return true;
+}
 
-    template<typename AddressType, typename EntryType>
-    bool StaticRangeMap<AddressType, EntryType>::RetrieveRangeAtIndex(
-            int index, const EntryType *&entry,
-            AddressType *entry_base, AddressType *entry_size) const {
+template<typename AddressType, typename EntryType>
+bool StaticRangeMap<AddressType, EntryType>::RetrieveRangeAtIndex(
+    int index, const EntryType*& entry,
+    AddressType* entry_base, AddressType* entry_size) const {
 
-        if (index >= GetCount()) {
-            BPLOG(ERROR) << "Index out of range: " << index << "/" << GetCount();
-            return false;
-        }
+  if (index >= GetCount()) {
+    BPLOG(ERROR) << "Index out of range: " << index << "/" << GetCount();
+    return false;
+  }
 
-        MapConstIterator iterator = map_.IteratorAtIndex(index);
+  MapConstIterator iterator = map_.IteratorAtIndex(index);
 
-        const Range *range = iterator.GetValuePtr();
+  const Range* range = iterator.GetValuePtr();
 
-        entry = range->entryptr();
-        if (entry_base)
-            *entry_base = range->base();
-        if (entry_size)
-            *entry_size = iterator.GetKey() - range->base() + 1;
+  entry = range->entryptr();
+  if (entry_base)
+    *entry_base = range->base();
+  if (entry_size)
+    *entry_size = iterator.GetKey() - range->base() + 1;
 
-        return true;
-    }
+  return true;
+}
 
 }  // namespace google_breakpad
 

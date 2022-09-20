@@ -51,14 +51,14 @@ namespace google_breakpad {
 // The implementation of this function calls sys_readlink() instead of
 // readlink(), it can thus be used in the context where calling to libc
 // functions is discouraged.
-    bool SafeReadLink(const char *path, char *buffer, size_t buffer_size);
+bool SafeReadLink(const char* path, char* buffer, size_t buffer_size);
 
 // Same as the three-argument version of SafeReadLink() but deduces the
 // size of |buffer| if it is a char array of known size.
-    template<size_t N>
-    bool SafeReadLink(const char *path, char (&buffer)[N]) {
-        return SafeReadLink(path, buffer, sizeof(buffer));
-    }
+template <size_t N>
+bool SafeReadLink(const char* path, char (&buffer)[N]) {
+  return SafeReadLink(path, buffer, sizeof(buffer));
+}
 
 }  // namespace google_breakpad
 

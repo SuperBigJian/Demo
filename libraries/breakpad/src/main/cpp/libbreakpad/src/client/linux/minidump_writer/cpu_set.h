@@ -42,102 +42,102 @@ namespace google_breakpad {
 // Helper class used to model a set of CPUs, as read from sysfs
 // files like /sys/devices/system/cpu/present
 // See See http://www.kernel.org/doc/Documentation/cputopology.txt
-    class CpuSet {
-    public:
-        // The maximum number of supported CPUs.
-        static const size_t kMaxCpus = 1024;
+class CpuSet {
+public:
+  // The maximum number of supported CPUs.
+  static const size_t kMaxCpus = 1024;
 
-        CpuSet() {
-            my_memset(mask_, 0, sizeof(mask_));
-        }
+  CpuSet() {
+    my_memset(mask_, 0, sizeof(mask_));
+  }
 
-        // Parse a sysfs file to extract the corresponding CPU set.
-        bool ParseSysFile(int fd) {
-            char buffer[512];
-            int ret = sys_read(fd, buffer, sizeof(buffer) - 1);
-            if (ret < 0)
-                return false;
+  // Parse a sysfs file to extract the corresponding CPU set.
+  bool ParseSysFile(int fd) {
+    char buffer[512];
+    int ret = sys_read(fd, buffer, sizeof(buffer)-1);
+    if (ret < 0)
+      return false;
 
-            buffer[ret] = '\0';
+    buffer[ret] = '\0';
 
-            // Expected format: comma-separated list of items, where each
-            // item can be a decimal integer, or two decimal integers separated
-            // by a dash.
-            // E.g.:
-            //       0
-            //       0,1,2,3
-            //       0-3
-            //       1,10-23
-            const char *p = buffer;
-            const char *p_end = p + ret;
-            while (p < p_end) {
-                // Skip leading space, if any
-                while (p < p_end && my_isspace(*p))
-                    p++;
+    // Expected format: comma-separated list of items, where each
+    // item can be a decimal integer, or two decimal integers separated
+    // by a dash.
+    // E.g.:
+    //       0
+    //       0,1,2,3
+    //       0-3
+    //       1,10-23
+    const char* p = buffer;
+    const char* p_end = p + ret;
+    while (p < p_end) {
+      // Skip leading space, if any
+      while (p < p_end && my_isspace(*p))
+        p++;
 
-                // Find start and size of current item.
-                const char *item = p;
-                size_t item_len = static_cast<size_t>(p_end - p);
-                const char *item_next =
-                        static_cast<const char *>(my_memchr(p, ',', item_len));
-                if (item_next != NULL) {
-                    p = item_next + 1;
-                    item_len = static_cast<size_t>(item_next - item);
-                } else {
-                    p = p_end;
-                    item_next = p_end;
-                }
+      // Find start and size of current item.
+      const char* item = p;
+      size_t item_len = static_cast<size_t>(p_end - p);
+      const char* item_next =
+          static_cast<const char*>(my_memchr(p, ',', item_len));
+      if (item_next != NULL) {
+        p = item_next + 1;
+        item_len = static_cast<size_t>(item_next - item);
+      } else {
+        p = p_end;
+        item_next = p_end;
+      }
 
-                // Ignore trailing spaces.
-                while (item_next > item && my_isspace(item_next[-1]))
-                    item_next--;
+      // Ignore trailing spaces.
+      while (item_next > item && my_isspace(item_next[-1]))
+        item_next--;
 
-                // skip empty items.
-                if (item_next == item)
-                    continue;
+      // skip empty items.
+      if (item_next == item)
+        continue;
 
-                // read first decimal value.
-                uintptr_t start = 0;
-                const char *next = my_read_decimal_ptr(&start, item);
-                uintptr_t end = start;
-                if (*next == '-')
-                    my_read_decimal_ptr(&end, next + 1);
+      // read first decimal value.
+      uintptr_t start = 0;
+      const char* next = my_read_decimal_ptr(&start, item);
+      uintptr_t end = start;
+      if (*next == '-')
+        my_read_decimal_ptr(&end, next+1);
 
-                while (start <= end)
-                    SetBit(start++);
-            }
-            return true;
-        }
+      while (start <= end)
+        SetBit(start++);
+    }
+    return true;
+  }
 
-        // Intersect this CPU set with another one.
-        void IntersectWith(const CpuSet &other) {
-            for (size_t nn = 0; nn < kMaskWordCount; ++nn)
-                mask_[nn] &= other.mask_[nn];
-        }
+  // Intersect this CPU set with another one.
+  void IntersectWith(const CpuSet& other) {
+    for (size_t nn = 0; nn < kMaskWordCount; ++nn)
+      mask_[nn] &= other.mask_[nn];
+  }
 
-        // Return the number of CPUs in this set.
-        int GetCount() {
-            int result = 0;
-            for (size_t nn = 0; nn < kMaskWordCount; ++nn) {
-                result += __builtin_popcount(mask_[nn]);
-            }
-            return result;
-        }
+  // Return the number of CPUs in this set.
+  int GetCount() {
+    int result = 0;
+    for (size_t nn = 0; nn < kMaskWordCount; ++nn) {
+      result += __builtin_popcount(mask_[nn]);
+    }
+    return result;
+  }
 
-    private:
-        void SetBit(uintptr_t index) {
-            size_t nn = static_cast<size_t>(index);
-            if (nn < kMaxCpus)
-                mask_[nn / kMaskWordBits] |= (1U << (nn % kMaskWordBits));
-        }
+private:
+  void SetBit(uintptr_t index) {
+    size_t nn = static_cast<size_t>(index);
+    if (nn < kMaxCpus)
+      mask_[nn / kMaskWordBits] |= (1U << (nn % kMaskWordBits));
+  }
 
-        typedef uint32_t MaskWordType;
-        static const size_t kMaskWordBits = 8 * sizeof(MaskWordType);
-        static const size_t kMaskWordCount =
-                (kMaxCpus + kMaskWordBits - 1) / kMaskWordBits;
+  typedef uint32_t MaskWordType;
+  static const size_t kMaskWordBits = 8*sizeof(MaskWordType);
+  static const size_t kMaskWordCount =
+      (kMaxCpus + kMaskWordBits - 1) / kMaskWordBits;
 
-        MaskWordType mask_[kMaskWordCount];
-    };
+  MaskWordType mask_[kMaskWordCount];
+};
 
 }  // namespace google_breakpad
 

@@ -54,23 +54,23 @@
 
 namespace {
 
-    struct Options {
-        bool machine_readable;
-        bool output_stack_contents;
-        bool output_requesting_thread_only;
+struct Options {
+  bool machine_readable;
+  bool output_stack_contents;
+  bool output_requesting_thread_only;
 
-        string minidump_file;
-        std::vector <string> symbol_paths;
-    };
+  string minidump_file;
+  std::vector<string> symbol_paths;
+};
 
-    using google_breakpad::BasicSourceLineResolver;
-    using google_breakpad::Minidump;
-    using google_breakpad::MinidumpMemoryList;
-    using google_breakpad::MinidumpThreadList;
-    using google_breakpad::MinidumpProcessor;
-    using google_breakpad::ProcessState;
-    using google_breakpad::SimpleSymbolSupplier;
-    using google_breakpad::scoped_ptr;
+using google_breakpad::BasicSourceLineResolver;
+using google_breakpad::Minidump;
+using google_breakpad::MinidumpMemoryList;
+using google_breakpad::MinidumpThreadList;
+using google_breakpad::MinidumpProcessor;
+using google_breakpad::ProcessState;
+using google_breakpad::SimpleSymbolSupplier;
+using google_breakpad::scoped_ptr;
 
 // Processes |options.minidump_file| using MinidumpProcessor.
 // |options.symbol_path|, if non-empty, is the base directory of a
@@ -83,104 +83,104 @@ namespace {
 // information if the minidump was produced as a result of a crash, and
 // call stacks for each thread contained in the minidump.  All information
 // is printed to stdout.
-    bool PrintMinidumpProcess(const Options &options) {
-        scoped_ptr <SimpleSymbolSupplier> symbol_supplier;
-        if (!options.symbol_paths.empty()) {
-            // TODO(mmentovai): check existence of symbol_path if specified?
-            symbol_supplier.reset(new SimpleSymbolSupplier(options.symbol_paths));
-        }
+bool PrintMinidumpProcess(const Options& options) {
+  scoped_ptr<SimpleSymbolSupplier> symbol_supplier;
+  if (!options.symbol_paths.empty()) {
+    // TODO(mmentovai): check existence of symbol_path if specified?
+    symbol_supplier.reset(new SimpleSymbolSupplier(options.symbol_paths));
+  }
 
-        BasicSourceLineResolver resolver;
-        MinidumpProcessor minidump_processor(symbol_supplier.get(), &resolver);
+  BasicSourceLineResolver resolver;
+  MinidumpProcessor minidump_processor(symbol_supplier.get(), &resolver);
 
-        // Increase the maximum number of threads and regions.
-        MinidumpThreadList::set_max_threads(std::numeric_limits<uint32_t>::max());
-        MinidumpMemoryList::set_max_regions(std::numeric_limits<uint32_t>::max());
-        // Process the minidump.
-        Minidump dump(options.minidump_file);
-        if (!dump.Read()) {
-            BPLOG(ERROR) << "Minidump " << dump.path() << " could not be read";
-            return false;
-        }
-        ProcessState process_state;
-        if (minidump_processor.Process(&dump, &process_state) !=
-            google_breakpad::PROCESS_OK) {
-            BPLOG(ERROR) << "MinidumpProcessor::Process failed";
-            return false;
-        }
+  // Increase the maximum number of threads and regions.
+  MinidumpThreadList::set_max_threads(std::numeric_limits<uint32_t>::max());
+  MinidumpMemoryList::set_max_regions(std::numeric_limits<uint32_t>::max());
+  // Process the minidump.
+  Minidump dump(options.minidump_file);
+  if (!dump.Read()) {
+     BPLOG(ERROR) << "Minidump " << dump.path() << " could not be read";
+     return false;
+  }
+  ProcessState process_state;
+  if (minidump_processor.Process(&dump, &process_state) !=
+      google_breakpad::PROCESS_OK) {
+    BPLOG(ERROR) << "MinidumpProcessor::Process failed";
+    return false;
+  }
 
-        if (options.machine_readable) {
-            PrintProcessStateMachineReadable(process_state);
-        } else {
-            PrintProcessState(process_state, options.output_stack_contents,
-                              options.output_requesting_thread_only, &resolver);
-        }
+  if (options.machine_readable) {
+    PrintProcessStateMachineReadable(process_state);
+  } else {
+    PrintProcessState(process_state, options.output_stack_contents,
+                      options.output_requesting_thread_only, &resolver);
+  }
 
-        return true;
-    }
+  return true;
+}
 
 }  // namespace
 
 static void Usage(int argc, const char *argv[], bool error) {
-    fprintf(error ? stderr : stdout,
-            "Usage: %s [options] <minidump-file> [symbol-path ...]\n"
-            "\n"
-            "Output a stack trace for the provided minidump\n"
-            "\n"
-            "Options:\n"
-            "\n"
-            "  -m         Output in machine-readable format\n"
-            "  -s         Output stack contents\n"
-            "  -c         Output thread that causes crash or dump only\n",
-            google_breakpad::BaseName(argv[0]).c_str());
+  fprintf(error ? stderr : stdout,
+          "Usage: %s [options] <minidump-file> [symbol-path ...]\n"
+          "\n"
+          "Output a stack trace for the provided minidump\n"
+          "\n"
+          "Options:\n"
+          "\n"
+          "  -m         Output in machine-readable format\n"
+          "  -s         Output stack contents\n"
+          "  -c         Output thread that causes crash or dump only\n",
+          google_breakpad::BaseName(argv[0]).c_str());
 }
 
-static void SetupOptions(int argc, const char *argv[], Options *options) {
-    int ch;
+static void SetupOptions(int argc, const char *argv[], Options* options) {
+  int ch;
 
-    options->machine_readable = false;
-    options->output_stack_contents = false;
-    options->output_requesting_thread_only = false;
+  options->machine_readable = false;
+  options->output_stack_contents = false;
+  options->output_requesting_thread_only = false;
 
-    while ((ch = getopt(argc, (char *const *) argv, "chms")) != -1) {
-        switch (ch) {
-            case 'h':
-                Usage(argc, argv, false);
-                exit(0);
-                break;
+  while ((ch = getopt(argc, (char * const*)argv, "chms")) != -1) {
+    switch (ch) {
+      case 'h':
+        Usage(argc, argv, false);
+        exit(0);
+        break;
 
-            case 'c':
-                options->output_requesting_thread_only = true;
-                break;
-            case 'm':
-                options->machine_readable = true;
-                break;
-            case 's':
-                options->output_stack_contents = true;
-                break;
+      case 'c':
+        options->output_requesting_thread_only = true;
+        break;
+      case 'm':
+        options->machine_readable = true;
+        break;
+      case 's':
+        options->output_stack_contents = true;
+        break;
 
-            case '?':
-                Usage(argc, argv, true);
-                exit(1);
-                break;
-        }
-    }
-
-    if ((argc - optind) == 0) {
-        fprintf(stderr, "%s: Missing minidump file\n", argv[0]);
+      case '?':
         Usage(argc, argv, true);
         exit(1);
+        break;
     }
+  }
 
-    options->minidump_file = argv[optind];
+  if ((argc - optind) == 0) {
+    fprintf(stderr, "%s: Missing minidump file\n", argv[0]);
+    Usage(argc, argv, true);
+    exit(1);
+  }
 
-    for (int argi = optind + 1; argi < argc; ++argi)
-        options->symbol_paths.push_back(argv[argi]);
+  options->minidump_file = argv[optind];
+
+  for (int argi = optind + 1; argi < argc; ++argi)
+    options->symbol_paths.push_back(argv[argi]);
 }
 
-int main(int argc, const char *argv[]) {
-    Options options;
-    SetupOptions(argc, argv, &options);
+int main(int argc, const char* argv[]) {
+  Options options;
+  SetupOptions(argc, argv, &options);
 
-    return PrintMinidumpProcess(options) ? 0 : 1;
+  return PrintMinidumpProcess(options) ? 0 : 1;
 }

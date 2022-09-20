@@ -37,157 +37,108 @@
 
 namespace google_breakpad {
 
-    using ::testing::Return;
-    using ::testing::_;
+using ::testing::Return;
+using ::testing::_;
 
-    class MockLibcurlWrapper : public LibcurlWrapper {
-    public:
-        MOCK_METHOD0(Init,
-        bool());
-        MOCK_METHOD2(SetProxy,
-        bool(
-        const string &proxy_host,
-        const string &proxy_userpwd
-        ));
-        MOCK_METHOD2(AddFile,
-        bool(
-        const string &upload_file_path,
-        const string &basename
-        ));
-        MOCK_METHOD5(SendRequest,
-        bool(
-        const string &url,
-        const std::map <string, string> &parameters,
-        long *http_status_code,
-                string
-        * http_header_data,
-        string *http_response_data
-        ));
-    };
+class MockLibcurlWrapper : public LibcurlWrapper {
+ public:
+  MOCK_METHOD0(Init, bool());
+  MOCK_METHOD2(SetProxy, bool(const string& proxy_host,
+                              const string& proxy_userpwd));
+  MOCK_METHOD2(AddFile, bool(const string& upload_file_path,
+                             const string& basename));
+  MOCK_METHOD5(SendRequest,
+               bool(const string& url,
+                    const std::map<string, string>& parameters,
+                    long* http_status_code,
+                    string* http_header_data,
+                    string* http_response_data));
+};
 
-    class GoogleCrashdumpUploaderTest : public ::testing::Test {
-    };
+class GoogleCrashdumpUploaderTest : public ::testing::Test {
+};
 
-    TEST_F(GoogleCrashdumpUploaderTest, InitFailsCausesUploadFailure
-    ) {
-    std::unique_ptr <MockLibcurlWrapper> m{new MockLibcurlWrapper()};
-    EXPECT_CALL(*m, Init()
-    ).Times(1).
-    WillOnce(Return(false)
-    );
-    GoogleCrashdumpUploader uploader("foobar", "1.0", "AAA-BBB", "", "",
-                                     "test@test.com", "none", "/tmp/foo.dmp",
-                                     "http://foo.com", "", "", std::move(m));
-    ASSERT_FALSE(uploader
-    .
-    Upload(NULL, NULL, NULL
-    ));
+TEST_F(GoogleCrashdumpUploaderTest, InitFailsCausesUploadFailure) {
+  std::unique_ptr<MockLibcurlWrapper> m{new MockLibcurlWrapper()};
+  EXPECT_CALL(*m, Init()).Times(1).WillOnce(Return(false));
+  GoogleCrashdumpUploader uploader("foobar", "1.0", "AAA-BBB", "", "",
+                                   "test@test.com", "none", "/tmp/foo.dmp",
+                                   "http://foo.com", "", "", std::move(m));
+  ASSERT_FALSE(uploader.Upload(NULL, NULL, NULL));
 }
 
-TEST_F(GoogleCrashdumpUploaderTest, TestSendRequestHappensWithValidParameters
-) {
-// Create a temp file
-char tempfn[80] = "/tmp/googletest-upload-XXXXXX";
-int fd = mkstemp(tempfn);
-ASSERT_NE(fd,
--1);
-close(fd);
+TEST_F(GoogleCrashdumpUploaderTest, TestSendRequestHappensWithValidParameters) {
+  // Create a temp file
+  char tempfn[80] = "/tmp/googletest-upload-XXXXXX";
+  int fd = mkstemp(tempfn);
+  ASSERT_NE(fd, -1);
+  close(fd);
 
-std::unique_ptr <MockLibcurlWrapper> m{new MockLibcurlWrapper()};
-EXPECT_CALL(*m, Init()
-).Times(1).
-WillOnce(Return(true)
-);
-EXPECT_CALL(*m, AddFile(tempfn, _)
-).
-WillOnce(Return(true)
-);
-EXPECT_CALL(*m, SendRequest("http://foo.com", _, _, _, _)
-)
-.Times(1)
-.
-WillOnce(Return(true)
-);
-GoogleCrashdumpUploader uploader("foobar", "1.0", "AAA-BBB", "", "",
-                                 "test@test.com", "none", tempfn,
-                                 "http://foo.com", "", "", std::move(m));
-ASSERT_TRUE(uploader
-.
-Upload(NULL, NULL, NULL
-));
+  std::unique_ptr<MockLibcurlWrapper> m{new MockLibcurlWrapper()};
+  EXPECT_CALL(*m, Init()).Times(1).WillOnce(Return(true));
+  EXPECT_CALL(*m, AddFile(tempfn, _)).WillOnce(Return(true));
+  EXPECT_CALL(*m, SendRequest("http://foo.com", _, _, _, _))
+      .Times(1)
+      .WillOnce(Return(true));
+  GoogleCrashdumpUploader uploader("foobar", "1.0", "AAA-BBB", "", "",
+                                   "test@test.com", "none", tempfn,
+                                   "http://foo.com", "", "", std::move(m));
+  ASSERT_TRUE(uploader.Upload(NULL, NULL, NULL));
 }
 
 
-TEST_F(GoogleCrashdumpUploaderTest, InvalidPathname
-) {
-std::unique_ptr <MockLibcurlWrapper> m{new MockLibcurlWrapper()};
-EXPECT_CALL(*m, Init()
-).Times(1).
-WillOnce(Return(true)
-);
-EXPECT_CALL(*m, SendRequest(_, _, _, _, _)
-).Times(0);
-GoogleCrashdumpUploader uploader("foobar", "1.0", "AAA-BBB", "", "",
-                                 "test@test.com", "none", "/tmp/foo.dmp",
-                                 "http://foo.com", "", "", std::move(m));
-ASSERT_FALSE(uploader
-.
-Upload(NULL, NULL, NULL
-));
+TEST_F(GoogleCrashdumpUploaderTest, InvalidPathname) {
+  std::unique_ptr<MockLibcurlWrapper> m{new MockLibcurlWrapper()};
+  EXPECT_CALL(*m, Init()).Times(1).WillOnce(Return(true));
+  EXPECT_CALL(*m, SendRequest(_,_,_,_,_)).Times(0);
+  GoogleCrashdumpUploader uploader("foobar", "1.0", "AAA-BBB", "", "",
+                                   "test@test.com", "none", "/tmp/foo.dmp",
+                                   "http://foo.com", "", "", std::move(m));
+  ASSERT_FALSE(uploader.Upload(NULL, NULL, NULL));
 }
 
-TEST_F(GoogleCrashdumpUploaderTest, TestRequiredParametersMustBePresent
-) {
-// Test with empty product name.
-GoogleCrashdumpUploader uploader("",
-                                 "1.0",
-                                 "AAA-BBB",
-                                 "",
-                                 "",
-                                 "test@test.com",
-                                 "none",
-                                 "/tmp/foo.dmp",
-                                 "http://foo.com",
-                                 "",
-                                 "");
-ASSERT_FALSE(uploader
-.
-Upload(NULL, NULL, NULL
-));
+TEST_F(GoogleCrashdumpUploaderTest, TestRequiredParametersMustBePresent) {
+  // Test with empty product name.
+  GoogleCrashdumpUploader uploader("",
+                                   "1.0",
+                                   "AAA-BBB",
+                                   "",
+                                   "",
+                                   "test@test.com",
+                                   "none",
+                                   "/tmp/foo.dmp",
+                                   "http://foo.com",
+                                   "",
+                                   "");
+  ASSERT_FALSE(uploader.Upload(NULL, NULL, NULL));
 
-// Test with empty product version.
-GoogleCrashdumpUploader uploader1("product",
-                                  "",
-                                  "AAA-BBB",
-                                  "",
-                                  "",
-                                  "",
-                                  "",
-                                  "/tmp/foo.dmp",
-                                  "",
-                                  "",
-                                  "");
+  // Test with empty product version.
+  GoogleCrashdumpUploader uploader1("product",
+                                    "",
+                                    "AAA-BBB",
+                                    "",
+                                    "",
+                                    "",
+                                    "",
+                                    "/tmp/foo.dmp",
+                                    "",
+                                    "",
+                                    "");
 
-ASSERT_FALSE(uploader1
-.
-Upload(NULL, NULL, NULL
-));
+  ASSERT_FALSE(uploader1.Upload(NULL, NULL, NULL));
 
-// Test with empty client GUID.
-GoogleCrashdumpUploader uploader2("product",
-                                  "1.0",
-                                  "",
-                                  "",
-                                  "",
-                                  "",
-                                  "",
-                                  "/tmp/foo.dmp",
-                                  "",
-                                  "",
-                                  "");
-ASSERT_FALSE(uploader2
-.
-Upload(NULL, NULL, NULL
-));
+  // Test with empty client GUID.
+  GoogleCrashdumpUploader uploader2("product",
+                                    "1.0",
+                                    "",
+                                    "",
+                                    "",
+                                    "",
+                                    "",
+                                    "/tmp/foo.dmp",
+                                    "",
+                                    "",
+                                    "");
+  ASSERT_FALSE(uploader2.Upload(NULL, NULL, NULL));
 }
 }

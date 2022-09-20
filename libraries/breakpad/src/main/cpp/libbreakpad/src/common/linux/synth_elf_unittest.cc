@@ -55,284 +55,137 @@ using ::testing::Types;
 
 class StringTableTest : public Test {
 public:
-    StringTableTest() : table(kLittleEndian) {}
+  StringTableTest() : table(kLittleEndian) {}
 
-    StringTable table;
+  StringTable table;
 };
 
-TEST_F(StringTableTest, Empty
-) {
-EXPECT_EQ(1U, table.
-
-Size()
-
-);
-string contents;
-ASSERT_TRUE(table
-.
-GetContents(&contents)
-);
-const char *kExpectedContents = "\0";
-EXPECT_EQ(0,
-memcmp(kExpectedContents,
-        contents
-.
-
-c_str(),
-        contents
-
-.
-
-size()
-
-));
-ASSERT_TRUE(table
-.empty_string.
-
-IsKnownConstant()
-
-);
-EXPECT_EQ(0U, table.empty_string.
-
-Value()
-
-);
+TEST_F(StringTableTest, Empty) {
+  EXPECT_EQ(1U, table.Size());
+  string contents;
+  ASSERT_TRUE(table.GetContents(&contents));
+  const char* kExpectedContents = "\0";
+  EXPECT_EQ(0, memcmp(kExpectedContents,
+                      contents.c_str(),
+                      contents.size()));
+  ASSERT_TRUE(table.empty_string.IsKnownConstant());
+  EXPECT_EQ(0U, table.empty_string.Value());
 }
 
-TEST_F(StringTableTest, Basic
-) {
-const string s1("table fills with strings");
-const string s2("offsets preserved as labels");
-const string s3("verified with tests");
-const char *kExpectedContents =
-        "\0table fills with strings\0"
-        "offsets preserved as labels\0"
-        "verified with tests\0";
-Label l1(table.Add(s1));
-Label l2(table.Add(s2));
-Label l3(table.Add(s3));
-string contents;
-ASSERT_TRUE(table
-.
-GetContents(&contents)
-);
-EXPECT_EQ(0,
-memcmp(kExpectedContents,
-        contents
-.
-
-c_str(),
-        contents
-
-.
-
-size()
-
-));
-// empty_string is at zero, other strings start at 1.
-ASSERT_TRUE(l1
-.
-
-IsKnownConstant()
-
-);
-EXPECT_EQ(1U, l1.
-
-Value()
-
-);
-// Each string has an extra byte for a trailing null.
-EXPECT_EQ(1 + s1.
-
-length()
-
-+ 1, l2.
-
-Value()
-
-);
-EXPECT_EQ(1 + s1.
-
-length()
-
-+ 1 + s2.
-
-length()
-
-+ 1, l3.
-
-Value()
-
-);
+TEST_F(StringTableTest, Basic) {
+  const string s1("table fills with strings");
+  const string s2("offsets preserved as labels");
+  const string s3("verified with tests");
+  const char* kExpectedContents = 
+    "\0table fills with strings\0"
+    "offsets preserved as labels\0"
+    "verified with tests\0";
+  Label l1(table.Add(s1));
+  Label l2(table.Add(s2));
+  Label l3(table.Add(s3));
+  string contents;
+  ASSERT_TRUE(table.GetContents(&contents));
+  EXPECT_EQ(0, memcmp(kExpectedContents,
+                      contents.c_str(),
+                      contents.size()));
+  // empty_string is at zero, other strings start at 1.
+  ASSERT_TRUE(l1.IsKnownConstant());
+  EXPECT_EQ(1U, l1.Value());
+  // Each string has an extra byte for a trailing null.
+  EXPECT_EQ(1 + s1.length() + 1, l2.Value());
+  EXPECT_EQ(1 + s1.length() + 1 + s2.length() + 1, l3.Value());
 }
 
-TEST_F(StringTableTest, Duplicates
-) {
-const string s1("string 1");
-const string s2("string 2");
-const string s3("");
-const char *kExpectedContents = "\0string 1\0string 2\0";
-Label l1(table.Add(s1));
-Label l2(table.Add(s2));
-// Adding strings twice should return the same Label.
-Label l3(table.Add(s3));
-Label l4(table.Add(s2));
-string contents;
-ASSERT_TRUE(table
-.
-GetContents(&contents)
-);
-EXPECT_EQ(0,
-memcmp(kExpectedContents,
-        contents
-.
-
-c_str(),
-        contents
-
-.
-
-size()
-
-));
-EXPECT_EQ(0U, table.empty_string.
-
-Value()
-
-);
-EXPECT_EQ(table
-.empty_string.
-
-Value(), l3
-
-.
-
-Value()
-
-);
-EXPECT_EQ(l2
-.
-
-Value(), l4
-
-.
-
-Value()
-
-);
+TEST_F(StringTableTest, Duplicates) {
+  const string s1("string 1");
+  const string s2("string 2");
+  const string s3("");
+  const char* kExpectedContents = "\0string 1\0string 2\0";
+  Label l1(table.Add(s1));
+  Label l2(table.Add(s2));
+  // Adding strings twice should return the same Label.
+  Label l3(table.Add(s3));
+  Label l4(table.Add(s2));
+  string contents;
+  ASSERT_TRUE(table.GetContents(&contents));
+  EXPECT_EQ(0, memcmp(kExpectedContents,
+                      contents.c_str(),
+                      contents.size()));
+  EXPECT_EQ(0U, table.empty_string.Value());
+  EXPECT_EQ(table.empty_string.Value(), l3.Value());
+  EXPECT_EQ(l2.Value(), l4.Value());
 }
 
-class SymbolTableTest : public Test {
-};
+class SymbolTableTest : public Test {};
 
-TEST_F(SymbolTableTest, Simple32
-) {
-StringTable table(kLittleEndian);
-SymbolTable syms(kLittleEndian, 4, table);
+TEST_F(SymbolTableTest, Simple32) {
+  StringTable table(kLittleEndian);
+  SymbolTable syms(kLittleEndian, 4, table);
 
-const string kFuncName1 = "superfunc";
-const uint32_t kFuncAddr1 = 0x10001000;
-const uint32_t kFuncSize1 = 0x10;
-const string kFuncName2 = "awesomefunc";
-const uint32_t kFuncAddr2 = 0x20002000;
-const uint32_t kFuncSize2 = 0x2f;
-const string kFuncName3 = "megafunc";
-const uint32_t kFuncAddr3 = 0x30003000;
-const uint32_t kFuncSize3 = 0x3c;
+  const string kFuncName1 = "superfunc";
+  const uint32_t kFuncAddr1 = 0x10001000;
+  const uint32_t kFuncSize1 = 0x10;
+  const string kFuncName2 = "awesomefunc";
+  const uint32_t kFuncAddr2 = 0x20002000;
+  const uint32_t kFuncSize2 = 0x2f;
+  const string kFuncName3 = "megafunc";
+  const uint32_t kFuncAddr3 = 0x30003000;
+  const uint32_t kFuncSize3 = 0x3c;
 
-syms.
-AddSymbol(kFuncName1, kFuncAddr1, kFuncSize1,
-        ELF32_ST_INFO(STB_GLOBAL, STT_FUNC),
-        SHN_UNDEF
-+ 1);
-syms.
-AddSymbol(kFuncName2, kFuncAddr2, kFuncSize2,
-        ELF32_ST_INFO(STB_LOCAL, STT_FUNC),
-        SHN_UNDEF
-+ 2);
-syms.
-AddSymbol(kFuncName3, kFuncAddr3, kFuncSize3,
-        ELF32_ST_INFO(STB_LOCAL, STT_FUNC),
-        SHN_UNDEF
-+ 3);
+  syms.AddSymbol(kFuncName1, kFuncAddr1, kFuncSize1,
+                 ELF32_ST_INFO(STB_GLOBAL, STT_FUNC),
+                 SHN_UNDEF + 1);
+  syms.AddSymbol(kFuncName2, kFuncAddr2, kFuncSize2,
+                 ELF32_ST_INFO(STB_LOCAL, STT_FUNC),
+                 SHN_UNDEF + 2);
+  syms.AddSymbol(kFuncName3, kFuncAddr3, kFuncSize3,
+                 ELF32_ST_INFO(STB_LOCAL, STT_FUNC),
+                 SHN_UNDEF + 3);
 
-const char kExpectedStringTable[] = "\0superfunc\0awesomefunc\0megafunc";
-const size_t kExpectedStringTableSize = sizeof(kExpectedStringTable);
-EXPECT_EQ(kExpectedStringTableSize, table
-.
+  const char kExpectedStringTable[] = "\0superfunc\0awesomefunc\0megafunc";
+  const size_t kExpectedStringTableSize = sizeof(kExpectedStringTable);
+  EXPECT_EQ(kExpectedStringTableSize, table.Size());
+  string table_contents;
+  table.GetContents(&table_contents);
+  EXPECT_EQ(0, memcmp(kExpectedStringTable,
+                      table_contents.c_str(),
+                      table_contents.size()));
 
-Size()
+  const uint8_t kExpectedSymbolContents[] = {
+    // Symbol 1
+    0x01, 0x00, 0x00, 0x00, // name
+    0x00, 0x10, 0x00, 0x10, // value
+    0x10, 0x00, 0x00, 0x00, // size
+    ELF32_ST_INFO(STB_GLOBAL, STT_FUNC), // info
+    0x00, // other
+    0x01, 0x00, // shndx
+    // Symbol 2
+    0x0B, 0x00, 0x00, 0x00, // name
+    0x00, 0x20, 0x00, 0x20, // value
+    0x2f, 0x00, 0x00, 0x00, // size
+    ELF32_ST_INFO(STB_LOCAL, STT_FUNC), // info
+    0x00, // other
+    0x02, 0x00, // shndx
+    // Symbol 3
+    0x17, 0x00, 0x00, 0x00, // name
+    0x00, 0x30, 0x00, 0x30, // value
+    0x3c, 0x00, 0x00, 0x00, // size
+    ELF32_ST_INFO(STB_LOCAL, STT_FUNC), // info
+    0x00, // other
+    0x03, 0x00, // shndx
+  };
+  const size_t kExpectedSymbolSize = sizeof(kExpectedSymbolContents);
+  EXPECT_EQ(kExpectedSymbolSize, syms.Size());
 
-);
-string table_contents;
-table.
-GetContents(&table_contents);
-EXPECT_EQ(0,
-memcmp(kExpectedStringTable,
-        table_contents
-.
-
-c_str(),
-        table_contents
-
-.
-
-size()
-
-));
-
-const uint8_t kExpectedSymbolContents[] = {
-        // Symbol 1
-        0x01, 0x00, 0x00, 0x00, // name
-        0x00, 0x10, 0x00, 0x10, // value
-        0x10, 0x00, 0x00, 0x00, // size
-        ELF32_ST_INFO(STB_GLOBAL, STT_FUNC), // info
-        0x00, // other
-        0x01, 0x00, // shndx
-        // Symbol 2
-        0x0B, 0x00, 0x00, 0x00, // name
-        0x00, 0x20, 0x00, 0x20, // value
-        0x2f, 0x00, 0x00, 0x00, // size
-        ELF32_ST_INFO(STB_LOCAL, STT_FUNC), // info
-        0x00, // other
-        0x02, 0x00, // shndx
-        // Symbol 3
-        0x17, 0x00, 0x00, 0x00, // name
-        0x00, 0x30, 0x00, 0x30, // value
-        0x3c, 0x00, 0x00, 0x00, // size
-        ELF32_ST_INFO(STB_LOCAL, STT_FUNC), // info
-        0x00, // other
-        0x03, 0x00, // shndx
-};
-const size_t kExpectedSymbolSize = sizeof(kExpectedSymbolContents);
-EXPECT_EQ(kExpectedSymbolSize, syms
-.
-
-Size()
-
-);
-
-string symbol_contents;
-syms.
-GetContents(&symbol_contents);
-EXPECT_EQ(0,
-memcmp(kExpectedSymbolContents,
-        symbol_contents
-.
-
-c_str(),
-        symbol_contents
-
-.
-
-size()
-
-));
+  string symbol_contents;
+  syms.GetContents(&symbol_contents);
+  EXPECT_EQ(0, memcmp(kExpectedSymbolContents,
+                      symbol_contents.c_str(),
+                      symbol_contents.size()));
 }
 
 template<typename ElfClass>
-class BasicElf : public Test {
-};
+class BasicElf : public Test {};
 
 // Doesn't seem worthwhile writing the tests to be endian-independent
 // when they're unlikely to ever be run on big-endian systems.

@@ -39,25 +39,25 @@ namespace google_breakpad {
 // Find the debug stream of the given |name| in the given |session|. Returns
 // true on success, false on error of if the stream does not exist. On success
 // the stream will be returned via |debug_stream|.
-    bool FindDebugStream(const wchar_t *name,
-                         IDiaSession *session,
-                         IDiaEnumDebugStreamData **debug_stream);
+bool FindDebugStream(const wchar_t* name,
+                     IDiaSession* session,
+                     IDiaEnumDebugStreamData** debug_stream);
 
 // Finds the first table implementing the COM interface with ID |iid| in the
 // given |session|. Returns true on success, false on error or if no such
 // table is found. On success the table will be returned via |table|.
-    bool FindTable(REFIID iid, IDiaSession *session, void **table);
+bool FindTable(REFIID iid, IDiaSession* session, void** table);
 
 // A templated version of FindTable. Finds the first table implementing type
 // |InterfaceType| in the given |session|. Returns true on success, false on
 // error or if no such table is found. On success the table will be returned via
 // |table|.
-    template<typename InterfaceType>
-    bool FindTable(IDiaSession *session, InterfaceType **table) {
-        return FindTable(__uuidof(InterfaceType),
-                         session,
-                         reinterpret_cast<void **>(table));
-    }
+template<typename InterfaceType>
+bool FindTable(IDiaSession* session, InterfaceType** table) {
+  return FindTable(__uuidof(InterfaceType),
+                   session,
+                   reinterpret_cast<void**>(table));
+}
 
 }  // namespace google_breakpad
 

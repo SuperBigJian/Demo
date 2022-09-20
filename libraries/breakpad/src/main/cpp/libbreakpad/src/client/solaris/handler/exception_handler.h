@@ -40,7 +40,7 @@
 
 namespace google_breakpad {
 
-    using std::string;
+using std::string;
 
 //
 // ExceptionHandler
@@ -68,140 +68,133 @@ namespace google_breakpad {
 // Caller should try to make the callbacks as crash-friendly as possible,
 // it should avoid use heap memory allocation as much as possible.
 //
-    class ExceptionHandler {
-    public:
-        // A callback function to run before Breakpad performs any substantial
-        // processing of an exception.  A FilterCallback is called before writing
-        // a minidump.  context is the parameter supplied by the user as
-        // callback_context when the handler was created.
-        //
-        // If a FilterCallback returns true, Breakpad will continue processing,
-        // attempting to write a minidump.  If a FilterCallback returns false,
-        // Breakpad  will immediately report the exception as unhandled without
-        // writing a minidump, allowing another handler the opportunity to handle it.
-        typedef bool (*FilterCallback)(void *context);
+class ExceptionHandler {
+ public:
+  // A callback function to run before Breakpad performs any substantial
+  // processing of an exception.  A FilterCallback is called before writing
+  // a minidump.  context is the parameter supplied by the user as
+  // callback_context when the handler was created.
+  //
+  // If a FilterCallback returns true, Breakpad will continue processing,
+  // attempting to write a minidump.  If a FilterCallback returns false,
+  // Breakpad  will immediately report the exception as unhandled without
+  // writing a minidump, allowing another handler the opportunity to handle it.
+  typedef bool (*FilterCallback)(void* context);
 
-        // A callback function to run after the minidump has been written.
-        // minidump_id is a unique id for the dump, so the minidump
-        // file is <dump_path>/<minidump_id>.dmp.  context is the parameter supplied
-        // by the user as callback_context when the handler was created.  succeeded
-        // indicates whether a minidump file was successfully written.
-        //
-        // If an exception occurred and the callback returns true, Breakpad will
-        // treat the exception as fully-handled, suppressing any other handlers from
-        // being notified of the exception.  If the callback returns false, Breakpad
-        // will treat the exception as unhandled, and allow another handler to handle
-        // it. If there are no other handlers, Breakpad will report the exception to
-        // the system as unhandled, allowing a debugger or native crash dialog the
-        // opportunity to handle the exception.  Most callback implementations
-        // should normally return the value of |succeeded|, or when they wish to
-        // not report an exception of handled, false.  Callbacks will rarely want to
-        // return true directly (unless |succeeded| is true).
-        typedef bool (*MinidumpCallback)(const char *dump_path,
-                                         const char *minidump_id,
-                                         void *context,
-                                         bool succeeded);
+  // A callback function to run after the minidump has been written.
+  // minidump_id is a unique id for the dump, so the minidump
+  // file is <dump_path>/<minidump_id>.dmp.  context is the parameter supplied
+  // by the user as callback_context when the handler was created.  succeeded
+  // indicates whether a minidump file was successfully written.
+  //
+  // If an exception occurred and the callback returns true, Breakpad will
+  // treat the exception as fully-handled, suppressing any other handlers from
+  // being notified of the exception.  If the callback returns false, Breakpad
+  // will treat the exception as unhandled, and allow another handler to handle
+  // it. If there are no other handlers, Breakpad will report the exception to
+  // the system as unhandled, allowing a debugger or native crash dialog the
+  // opportunity to handle the exception.  Most callback implementations
+  // should normally return the value of |succeeded|, or when they wish to
+  // not report an exception of handled, false.  Callbacks will rarely want to
+  // return true directly (unless |succeeded| is true).
+  typedef bool (*MinidumpCallback)(const char* dump_path,
+                                   const char* minidump_id,
+                                   void* context,
+                                   bool succeeded);
 
-        // Creates a new ExceptionHandler instance to handle writing minidumps.
-        // Before writing a minidump, the optional filter callback will be called.
-        // Its return value determines whether or not Breakpad should write a
-        // minidump.  Minidump files will be written to dump_path, and the optional
-        // callback is called after writing the dump file, as described above.
-        // If install_handler is true, then a minidump will be written whenever
-        // an unhandled exception occurs.  If it is false, minidumps will only
-        // be written when WriteMinidump is called.
-        ExceptionHandler(const string &dump_path,
-                         FilterCallback filter, MinidumpCallback callback,
-                         void *callback_context,
-                         bool install_handler);
+  // Creates a new ExceptionHandler instance to handle writing minidumps.
+  // Before writing a minidump, the optional filter callback will be called.
+  // Its return value determines whether or not Breakpad should write a
+  // minidump.  Minidump files will be written to dump_path, and the optional
+  // callback is called after writing the dump file, as described above.
+  // If install_handler is true, then a minidump will be written whenever
+  // an unhandled exception occurs.  If it is false, minidumps will only
+  // be written when WriteMinidump is called.
+  ExceptionHandler(const string& dump_path,
+                   FilterCallback filter, MinidumpCallback callback,
+                   void* callback_context,
+                   bool install_handler);
+  ~ExceptionHandler();
 
-        ~ExceptionHandler();
+  // Get and Set the minidump path.
+  string dump_path() const { return dump_path_; }
+  void set_dump_path(const string& dump_path) {
+    dump_path_ = dump_path;
+    dump_path_c_ = dump_path_.c_str();
+  }
 
-        // Get and Set the minidump path.
-        string dump_path() const { return dump_path_; }
+  // Writes a minidump immediately.  This can be used to capture the
+  // execution state independently of a crash.  Returns true on success.
+  bool WriteMinidump();
 
-        void set_dump_path(const string &dump_path) {
-            dump_path_ = dump_path;
-            dump_path_c_ = dump_path_.c_str();
-        }
+  // Convenience form of WriteMinidump which does not require an
+  // ExceptionHandler instance.
+  static bool WriteMinidump(const string& dump_path,
+                            MinidumpCallback callback,
+                            void* callback_context);
 
-        // Writes a minidump immediately.  This can be used to capture the
-        // execution state independently of a crash.  Returns true on success.
-        bool WriteMinidump();
+ private:
+  // Setup crash handler.
+  void SetupHandler();
+  // Setup signal handler for a signal.
+  void SetupHandler(int signo);
+  // Teardown the handler for a signal.
+  void TeardownHandler(int signo);
+  // Teardown all handlers.
+  void TeardownAllHandlers();
 
-        // Convenience form of WriteMinidump which does not require an
-        // ExceptionHandler instance.
-        static bool WriteMinidump(const string &dump_path,
-                                  MinidumpCallback callback,
-                                  void *callback_context);
+  // Runs the main loop for the exception handler thread.
+  static void* ExceptionHandlerThreadMain(void* lpParameter);
 
-    private:
-        // Setup crash handler.
-        void SetupHandler();
+  // Signal handler.
+  static void HandleException(int signo);
 
-        // Setup signal handler for a signal.
-        void SetupHandler(int signo);
+  // Write all the information to the dump file.
+  // If called from a signal handler, sighandler_ebp is the ebp of
+  // that signal handler's frame, and sig_ctx is an out parameter
+  // that will be set to point at the ucontext_t that was placed
+  // on the stack by the kernel.  You can pass zero and NULL
+  // for the second and third parameters if you are not calling
+  // this from a signal handler.
+  bool InternalWriteMinidump(int signo, uintptr_t sighandler_ebp,
+                             ucontext_t** sig_ctx);
 
-        // Teardown the handler for a signal.
-        void TeardownHandler(int signo);
+ private:
+  // The callbacks before and after writing the dump file.
+  FilterCallback filter_;
+  MinidumpCallback callback_;
+  void* callback_context_;
 
-        // Teardown all handlers.
-        void TeardownAllHandlers();
+  // The directory in which a minidump will be written, set by the dump_path
+  // argument to the constructor, or set_dump_path.
+  string dump_path_;
+  // C style dump path. Keep this when setting dump path, since calling
+  // c_str() of std::string when crashing may not be safe.
+  const char* dump_path_c_;
 
-        // Runs the main loop for the exception handler thread.
-        static void *ExceptionHandlerThreadMain(void *lpParameter);
+  // True if the ExceptionHandler installed an unhandled exception filter
+  // when created (with an install_handler parameter set to true).
+  bool installed_handler_;
 
-        // Signal handler.
-        static void HandleException(int signo);
+  // Keep the previous handlers for the signal.
+  typedef void (*sighandler_t)(int);
+  std::map<int, sighandler_t> old_handlers_;
 
-        // Write all the information to the dump file.
-        // If called from a signal handler, sighandler_ebp is the ebp of
-        // that signal handler's frame, and sig_ctx is an out parameter
-        // that will be set to point at the ucontext_t that was placed
-        // on the stack by the kernel.  You can pass zero and NULL
-        // for the second and third parameters if you are not calling
-        // this from a signal handler.
-        bool InternalWriteMinidump(int signo, uintptr_t sighandler_ebp,
-                                   ucontext_t **sig_ctx);
+  // The global exception handler stack. This is need becuase there may exist
+  // multiple ExceptionHandler instances in a process. Each will have itself
+  // registered in this stack.
+  static std::vector<ExceptionHandler*>* handler_stack_;
+  // The index of the handler that should handle the next exception.
+  static int handler_stack_index_;
+  static pthread_mutex_t handler_stack_mutex_;
 
-    private:
-        // The callbacks before and after writing the dump file.
-        FilterCallback filter_;
-        MinidumpCallback callback_;
-        void *callback_context_;
+  // The minidump generator.
+  MinidumpGenerator minidump_generator_;
 
-        // The directory in which a minidump will be written, set by the dump_path
-        // argument to the constructor, or set_dump_path.
-        string dump_path_;
-        // C style dump path. Keep this when setting dump path, since calling
-        // c_str() of std::string when crashing may not be safe.
-        const char *dump_path_c_;
-
-        // True if the ExceptionHandler installed an unhandled exception filter
-        // when created (with an install_handler parameter set to true).
-        bool installed_handler_;
-
-        // Keep the previous handlers for the signal.
-        typedef void (*sighandler_t)(int);
-
-        std::map<int, sighandler_t> old_handlers_;
-
-        // The global exception handler stack. This is need becuase there may exist
-        // multiple ExceptionHandler instances in a process. Each will have itself
-        // registered in this stack.
-        static std::vector<ExceptionHandler *> *handler_stack_;
-        // The index of the handler that should handle the next exception.
-        static int handler_stack_index_;
-        static pthread_mutex_t handler_stack_mutex_;
-
-        // The minidump generator.
-        MinidumpGenerator minidump_generator_;
-
-        // disallow copy ctor and operator=
-        explicit ExceptionHandler(const ExceptionHandler &);
-
-        void operator=(const ExceptionHandler &);
-    };
+  // disallow copy ctor and operator=
+  explicit ExceptionHandler(const ExceptionHandler&);
+  void operator=(const ExceptionHandler&);
+};
 
 }  // namespace google_breakpad
 

@@ -42,336 +42,123 @@ using namespace google_breakpad;
 
 namespace {
 
-    typedef testing::Test CpuSetTest;
+typedef testing::Test CpuSetTest;
 
 // Helper class to write test text file to a temporary file and return
 // its file descriptor.
-    class ScopedTestFile : public AutoTestFile {
-    public:
-        explicit ScopedTestFile(const char *text)
-                : AutoTestFile("cpu_set", text) {
-        }
-    };
+class ScopedTestFile : public AutoTestFile {
+public:
+  explicit ScopedTestFile(const char* text)
+    : AutoTestFile("cpu_set", text) {
+  }
+};
 
 }
 
-TEST(CpuSetTest, EmptyCount
-) {
-CpuSet set;
-ASSERT_EQ(0, set.
-
-GetCount()
-
-);
+TEST(CpuSetTest, EmptyCount) {
+  CpuSet set;
+  ASSERT_EQ(0, set.GetCount());
 }
 
-TEST(CpuSetTest, OneCpu
-) {
-ScopedTestFile file("10");
-ASSERT_TRUE(file
-.
+TEST(CpuSetTest, OneCpu) {
+  ScopedTestFile file("10");
+  ASSERT_TRUE(file.IsOk());
 
-IsOk()
-
-);
-
-CpuSet set;
-ASSERT_TRUE(set
-.
-ParseSysFile(file
-.
-
-GetFd()
-
-));
-ASSERT_EQ(1, set.
-
-GetCount()
-
-);
+  CpuSet set;
+  ASSERT_TRUE(set.ParseSysFile(file.GetFd()));
+  ASSERT_EQ(1, set.GetCount());
 }
 
-TEST(CpuSetTest, OneCpuTerminated
-) {
-ScopedTestFile file("10\n");
-ASSERT_TRUE(file
-.
+TEST(CpuSetTest, OneCpuTerminated) {
+  ScopedTestFile file("10\n");
+  ASSERT_TRUE(file.IsOk());
 
-IsOk()
-
-);
-
-CpuSet set;
-ASSERT_TRUE(set
-.
-ParseSysFile(file
-.
-
-GetFd()
-
-));
-ASSERT_EQ(1, set.
-
-GetCount()
-
-);
+  CpuSet set;
+  ASSERT_TRUE(set.ParseSysFile(file.GetFd()));
+  ASSERT_EQ(1, set.GetCount());
 }
 
-TEST(CpuSetTest, TwoCpusWithComma
-) {
-ScopedTestFile file("1,10");
-ASSERT_TRUE(file
-.
+TEST(CpuSetTest, TwoCpusWithComma) {
+  ScopedTestFile file("1,10");
+  ASSERT_TRUE(file.IsOk());
 
-IsOk()
-
-);
-
-CpuSet set;
-ASSERT_TRUE(set
-.
-ParseSysFile(file
-.
-
-GetFd()
-
-));
-ASSERT_EQ(2, set.
-
-GetCount()
-
-);
+  CpuSet set;
+  ASSERT_TRUE(set.ParseSysFile(file.GetFd()));
+  ASSERT_EQ(2, set.GetCount());
 }
 
-TEST(CpuSetTest, TwoCpusWithRange
-) {
-ScopedTestFile file("1-2");
-ASSERT_TRUE(file
-.
+TEST(CpuSetTest, TwoCpusWithRange) {
+  ScopedTestFile file("1-2");
+  ASSERT_TRUE(file.IsOk());
 
-IsOk()
-
-);
-
-CpuSet set;
-ASSERT_TRUE(set
-.
-ParseSysFile(file
-.
-
-GetFd()
-
-));
-ASSERT_EQ(2, set.
-
-GetCount()
-
-);
+  CpuSet set;
+  ASSERT_TRUE(set.ParseSysFile(file.GetFd()));
+  ASSERT_EQ(2, set.GetCount());
 }
 
-TEST(CpuSetTest, TenCpusWithRange
-) {
-ScopedTestFile file("9-18");
-ASSERT_TRUE(file
-.
+TEST(CpuSetTest, TenCpusWithRange) {
+  ScopedTestFile file("9-18");
+  ASSERT_TRUE(file.IsOk());
 
-IsOk()
-
-);
-
-CpuSet set;
-ASSERT_TRUE(set
-.
-ParseSysFile(file
-.
-
-GetFd()
-
-));
-ASSERT_EQ(10, set.
-
-GetCount()
-
-);
+  CpuSet set;
+  ASSERT_TRUE(set.ParseSysFile(file.GetFd()));
+  ASSERT_EQ(10, set.GetCount());
 }
 
-TEST(CpuSetTest, MultiItems
-) {
-ScopedTestFile file("0, 2-4, 128");
-ASSERT_TRUE(file
-.
+TEST(CpuSetTest, MultiItems) {
+  ScopedTestFile file("0, 2-4, 128");
+  ASSERT_TRUE(file.IsOk());
 
-IsOk()
-
-);
-
-CpuSet set;
-ASSERT_TRUE(set
-.
-ParseSysFile(file
-.
-
-GetFd()
-
-));
-ASSERT_EQ(5, set.
-
-GetCount()
-
-);
+  CpuSet set;
+  ASSERT_TRUE(set.ParseSysFile(file.GetFd()));
+  ASSERT_EQ(5, set.GetCount());
 }
 
-TEST(CpuSetTest, IntersectWith
-) {
-ScopedTestFile file1("9-19");
-ASSERT_TRUE(file1
-.
+TEST(CpuSetTest, IntersectWith) {
+  ScopedTestFile file1("9-19");
+  ASSERT_TRUE(file1.IsOk());
+  CpuSet set1;
+  ASSERT_TRUE(set1.ParseSysFile(file1.GetFd()));
+  ASSERT_EQ(11, set1.GetCount());
 
-IsOk()
+  ScopedTestFile file2("16-24");
+  ASSERT_TRUE(file2.IsOk());
+  CpuSet set2;
+  ASSERT_TRUE(set2.ParseSysFile(file2.GetFd()));
+  ASSERT_EQ(9, set2.GetCount());
 
-);
-CpuSet set1;
-ASSERT_TRUE(set1
-.
-ParseSysFile(file1
-.
-
-GetFd()
-
-));
-ASSERT_EQ(11, set1.
-
-GetCount()
-
-);
-
-ScopedTestFile file2("16-24");
-ASSERT_TRUE(file2
-.
-
-IsOk()
-
-);
-CpuSet set2;
-ASSERT_TRUE(set2
-.
-ParseSysFile(file2
-.
-
-GetFd()
-
-));
-ASSERT_EQ(9, set2.
-
-GetCount()
-
-);
-
-set1.
-IntersectWith(set2);
-ASSERT_EQ(4, set1.
-
-GetCount()
-
-);
-ASSERT_EQ(9, set2.
-
-GetCount()
-
-);
+  set1.IntersectWith(set2);
+  ASSERT_EQ(4, set1.GetCount());
+  ASSERT_EQ(9, set2.GetCount());
 }
 
-TEST(CpuSetTest, SelfIntersection
-) {
-ScopedTestFile file1("9-19");
-ASSERT_TRUE(file1
-.
+TEST(CpuSetTest, SelfIntersection) {
+  ScopedTestFile file1("9-19");
+  ASSERT_TRUE(file1.IsOk());
+  CpuSet set1;
+  ASSERT_TRUE(set1.ParseSysFile(file1.GetFd()));
+  ASSERT_EQ(11, set1.GetCount());
 
-IsOk()
-
-);
-CpuSet set1;
-ASSERT_TRUE(set1
-.
-ParseSysFile(file1
-.
-
-GetFd()
-
-));
-ASSERT_EQ(11, set1.
-
-GetCount()
-
-);
-
-set1.
-IntersectWith(set1);
-ASSERT_EQ(11, set1.
-
-GetCount()
-
-);
+  set1.IntersectWith(set1);
+  ASSERT_EQ(11, set1.GetCount());
 }
 
-TEST(CpuSetTest, EmptyIntersection
-) {
-ScopedTestFile file1("0-19");
-ASSERT_TRUE(file1
-.
+TEST(CpuSetTest, EmptyIntersection) {
+  ScopedTestFile file1("0-19");
+  ASSERT_TRUE(file1.IsOk());
+  CpuSet set1;
+  ASSERT_TRUE(set1.ParseSysFile(file1.GetFd()));
+  ASSERT_EQ(20, set1.GetCount());
 
-IsOk()
+  ScopedTestFile file2("20-39");
+  ASSERT_TRUE(file2.IsOk());
+  CpuSet set2;
+  ASSERT_TRUE(set2.ParseSysFile(file2.GetFd()));
+  ASSERT_EQ(20, set2.GetCount());
 
-);
-CpuSet set1;
-ASSERT_TRUE(set1
-.
-ParseSysFile(file1
-.
+  set1.IntersectWith(set2);
+  ASSERT_EQ(0, set1.GetCount());
 
-GetFd()
-
-));
-ASSERT_EQ(20, set1.
-
-GetCount()
-
-);
-
-ScopedTestFile file2("20-39");
-ASSERT_TRUE(file2
-.
-
-IsOk()
-
-);
-CpuSet set2;
-ASSERT_TRUE(set2
-.
-ParseSysFile(file2
-.
-
-GetFd()
-
-));
-ASSERT_EQ(20, set2.
-
-GetCount()
-
-);
-
-set1.
-IntersectWith(set2);
-ASSERT_EQ(0, set1.
-
-GetCount()
-
-);
-
-ASSERT_EQ(20, set2.
-
-GetCount()
-
-);
+  ASSERT_EQ(20, set2.GetCount());
 }
 

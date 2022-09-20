@@ -43,15 +43,15 @@ namespace google_breakpad {
 // |omap_data|, and then disabling automatic translation for the session.
 // OMAP data is present in the PDB if |omap_data| is not empty. This returns
 // true on success, false otherwise.
-    bool GetOmapDataAndDisableTranslation(IDiaSession *dia_session,
-                                          OmapData *omap_data);
+bool GetOmapDataAndDisableTranslation(IDiaSession* dia_session,
+                                      OmapData* omap_data);
 
 // Given raw OMAP data builds an ImageMap. This can be used to query individual
 // image ranges using MapAddressRange.
 // |omap_data|| is the OMAP data extracted from the PDB.
 // |image_map| will be populated with a description of the image mapping. If
 //     |omap_data| is empty then this will also be empty.
-    void BuildImageMap(const OmapData &omap_data, ImageMap *image_map);
+void BuildImageMap(const OmapData& omap_data, ImageMap* image_map);
 
 // Given an address range in the original image space determines how exactly it
 // has been tranformed.
@@ -63,9 +63,9 @@ namespace google_breakpad {
 //     fully represent the mapping. This will be appended to if it is not
 //     empty. If |omap_data| is empty then |mapped_ranges| will simply be
 //     populated with a copy of |original_range| (the identity transform).
-    void MapAddressRange(const ImageMap &image_map,
-                         const AddressRange &original_range,
-                         AddressRangeVector *mapped_ranges);
+void MapAddressRange(const ImageMap& image_map,
+                     const AddressRange& original_range,
+                     AddressRangeVector* mapped_ranges);
 
 }  // namespace google_breakpad
 

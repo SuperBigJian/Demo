@@ -69,9 +69,8 @@ extern const NXArchInfo *NXGetLocalArchInfo(void);
  * NULL is returned if no matching NXArchInfo can be found.
  */
 extern const NXArchInfo *NXGetArchInfoFromName(const char *name);
-
 extern const NXArchInfo *NXGetArchInfoFromCpuType(cpu_type_t cputype,
-                                                  cpu_subtype_t cpusubtype);
+						  cpu_subtype_t cpusubtype);
 
 /* NXFindBestFatArch() is passed a cputype and cpusubtype and a set of
  * fat_arch structs and selects the best one that matches (if any) and returns
@@ -83,9 +82,9 @@ extern const NXArchInfo *NXGetArchInfoFromCpuType(cpu_type_t cputype,
  * cpusubtype and one of the fat_arch structs this routine will always succeed.
  */
 extern struct fat_arch *NXFindBestFatArch(cpu_type_t cputype,
-                                          cpu_subtype_t cpusubtype,
-                                          struct fat_arch *fat_archs,
-                                          uint32_t nfat_archs);
+					  cpu_subtype_t cpusubtype,
+					  struct fat_arch *fat_archs,
+					  uint32_t nfat_archs);
 
 /* NXCombineCpuSubtypes() returns the resulting cpusubtype when combining two
  * different cpusubtypes for the specified cputype.  If the two cpusubtypes
@@ -96,8 +95,8 @@ extern struct fat_arch *NXFindBestFatArch(cpu_type_t cputype,
  * be combined and this routine will return the cpusubtype pass in.
  */
 extern cpu_subtype_t NXCombineCpuSubtypes(cpu_type_t cputype,
-                                          cpu_subtype_t cpusubtype1,
-                                          cpu_subtype_t cpusubtype2);
+					  cpu_subtype_t cpusubtype1,
+					  cpu_subtype_t cpusubtype2);
 
 #if __cplusplus
 }

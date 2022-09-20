@@ -40,10 +40,8 @@
 
 namespace google_breakpad {
 
-    class UntypedMDRVA;
-
-    template<typename MDType>
-    class TypedMDRVA;
+class UntypedMDRVA;
+template<typename MDType> class TypedMDRVA;
 
 // The user of this class can Open() a file and add minidump streams, data, and
 // strings using the definitions in minidump_format.h.  Since this class is
@@ -67,209 +65,207 @@ namespace google_breakpad {
 //  :
 // writer.Close();
 
-    class MinidumpFileWriter {
-    public:
-        // Invalid MDRVA (Minidump Relative Virtual Address)
-        // returned on failed allocation
-        static const MDRVA kInvalidMDRVA;
+class MinidumpFileWriter {
+public:
+  // Invalid MDRVA (Minidump Relative Virtual Address)
+  // returned on failed allocation
+  static const MDRVA kInvalidMDRVA;
 
-        MinidumpFileWriter();
+  MinidumpFileWriter();
+  ~MinidumpFileWriter();
 
-        ~MinidumpFileWriter();
+  // Open |path| as the destination of the minidump data. If |path| already
+  // exists, then Open() will fail.
+  // Return true on success, or false on failure.
+  bool Open(const char* path);
 
-        // Open |path| as the destination of the minidump data. If |path| already
-        // exists, then Open() will fail.
-        // Return true on success, or false on failure.
-        bool Open(const char *path);
+  // Sets the file descriptor |file| as the destination of the minidump data.
+  // Can be used as an alternative to Open() when a file descriptor is
+  // available.
+  // Note that |fd| is not closed when the instance of MinidumpFileWriter is
+  // destroyed.
+  void SetFile(const int file);
 
-        // Sets the file descriptor |file| as the destination of the minidump data.
-        // Can be used as an alternative to Open() when a file descriptor is
-        // available.
-        // Note that |fd| is not closed when the instance of MinidumpFileWriter is
-        // destroyed.
-        void SetFile(const int file);
+  // Close the current file (that was either created when Open was called, or
+  // specified with SetFile).
+  // Return true on success, or false on failure.
+  bool Close();
 
-        // Close the current file (that was either created when Open was called, or
-        // specified with SetFile).
-        // Return true on success, or false on failure.
-        bool Close();
+  // Copy the contents of |str| to a MDString and write it to the file.
+  // |str| is expected to be either UTF-16 or UTF-32 depending on the size
+  // of wchar_t.
+  // Maximum |length| of characters to copy from |str|, or specify 0 to use the
+  // entire NULL terminated string.  Copying will stop at the first NULL.
+  // |location| the allocated location
+  // Return true on success, or false on failure
+  bool WriteString(const wchar_t* str, unsigned int length,
+                   MDLocationDescriptor* location);
 
-        // Copy the contents of |str| to a MDString and write it to the file.
-        // |str| is expected to be either UTF-16 or UTF-32 depending on the size
-        // of wchar_t.
-        // Maximum |length| of characters to copy from |str|, or specify 0 to use the
-        // entire NULL terminated string.  Copying will stop at the first NULL.
-        // |location| the allocated location
-        // Return true on success, or false on failure
-        bool WriteString(const wchar_t *str, unsigned int length,
-                         MDLocationDescriptor *location);
+  // Same as above, except with |str| as a UTF-8 string
+  bool WriteString(const char* str, unsigned int length,
+                   MDLocationDescriptor* location);
 
-        // Same as above, except with |str| as a UTF-8 string
-        bool WriteString(const char *str, unsigned int length,
-                         MDLocationDescriptor *location);
+  // Write |size| bytes starting at |src| into the current position.
+  // Return true on success and set |output| to position, or false on failure
+  bool WriteMemory(const void* src, size_t size, MDMemoryDescriptor* output);
 
-        // Write |size| bytes starting at |src| into the current position.
-        // Return true on success and set |output| to position, or false on failure
-        bool WriteMemory(const void *src, size_t size, MDMemoryDescriptor *output);
+  // Copies |size| bytes from |src| to |position|
+  // Return true on success, or false on failure
+  bool Copy(MDRVA position, const void* src, ssize_t size);
 
-        // Copies |size| bytes from |src| to |position|
-        // Return true on success, or false on failure
-        bool Copy(MDRVA position, const void *src, ssize_t size);
+  // Return the current position for writing to the minidump
+  inline MDRVA position() const { return position_; }
 
-        // Return the current position for writing to the minidump
-        inline MDRVA position() const { return position_; }
+ private:
+  friend class UntypedMDRVA;
 
-    private:
-        friend class UntypedMDRVA;
+  // Allocates an area of |size| bytes.
+  // Returns the position of the allocation, or kInvalidMDRVA if it was
+  // unable to allocate the bytes.
+  MDRVA Allocate(size_t size);
 
-        // Allocates an area of |size| bytes.
-        // Returns the position of the allocation, or kInvalidMDRVA if it was
-        // unable to allocate the bytes.
-        MDRVA Allocate(size_t size);
+  // The file descriptor for the output file.
+  int file_;
 
-        // The file descriptor for the output file.
-        int file_;
+  // Whether |file_| should be closed when the instance is destroyed.
+  bool close_file_when_destroyed_;
 
-        // Whether |file_| should be closed when the instance is destroyed.
-        bool close_file_when_destroyed_;
+  // Current position in buffer
+  MDRVA position_;
 
-        // Current position in buffer
-        MDRVA position_;
+  // Current allocated size
+  size_t size_;
 
-        // Current allocated size
-        size_t size_;
+  // Copy |length| characters from |str| to |mdstring|.  These are distinct
+  // because the underlying MDString is a UTF-16 based string.  The wchar_t
+  // variant may need to create a MDString that has more characters than the
+  // source |str|, whereas the UTF-8 variant may coalesce characters to form
+  // a single UTF-16 character.
+  bool CopyStringToMDString(const wchar_t* str, unsigned int length,
+                            TypedMDRVA<MDString>* mdstring);
+  bool CopyStringToMDString(const char* str, unsigned int length,
+                            TypedMDRVA<MDString>* mdstring);
 
-        // Copy |length| characters from |str| to |mdstring|.  These are distinct
-        // because the underlying MDString is a UTF-16 based string.  The wchar_t
-        // variant may need to create a MDString that has more characters than the
-        // source |str|, whereas the UTF-8 variant may coalesce characters to form
-        // a single UTF-16 character.
-        bool CopyStringToMDString(const wchar_t *str, unsigned int length,
-                                  TypedMDRVA<MDString> *mdstring);
-
-        bool CopyStringToMDString(const char *str, unsigned int length,
-                                  TypedMDRVA<MDString> *mdstring);
-
-        // The common templated code for writing a string
-        template<typename CharType>
-        bool WriteStringCore(const CharType *str, unsigned int length,
-                             MDLocationDescriptor *location);
-    };
+  // The common templated code for writing a string
+  template <typename CharType>
+  bool WriteStringCore(const CharType* str, unsigned int length,
+                       MDLocationDescriptor* location);
+};
 
 // Represents an untyped allocated chunk
-    class UntypedMDRVA {
-    public:
-        explicit UntypedMDRVA(MinidumpFileWriter *writer)
-                : writer_(writer),
-                  position_(writer->position()),
-                  size_(0) {}
+class UntypedMDRVA {
+ public:
+  explicit UntypedMDRVA(MinidumpFileWriter* writer)
+      : writer_(writer),
+        position_(writer->position()),
+        size_(0) {}
 
-        // Allocates |size| bytes.  Must not call more than once.
-        // Return true on success, or false on failure
-        bool Allocate(size_t size);
+  // Allocates |size| bytes.  Must not call more than once.
+  // Return true on success, or false on failure
+  bool Allocate(size_t size);
 
-        // Returns the current position or kInvalidMDRVA if allocation failed
-        inline MDRVA position() const { return position_; }
+  // Returns the current position or kInvalidMDRVA if allocation failed
+  inline MDRVA position() const { return position_; }
 
-        // Number of bytes allocated
-        inline size_t size() const { return size_; }
+  // Number of bytes allocated
+  inline size_t size() const { return size_; }
 
-        // Return size and position
-        inline MDLocationDescriptor location() const {
-            MDLocationDescriptor location = {static_cast<uint32_t>(size_),
-                                             position_};
-            return location;
-        }
+  // Return size and position
+  inline MDLocationDescriptor location() const {
+    MDLocationDescriptor location = { static_cast<uint32_t>(size_),
+                                      position_ };
+    return location;
+  }
 
-        // Copy |size| bytes starting at |src| into the minidump at |position|
-        // Return true on success, or false on failure
-        bool Copy(MDRVA position, const void *src, size_t size);
+  // Copy |size| bytes starting at |src| into the minidump at |position|
+  // Return true on success, or false on failure
+  bool Copy(MDRVA position, const void* src, size_t size);
 
-        // Copy |size| bytes from |src| to the current position
-        inline bool Copy(const void *src, size_t size) {
-            return Copy(position_, src, size);
-        }
+  // Copy |size| bytes from |src| to the current position
+  inline bool Copy(const void* src, size_t size) {
+    return Copy(position_, src, size);
+  }
 
-    protected:
-        // Writer we associate with
-        MinidumpFileWriter *writer_;
+ protected:
+  // Writer we associate with
+  MinidumpFileWriter* writer_;
 
-        // Position of the start of the data
-        MDRVA position_;
+  // Position of the start of the data
+  MDRVA position_;
 
-        // Allocated size
-        size_t size_;
-    };
+  // Allocated size
+  size_t size_;
+};
 
 // Represents a Minidump object chunk.  Additional memory can be allocated at
 // the end of the object as a:
 // - single allocation
 // - Array of MDType objects
 // - A MDType object followed by an array
-    template<typename MDType>
-    class TypedMDRVA : public UntypedMDRVA {
-    public:
-        // Constructs an unallocated MDRVA
-        explicit TypedMDRVA(MinidumpFileWriter *writer)
-                : UntypedMDRVA(writer),
-                  data_(),
-                  allocation_state_(UNALLOCATED) {}
+template<typename MDType>
+class TypedMDRVA : public UntypedMDRVA {
+ public:
+  // Constructs an unallocated MDRVA
+  explicit TypedMDRVA(MinidumpFileWriter* writer)
+      : UntypedMDRVA(writer),
+        data_(),
+        allocation_state_(UNALLOCATED) {}
 
-        inline ~TypedMDRVA() {
-            // Ensure that the data_ object is written out
-            if (allocation_state_ != ARRAY)
-                Flush();
-        }
+  inline ~TypedMDRVA() {
+    // Ensure that the data_ object is written out
+    if (allocation_state_ != ARRAY)
+      Flush();
+  }
 
-        // Address of object data_ of MDType.  This is not declared const as the
-        // typical usage will be to access the underlying |data_| object as to
-        // alter its contents.
-        MDType *get() { return &data_; }
+  // Address of object data_ of MDType.  This is not declared const as the
+  // typical usage will be to access the underlying |data_| object as to
+  // alter its contents.
+  MDType* get() { return &data_; }
 
-        // Allocates minidump_size<MDType>::size() bytes.
-        // Must not call more than once.
-        // Return true on success, or false on failure
-        bool Allocate();
+  // Allocates minidump_size<MDType>::size() bytes.
+  // Must not call more than once.
+  // Return true on success, or false on failure
+  bool Allocate();
 
-        // Allocates minidump_size<MDType>::size() + |additional| bytes.
-        // Must not call more than once.
-        // Return true on success, or false on failure
-        bool Allocate(size_t additional);
+  // Allocates minidump_size<MDType>::size() + |additional| bytes.
+  // Must not call more than once.
+  // Return true on success, or false on failure
+  bool Allocate(size_t additional);
 
-        // Allocate an array of |count| elements of MDType.
-        // Must not call more than once.
-        // Return true on success, or false on failure
-        bool AllocateArray(size_t count);
+  // Allocate an array of |count| elements of MDType.
+  // Must not call more than once.
+  // Return true on success, or false on failure
+  bool AllocateArray(size_t count);
 
-        // Allocate an array of |count| elements of |size| after object of MDType
-        // Must not call more than once.
-        // Return true on success, or false on failure
-        bool AllocateObjectAndArray(size_t count, size_t size);
+  // Allocate an array of |count| elements of |size| after object of MDType
+  // Must not call more than once.
+  // Return true on success, or false on failure
+  bool AllocateObjectAndArray(size_t count, size_t size);
 
-        // Copy |item| to |index|
-        // Must have been allocated using AllocateArray().
-        // Return true on success, or false on failure
-        bool CopyIndex(unsigned int index, MDType *item);
+  // Copy |item| to |index|
+  // Must have been allocated using AllocateArray().
+  // Return true on success, or false on failure
+  bool CopyIndex(unsigned int index, MDType* item);
 
-        // Copy |size| bytes starting at |str| to |index|
-        // Must have been allocated using AllocateObjectAndArray().
-        // Return true on success, or false on failure
-        bool CopyIndexAfterObject(unsigned int index, const void *src, size_t size);
+  // Copy |size| bytes starting at |str| to |index|
+  // Must have been allocated using AllocateObjectAndArray().
+  // Return true on success, or false on failure
+  bool CopyIndexAfterObject(unsigned int index, const void* src, size_t size);
 
-        // Write data_
-        bool Flush();
+  // Write data_
+  bool Flush();
 
-    private:
-        enum AllocationState {
-            UNALLOCATED = 0,
-            SINGLE_OBJECT,
-            ARRAY,
-            SINGLE_OBJECT_WITH_ARRAY
-        };
+ private:
+  enum AllocationState {
+    UNALLOCATED = 0,
+    SINGLE_OBJECT,
+    ARRAY,
+    SINGLE_OBJECT_WITH_ARRAY
+  };
 
-        MDType data_;
-        AllocationState allocation_state_;
-    };
+  MDType data_;
+  AllocationState allocation_state_;
+};
 
 }  // namespace google_breakpad
 

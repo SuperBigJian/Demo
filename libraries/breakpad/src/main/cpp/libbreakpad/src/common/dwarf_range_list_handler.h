@@ -49,23 +49,23 @@ namespace google_breakpad {
 // A class for producing a vector of google_breakpad::Module::Range
 // instances from a parsed DWARF range list.
 
-    class DwarfRangeListHandler : public RangeListHandler {
-    public:
-        DwarfRangeListHandler(vector <Module::Range> *ranges)
-                : ranges_(ranges) {}
+class DwarfRangeListHandler: public RangeListHandler {
+ public:
+  DwarfRangeListHandler(vector<Module::Range>* ranges)
+      : ranges_(ranges) { }
 
-        ~DwarfRangeListHandler() {}
+  ~DwarfRangeListHandler() { }
 
-        // Add a range to the list
-        void AddRange(uint64_t begin, uint64_t end);
+  // Add a range to the list
+  void AddRange(uint64_t begin, uint64_t end);
 
-        // Sort the ranges so that they are in ascending order of starting address
-        void Finish();
+  // Sort the ranges so that they are in ascending order of starting address
+  void Finish();
 
-    private:
-        // The list of ranges to be populated
-        vector <Module::Range> *ranges_;
-    };
+ private:
+  // The list of ranges to be populated
+  vector<Module::Range>* ranges_;
+};
 
 } // namespace google_breakpad
 

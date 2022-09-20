@@ -87,30 +87,30 @@
  *	them.
  */
 
-#ifndef    _MACH_I386_VM_PARAM_H_
+#ifndef	_MACH_I386_VM_PARAM_H_
 #define _MACH_I386_VM_PARAM_H_
 
-#define BYTE_SIZE        8        /* byte size in bits */
+#define BYTE_SIZE		8		/* byte size in bits */
 
-#define I386_PGBYTES        4096        /* bytes per 80386 page */
-#define I386_PGSHIFT        12        /* bitshift for pages */
+#define I386_PGBYTES		4096		/* bytes per 80386 page */
+#define I386_PGSHIFT		12		/* bitshift for pages */
 
-#define    PAGE_SIZE        I386_PGBYTES
-#define    PAGE_SHIFT        I386_PGSHIFT
-#define    PAGE_MASK        (PAGE_SIZE - 1)
+#define	PAGE_SIZE		I386_PGBYTES
+#define	PAGE_SHIFT		I386_PGSHIFT
+#define	PAGE_MASK		(PAGE_SIZE - 1)
 
-#define I386_LPGBYTES        2*1024*1024    /* bytes per large page */
-#define I386_LPGSHIFT        21        /* bitshift for large pages */
-#define I386_LPGMASK        (I386_LPGBYTES-1)
+#define I386_LPGBYTES		2*1024*1024	/* bytes per large page */
+#define I386_LPGSHIFT		21		/* bitshift for large pages */
+#define I386_LPGMASK		(I386_LPGBYTES-1)
 
 /*
  *	Convert bytes to pages and convert pages to bytes.
  *	No rounding is used.
  */
 
-#define i386_btop(x)        ((ppnum_t)((x) >> I386_PGSHIFT))
-#define machine_btop(x)        i386_btop(x)
-#define i386_ptob(x)        (((pmap_paddr_t)(x)) << I386_PGSHIFT)
+#define i386_btop(x)		((ppnum_t)((x) >> I386_PGSHIFT))
+#define machine_btop(x)		i386_btop(x)
+#define i386_ptob(x)		(((pmap_paddr_t)(x)) << I386_PGSHIFT)
 
 /*
  *	Round off or truncate to the nearest page.  These will work
@@ -118,24 +118,25 @@
  *	bytes.
  */
 
-#define i386_round_page(x)    ((((pmap_paddr_t)(x)) + I386_PGBYTES - 1) & \
-                    ~(I386_PGBYTES-1))
-#define i386_trunc_page(x)    (((pmap_paddr_t)(x)) & ~(I386_PGBYTES-1))
+#define i386_round_page(x)	((((pmap_paddr_t)(x)) + I386_PGBYTES - 1) & \
+					~(I386_PGBYTES-1))
+#define i386_trunc_page(x)	(((pmap_paddr_t)(x)) & ~(I386_PGBYTES-1))
 
 
-#define VM_MIN_ADDRESS64    ((user_addr_t) 0x0000000000000000ULL)
+
+#define VM_MIN_ADDRESS64	((user_addr_t) 0x0000000000000000ULL)
 /*
  * default top of user stack... it grows down from here
  */
-#define VM_USRSTACK64        ((user_addr_t) 0x00007FFF5FC00000ULL)
-#define VM_DYLD64        ((user_addr_t) 0x00007FFF5FC00000ULL)
-#define VM_LIB64_SHR_DATA    ((user_addr_t) 0x00007FFF60000000ULL)
-#define VM_LIB64_SHR_TEXT    ((user_addr_t) 0x00007FFF80000000ULL)
+#define VM_USRSTACK64		((user_addr_t) 0x00007FFF5FC00000ULL)
+#define VM_DYLD64		((user_addr_t) 0x00007FFF5FC00000ULL)
+#define VM_LIB64_SHR_DATA	((user_addr_t) 0x00007FFF60000000ULL)
+#define VM_LIB64_SHR_TEXT	((user_addr_t) 0x00007FFF80000000ULL)
 /*
  * the end of the usable user address space , for now about 47 bits.
  * the 64 bit commpage is past the end of this
  */
-#define VM_MAX_PAGE_ADDRESS    ((user_addr_t) 0x00007FFFFFE00000ULL)
+#define VM_MAX_PAGE_ADDRESS	((user_addr_t) 0x00007FFFFFE00000ULL)
 /*
  * canonical end of user address space for limits checking
  */
@@ -143,13 +144,14 @@
 
 
 /* system-wide values */
-#define MACH_VM_MIN_ADDRESS        ((mach_vm_offset_t) 0)
-#define MACH_VM_MAX_ADDRESS        ((mach_vm_offset_t) VM_MAX_PAGE_ADDRESS)
+#define MACH_VM_MIN_ADDRESS		((mach_vm_offset_t) 0)
+#define MACH_VM_MAX_ADDRESS		((mach_vm_offset_t) VM_MAX_PAGE_ADDRESS)
 
 /* process-relative values (all 32-bit legacy only for now) */
-#define VM_MIN_ADDRESS        ((vm_offset_t) 0)
-#define VM_USRSTACK32        ((vm_offset_t) 0xC0000000)
-#define VM_MAX_ADDRESS        ((vm_offset_t) 0xFFE00000)
+#define VM_MIN_ADDRESS		((vm_offset_t) 0)
+#define VM_USRSTACK32		((vm_offset_t) 0xC0000000)
+#define VM_MAX_ADDRESS		((vm_offset_t) 0xFFE00000)
 
 
-#endif    /* _MACH_I386_VM_PARAM_H_ */
+
+#endif	/* _MACH_I386_VM_PARAM_H_ */

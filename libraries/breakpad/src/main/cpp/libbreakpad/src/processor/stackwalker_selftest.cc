@@ -59,7 +59,7 @@
 #if defined(__sparc) && !defined(__sparc__)
 #define __sparc__
 #endif
-
+ 
 #if (defined(__SUNPRO_CC) || defined(__GNUC__)) && \
     (defined(__i386__) || defined(__ppc__) || defined(__sparc__))
 
@@ -420,13 +420,13 @@ int main(int argc, char** argv) {
 // Not i386 or ppc or sparc?  We can only test stacks we know how to walk.
 
 
-int main(int argc, char **argv) {
-    BPLOG_INIT(&argc, &argv);
+int main(int argc, char** argv) {
+  BPLOG_INIT(&argc, &argv);
 
-    // "make check" interprets an exit status of 77 to mean that the test is
-    // not supported.
-    BPLOG(ERROR) << "Selftest not supported here";
-    return 77;
+  // "make check" interprets an exit status of 77 to mean that the test is
+  // not supported.
+  BPLOG(ERROR) << "Selftest not supported here";
+  return 77;
 }
 
 

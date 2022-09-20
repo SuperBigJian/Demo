@@ -37,20 +37,20 @@ NS_ASSUME_NONNULL_BEGIN
  Represents a simple (non-multipart) HTTP POST request.
  */
 @interface HTTPSimplePostRequest : HTTPRequest {
-@protected
-    NSString *contentType_;
-    NSString *body_;
+ @protected
+  NSString* contentType_;
+  NSString* body_;
 }
 
 /**
  Sets the content type of the POST request.
  */
-- (void)setContentType:(NSString *)contentType;
+- (void)setContentType:(NSString*)contentType;
 
 /**
  Sets the contents of the POST request's body.
  */
-- (void)setBody:(NSString *)body;
+- (void)setBody:(NSString*)body;
 
 @end
 

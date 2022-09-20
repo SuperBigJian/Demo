@@ -45,82 +45,79 @@
 
 namespace google_breakpad {
 
-    using std::string;
-    using std::wstring;
-    using std::map;
+using std::string;
+using std::wstring;
+using std::map;
 
-    class HTTPUpload {
-    public:
-        // Sends a PUT request containing the data in |path| to the given
-        // URL.
-        // Only HTTP(S) URLs are currently supported.  Returns true on success.
-        // If the request is successful and response_body is non-NULL,
-        // the response body will be returned in response_body.
-        // If response_code is non-NULL, it will be set to the HTTP response code
-        // received (or 0 if the request failed before getting an HTTP response).
-        static bool SendPutRequest(
-                const wstring &url,
-                const wstring &path,
-                int *timeout_ms,
-                wstring *response_body,
-                int *response_code);
+class HTTPUpload {
+ public:
+  // Sends a PUT request containing the data in |path| to the given
+  // URL.
+  // Only HTTP(S) URLs are currently supported.  Returns true on success.
+  // If the request is successful and response_body is non-NULL,
+  // the response body will be returned in response_body.
+  // If response_code is non-NULL, it will be set to the HTTP response code
+  // received (or 0 if the request failed before getting an HTTP response).
+  static bool SendPutRequest(
+      const wstring& url,
+      const wstring& path,
+      int* timeout_ms,
+      wstring* response_body,
+      int* response_code);
 
-        // Sends a GET request to the given URL.
-        // Only HTTP(S) URLs are currently supported.  Returns true on success.
-        // If the request is successful and response_body is non-NULL,
-        // the response body will be returned in response_body.
-        // If response_code is non-NULL, it will be set to the HTTP response code
-        // received (or 0 if the request failed before getting an HTTP response).
-        static bool SendGetRequest(
-                const wstring &url,
-                int *timeout_ms,
-                wstring *response_body,
-                int *response_code);
+  // Sends a GET request to the given URL.
+  // Only HTTP(S) URLs are currently supported.  Returns true on success.
+  // If the request is successful and response_body is non-NULL,
+  // the response body will be returned in response_body.
+  // If response_code is non-NULL, it will be set to the HTTP response code
+  // received (or 0 if the request failed before getting an HTTP response).
+  static bool SendGetRequest(
+      const wstring& url,
+      int* timeout_ms,
+      wstring* response_body,
+      int* response_code);
 
-        // Sends the given sets of parameters and files as a multipart POST
-        // request to the given URL.
-        // Each key in |files| is the name of the file part of the request
-        // (i.e. it corresponds to the name= attribute on an <input type="file">.
-        // Parameter names must contain only printable ASCII characters,
-        // and may not contain a quote (") character.
-        // Only HTTP(S) URLs are currently supported.  Returns true on success.
-        // If the request is successful and response_body is non-NULL,
-        // the response body will be returned in response_body.
-        // If response_code is non-NULL, it will be set to the HTTP response code
-        // received (or 0 if the request failed before getting an HTTP response).
-        static bool SendMultipartPostRequest(
-                const wstring &url,
-                const map <wstring, wstring> &parameters,
-                const map <wstring, wstring> &files,
-                int *timeout_ms,
-                wstring *response_body,
-                int *response_code);
+  // Sends the given sets of parameters and files as a multipart POST
+  // request to the given URL.
+  // Each key in |files| is the name of the file part of the request
+  // (i.e. it corresponds to the name= attribute on an <input type="file">.
+  // Parameter names must contain only printable ASCII characters,
+  // and may not contain a quote (") character.
+  // Only HTTP(S) URLs are currently supported.  Returns true on success.
+  // If the request is successful and response_body is non-NULL,
+  // the response body will be returned in response_body.
+  // If response_code is non-NULL, it will be set to the HTTP response code
+  // received (or 0 if the request failed before getting an HTTP response).
+  static bool SendMultipartPostRequest(
+      const wstring& url,
+      const map<wstring, wstring>& parameters,
+      const map<wstring, wstring>& files,
+      int *timeout_ms,
+      wstring *response_body,
+      int *response_code);
 
-        // Sends a POST request, with the body set to |body|, to the given URL.
-        // Only HTTP(S) URLs are currently supported.  Returns true on success.
-        // If the request is successful and response_body is non-NULL,
-        // the response body will be returned in response_body.
-        // If response_code is non-NULL, it will be set to the HTTP response code
-        // received (or 0 if the request failed before getting an HTTP response).
-        static bool SendSimplePostRequest(
-                const wstring &url,
-                const wstring &body,
-                const wstring &content_type,
-                int *timeout_ms,
-                wstring *response_body,
-                int *response_code);
+  // Sends a POST request, with the body set to |body|, to the given URL.
+  // Only HTTP(S) URLs are currently supported.  Returns true on success.
+  // If the request is successful and response_body is non-NULL,
+  // the response body will be returned in response_body.
+  // If response_code is non-NULL, it will be set to the HTTP response code
+  // received (or 0 if the request failed before getting an HTTP response).
+  static bool SendSimplePostRequest(
+      const wstring& url,
+      const wstring& body,
+      const wstring& content_type,
+      int *timeout_ms,
+      wstring *response_body,
+      int *response_code);
 
-    private:
-        // No instances of this class should be created.
-        // Disallow all constructors, destructors, and operator=.
-        HTTPUpload();
-
-        explicit HTTPUpload(const HTTPUpload &);
-
-        void operator=(const HTTPUpload &);
-
-        ~HTTPUpload();
-    };
+ private:
+  // No instances of this class should be created.
+  // Disallow all constructors, destructors, and operator=.
+  HTTPUpload();
+  explicit HTTPUpload(const HTTPUpload&);
+  void operator=(const HTTPUpload&);
+  ~HTTPUpload();
+};
 
 }  // namespace google_breakpad
 

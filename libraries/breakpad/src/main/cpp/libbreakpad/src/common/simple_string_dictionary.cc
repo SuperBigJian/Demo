@@ -31,15 +31,15 @@
 
 namespace google_breakpad {
 
-    namespace {
+namespace {
 
 // In C++98 (ISO 14882), section 9.5.1 says that a union cannot have a member
 // with a non-trivial ctor, copy ctor, dtor, or assignment operator. Use this
 // property to ensure that Entry remains POD.
-        union Compile_Assert {
-            NonAllocatingMap<1, 1, 1>::Entry Compile_Assert__entry_must_be_pod;
-        };
+union Compile_Assert {
+  NonAllocatingMap<1, 1, 1>::Entry Compile_Assert__entry_must_be_pod;
+};
 
-    }
+}
 
 }  // namespace google_breakpad

@@ -50,30 +50,30 @@ extern NSString *const kDefaultServerType;
 typedef void (^UploadCompletionBlock)(NSString *reportId, NSError *error);
 
 @interface Uploader : NSObject {
-@private
-    NSMutableDictionary *parameters_;        // Key value pairs of data (STRONG)
-    NSData *minidumpContents_;               // The data in the minidump (STRONG)
-    NSData *logFileData_;                    // An NSdata for the tar,
-    // bz2'd log file.
-    NSMutableDictionary *serverDictionary_;  // The dictionary mapping a
-    // server type name to a
-    // dictionary of server
-    // parameter names.
-    NSMutableDictionary *socorroDictionary_; // The dictionary for
-    // Socorro.
-    NSMutableDictionary *googleDictionary_;  // The dictionary for
-    // Google.
-    NSMutableDictionary *extraServerVars_;   // A dictionary containing
-    // extra key/value pairs
-    // that are uploaded to the
-    // crash server with the
-    // minidump.
-    UploadCompletionBlock uploadCompletion_;  // A block called on network upload
-    // completion. Parameters are:
-    // The report ID returned by the
-    // server,
-    // the NSError triggered during
-    // upload.
+ @private
+  NSMutableDictionary *parameters_;        // Key value pairs of data (STRONG)
+  NSData *minidumpContents_;               // The data in the minidump (STRONG)
+  NSData *logFileData_;                    // An NSdata for the tar,
+                                           // bz2'd log file.
+  NSMutableDictionary *serverDictionary_;  // The dictionary mapping a
+                                           // server type name to a
+                                           // dictionary of server
+                                           // parameter names.
+  NSMutableDictionary *socorroDictionary_; // The dictionary for
+                                           // Socorro.
+  NSMutableDictionary *googleDictionary_;  // The dictionary for
+                                           // Google.
+  NSMutableDictionary *extraServerVars_;   // A dictionary containing
+                                           // extra key/value pairs
+                                           // that are uploaded to the
+                                           // crash server with the
+                                           // minidump.
+  UploadCompletionBlock uploadCompletion_;  // A block called on network upload
+                                            // completion. Parameters are:
+                                            // The report ID returned by the
+                                            // server,
+                                            // the NSError triggered during
+                                            // upload.
 }
 
 - (id)initWithConfigFile:(const char *)configFile;

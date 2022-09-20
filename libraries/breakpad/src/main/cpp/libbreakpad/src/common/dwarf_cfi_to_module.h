@@ -52,161 +52,151 @@
 
 namespace google_breakpad {
 
-    using google_breakpad::Module;
-    using std::set;
-    using std::vector;
+using google_breakpad::Module;
+using std::set;
+using std::vector;
 
 // A class that accepts parsed call frame information from the DWARF
 // CFI parser and populates a google_breakpad::Module object with the
 // contents.
-    class DwarfCFIToModule : public CallFrameInfo::Handler {
-    public:
+class DwarfCFIToModule: public CallFrameInfo::Handler {
+ public:
 
-        // DwarfCFIToModule uses an instance of this class to report errors
-        // detected while converting DWARF CFI to Breakpad STACK CFI records.
-        class Reporter {
-        public:
-            // Create a reporter that writes messages to the standard error
-            // stream. FILE is the name of the file we're processing, and
-            // SECTION is the name of the section within that file that we're
-            // looking at (.debug_frame, .eh_frame, etc.).
-            Reporter(const string &file, const string &section)
-                    : file_(file), section_(section) {}
+  // DwarfCFIToModule uses an instance of this class to report errors
+  // detected while converting DWARF CFI to Breakpad STACK CFI records.
+  class Reporter {
+   public:
+    // Create a reporter that writes messages to the standard error
+    // stream. FILE is the name of the file we're processing, and
+    // SECTION is the name of the section within that file that we're
+    // looking at (.debug_frame, .eh_frame, etc.).
+    Reporter(const string& file, const string& section)
+      : file_(file), section_(section) { }
+    virtual ~Reporter() { }
 
-            virtual ~Reporter() {}
+    // The DWARF CFI entry at OFFSET cites register REG, but REG is not
+    // covered by the vector of register names passed to the
+    // DwarfCFIToModule constructor, nor does it match the return
+    // address column number for this entry.
+    virtual void UnnamedRegister(size_t offset, int reg);
 
-            // The DWARF CFI entry at OFFSET cites register REG, but REG is not
-            // covered by the vector of register names passed to the
-            // DwarfCFIToModule constructor, nor does it match the return
-            // address column number for this entry.
-            virtual void UnnamedRegister(size_t offset, int reg);
+    // The DWARF CFI entry at OFFSET says that REG is undefined, but the
+    // Breakpad symbol file format cannot express this.
+    virtual void UndefinedNotSupported(size_t offset, const string& reg);
 
-            // The DWARF CFI entry at OFFSET says that REG is undefined, but the
-            // Breakpad symbol file format cannot express this.
-            virtual void UndefinedNotSupported(size_t offset, const string &reg);
+    // The DWARF CFI entry at OFFSET says that REG uses a DWARF
+    // expression to find its value, but DwarfCFIToModule is not
+    // capable of translating DWARF expressions to Breakpad postfix
+    // expressions.
+    virtual void ExpressionsNotSupported(size_t offset, const string& reg);
 
-            // The DWARF CFI entry at OFFSET says that REG uses a DWARF
-            // expression to find its value, but DwarfCFIToModule is not
-            // capable of translating DWARF expressions to Breakpad postfix
-            // expressions.
-            virtual void ExpressionsNotSupported(size_t offset, const string &reg);
+  protected:
+    string file_, section_;
+  };
 
-        protected:
-            string file_, section_;
-        };
+  // Register name tables. If TABLE is a vector returned by one of these
+  // functions, then TABLE[R] is the name of the register numbered R in
+  // DWARF call frame information.
+  class RegisterNames {
+   public:
+    // Intel's "x86" or IA-32.
+    static vector<string> I386();
 
-        // Register name tables. If TABLE is a vector returned by one of these
-        // functions, then TABLE[R] is the name of the register numbered R in
-        // DWARF call frame information.
-        class RegisterNames {
-        public:
-            // Intel's "x86" or IA-32.
-            static vector <string> I386();
+    // AMD x86_64, AMD64, Intel EM64T, or Intel 64
+    static vector<string> X86_64();
 
-            // AMD x86_64, AMD64, Intel EM64T, or Intel 64
-            static vector <string> X86_64();
+    // ARM.
+    static vector<string> ARM();
 
-            // ARM.
-            static vector <string> ARM();
+    // ARM64, aka AARCH64.
+    static vector<string> ARM64();
 
-            // ARM64, aka AARCH64.
-            static vector <string> ARM64();
+    // MIPS.
+    static vector<string> MIPS();
 
-            // MIPS.
-            static vector <string> MIPS();
+   private:
+    // Given STRINGS, an array of C strings with SIZE elements, return an
+    // equivalent vector<string>.
+    static vector<string> MakeVector(const char* const* strings, size_t size);
+  };
 
-        private:
-            // Given STRINGS, an array of C strings with SIZE elements, return an
-            // equivalent vector<string>.
-            static vector <string> MakeVector(const char *const *strings, size_t size);
-        };
+  // Create a handler for the CallFrameInfo parser that
+  // records the stack unwinding information it receives in MODULE.
+  //
+  // Use REGISTER_NAMES[I] as the name of register number I; *this
+  // keeps a reference to the vector, so the vector should remain
+  // alive for as long as the DwarfCFIToModule does.
+  //
+  // Use REPORTER for reporting problems encountered in the conversion
+  // process.
+  DwarfCFIToModule(Module* module, const vector<string>& register_names,
+                   Reporter* reporter)
+      : module_(module), register_names_(register_names), reporter_(reporter),
+        entry_(NULL), return_address_(-1), cfa_name_(".cfa"), ra_name_(".ra") {
+  }
+  virtual ~DwarfCFIToModule() { delete entry_; }
 
-        // Create a handler for the CallFrameInfo parser that
-        // records the stack unwinding information it receives in MODULE.
-        //
-        // Use REGISTER_NAMES[I] as the name of register number I; *this
-        // keeps a reference to the vector, so the vector should remain
-        // alive for as long as the DwarfCFIToModule does.
-        //
-        // Use REPORTER for reporting problems encountered in the conversion
-        // process.
-        DwarfCFIToModule(Module *module, const vector <string> &register_names,
-                         Reporter *reporter)
-                : module_(module), register_names_(register_names), reporter_(reporter),
-                  entry_(NULL), return_address_(-1), cfa_name_(".cfa"), ra_name_(".ra") {
-        }
+  virtual bool Entry(size_t offset, uint64_t address, uint64_t length,
+                     uint8_t version, const string& augmentation,
+                     unsigned return_address);
+  virtual bool UndefinedRule(uint64_t address, int reg);
+  virtual bool SameValueRule(uint64_t address, int reg);
+  virtual bool OffsetRule(uint64_t address, int reg,
+                          int base_register, long offset);
+  virtual bool ValOffsetRule(uint64_t address, int reg,
+                             int base_register, long offset);
+  virtual bool RegisterRule(uint64_t address, int reg, int base_register);
+  virtual bool ExpressionRule(uint64_t address, int reg,
+                              const string& expression);
+  virtual bool ValExpressionRule(uint64_t address, int reg,
+                                 const string& expression);
+  virtual bool End();
 
-        virtual ~DwarfCFIToModule() { delete entry_; }
+  virtual string Architecture();
 
-        virtual bool Entry(size_t offset, uint64_t address, uint64_t length,
-                           uint8_t version, const string &augmentation,
-                           unsigned return_address);
+ private:
+  // Return the name to use for register REG.
+  string RegisterName(int i);
 
-        virtual bool UndefinedRule(uint64_t address, int reg);
+  // Record RULE for register REG at ADDRESS.
+  void Record(Module::Address address, int reg, const string& rule);
 
-        virtual bool SameValueRule(uint64_t address, int reg);
+  // The module to which we should add entries.
+  Module* module_;
 
-        virtual bool OffsetRule(uint64_t address, int reg,
-                                int base_register, long offset);
+  // Map from register numbers to register names.
+  const vector<string>& register_names_;
 
-        virtual bool ValOffsetRule(uint64_t address, int reg,
-                                   int base_register, long offset);
+  // The reporter to use to report problems.
+  Reporter* reporter_;
 
-        virtual bool RegisterRule(uint64_t address, int reg, int base_register);
+  // The current entry we're constructing.
+  Module::StackFrameEntry* entry_;
 
-        virtual bool ExpressionRule(uint64_t address, int reg,
-                                    const string &expression);
+  // The section offset of the current frame description entry, for
+  // use in error messages.
+  size_t entry_offset_;
 
-        virtual bool ValExpressionRule(uint64_t address, int reg,
-                                       const string &expression);
+  // The return address column for that entry.
+  unsigned return_address_;
 
-        virtual bool End();
+  // The names of the return address and canonical frame address. Putting
+  // these here instead of using string literals allows us to share their
+  // texts in reference-counted string implementations (all the
+  // popular ones). Many, many rules cite these strings.
+  string cfa_name_, ra_name_;
 
-        virtual string Architecture();
-
-    private:
-        // Return the name to use for register REG.
-        string RegisterName(int i);
-
-        // Record RULE for register REG at ADDRESS.
-        void Record(Module::Address address, int reg, const string &rule);
-
-        // The module to which we should add entries.
-        Module *module_;
-
-        // Map from register numbers to register names.
-        const vector <string> &register_names_;
-
-        // The reporter to use to report problems.
-        Reporter *reporter_;
-
-        // The current entry we're constructing.
-        Module::StackFrameEntry *entry_;
-
-        // The section offset of the current frame description entry, for
-        // use in error messages.
-        size_t entry_offset_;
-
-        // The return address column for that entry.
-        unsigned return_address_;
-
-        // The names of the return address and canonical frame address. Putting
-        // these here instead of using string literals allows us to share their
-        // texts in reference-counted string implementations (all the
-        // popular ones). Many, many rules cite these strings.
-        string cfa_name_, ra_name_;
-
-        // A set of strings used by this CFI. Before storing a string in one of
-        // our data structures, insert it into this set, and then use the string
-        // from the set.
-        //
-        // Because string uses reference counting internally, simply using
-        // strings from this set, even if passed by value, assigned, or held
-        // directly in structures and containers (map<string, ...>, for example),
-        // causes those strings to share a single instance of each distinct piece
-        // of text.
-        set <string> common_strings_;
-    };
+  // A set of strings used by this CFI. Before storing a string in one of
+  // our data structures, insert it into this set, and then use the string
+  // from the set.
+  //
+  // Because string uses reference counting internally, simply using
+  // strings from this set, even if passed by value, assigned, or held
+  // directly in structures and containers (map<string, ...>, for example),
+  // causes those strings to share a single instance of each distinct piece
+  // of text.
+  set<string> common_strings_;
+};
 
 } // namespace google_breakpad
 

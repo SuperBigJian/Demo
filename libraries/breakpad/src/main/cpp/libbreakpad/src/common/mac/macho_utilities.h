@@ -57,9 +57,9 @@
 // The uuid_command struct/swap routines were added during the 10.4 series.
 // Their presence isn't guaranteed.
 struct breakpad_uuid_command {
-    uint32_t cmd;            /* LC_UUID */
-    uint32_t cmdsize;        /* sizeof(struct uuid_command) */
-    uint8_t uuid[16];       /* the 128-bit uuid */
+  uint32_t    cmd;            /* LC_UUID */
+  uint32_t    cmdsize;        /* sizeof(struct uuid_command) */
+  uint8_t     uuid[16];       /* the 128-bit uuid */
 };
 
 void breakpad_swap_uuid_command(struct breakpad_uuid_command *uc);

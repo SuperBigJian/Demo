@@ -49,228 +49,188 @@ typedef google_breakpad::StaticAddressMap<int, char> TestMap;
 typedef google_breakpad::AddressMap<int, string> AddrMap;
 
 class TestStaticAddressMap : public ::testing::Test {
-protected:
-    void SetUp() {
-        for (int testcase = 0; testcase < kNumberTestCases; ++testcase) {
-            testdata[testcase] = new int[testsize[testcase]];
-        }
-
-        // Test data set0: NULL (empty map)
-
-        // Test data set1: single element.
-        testdata[1][0] = 10;
-
-        // Test data set2: six elements.
-        const int tempdata[] = {5, 10, 14, 15, 16, 20};
-        for (int i = 0; i < testsize[2]; ++i)
-            testdata[2][i] = tempdata[i];
-
-        // Test data set3:
-        srand(time(NULL));
-        for (int i = 0; i < testsize[3]; ++i)
-            testdata[3][i] = rand();
-
-        // Setup maps.
-        std::stringstream sstream;
-        for (int testcase = 0; testcase < kNumberTestCases; ++testcase) {
-            for (int data_item = 0; data_item < testsize[testcase]; ++data_item) {
-                sstream.clear();
-                sstream << "test " << testdata[testcase][data_item];
-                addr_map[testcase].Store(testdata[testcase][data_item], sstream.str());
-            }
-            map_data[testcase] = serializer.Serialize(addr_map[testcase], NULL);
-            test_map[testcase] = TestMap(map_data[testcase]);
-        }
+ protected:
+  void SetUp() {
+    for (int testcase = 0; testcase < kNumberTestCases; ++testcase) {
+      testdata[testcase] = new int[testsize[testcase]];
     }
 
-    void TearDown() {
-        for (int i = 0; i < kNumberTestCases; ++i) {
-            delete[] map_data[i];
-            delete[] testdata[i];
-        }
+    // Test data set0: NULL (empty map)
+
+    // Test data set1: single element.
+    testdata[1][0] = 10;
+
+    // Test data set2: six elements.
+    const int tempdata[] = {5, 10, 14, 15, 16, 20};
+    for (int i = 0; i < testsize[2]; ++i)
+      testdata[2][i] = tempdata[i];
+
+    // Test data set3:
+    srand(time(NULL));
+    for (int i = 0; i < testsize[3]; ++i)
+      testdata[3][i] = rand();
+
+    // Setup maps.
+    std::stringstream sstream;
+    for (int testcase = 0; testcase < kNumberTestCases; ++testcase) {
+      for (int data_item = 0; data_item < testsize[testcase]; ++data_item) {
+        sstream.clear();
+        sstream << "test " << testdata[testcase][data_item];
+        addr_map[testcase].Store(testdata[testcase][data_item], sstream.str());
+      }
+      map_data[testcase] = serializer.Serialize(addr_map[testcase], NULL);
+      test_map[testcase] = TestMap(map_data[testcase]);
     }
+  }
 
-    void CompareRetrieveResult(int testcase, int target) {
-        int address;
-        int address_test;
-        string entry;
-        string entry_test;
-        const char *entry_cstring = NULL;
-        bool found;
-        bool found_test;
-
-        found = addr_map[testcase].Retrieve(target, &entry, &address);
-        found_test =
-                test_map[testcase].Retrieve(target, entry_cstring, &address_test);
-
-        ASSERT_EQ(found, found_test);
-
-        if (found && found_test) {
-            ASSERT_EQ(address, address_test);
-            entry_test = entry_cstring;
-            ASSERT_EQ(entry, entry_test);
-        }
+  void TearDown() {
+    for (int i = 0; i < kNumberTestCases; ++i) {
+      delete [] map_data[i];
+      delete [] testdata[i];
     }
+  }
 
-    void RetrieveTester(int testcase) {
-        int target;
-        target = INT_MIN;
-        CompareRetrieveResult(testcase, target);
-        target = INT_MAX;
-        CompareRetrieveResult(testcase, target);
+  void CompareRetrieveResult(int testcase, int target) {
+    int address;
+    int address_test;
+    string entry;
+    string entry_test;
+    const char* entry_cstring = NULL;
+    bool found;
+    bool found_test;
 
-        srand(time(0));
-        for (int data_item = 0; data_item < testsize[testcase]; ++data_item) {
-            // Retrive (aka, search) for target address and compare results from
-            // AddressMap and StaticAddressMap.
+    found = addr_map[testcase].Retrieve(target, &entry, &address);
+    found_test =
+        test_map[testcase].Retrieve(target, entry_cstring, &address_test);
 
-            // First, assign the search target to be one of original testdata that is
-            // known to exist in the map.
-            target = testdata[testcase][data_item];
-            CompareRetrieveResult(testcase, target);
-            // Then, add +2 / -1 bias to target value, in order to test searching for
-            // a target address not stored in the map.
-            target -= 1;
-            CompareRetrieveResult(testcase, target);
-            target += 3;
-            CompareRetrieveResult(testcase, target);
-            // Repeatedly test searching for random target addresses.
-            target = rand();
-            CompareRetrieveResult(testcase, target);
-        }
+    ASSERT_EQ(found, found_test);
+
+    if (found && found_test) {
+      ASSERT_EQ(address, address_test);
+      entry_test = entry_cstring;
+      ASSERT_EQ(entry, entry_test);
     }
+  }
 
-    // Test data sets:
-    static const int kNumberTestCases = 4;
-    static const int testsize[];
-    int *testdata[kNumberTestCases];
+  void RetrieveTester(int testcase) {
+    int target;
+    target = INT_MIN;
+    CompareRetrieveResult(testcase, target);
+    target = INT_MAX;
+    CompareRetrieveResult(testcase, target);
 
-    AddrMap addr_map[kNumberTestCases];
-    TestMap test_map[kNumberTestCases];
-    char *map_data[kNumberTestCases];
-    google_breakpad::AddressMapSerializer<int, string> serializer;
+    srand(time(0));
+    for (int data_item = 0; data_item < testsize[testcase]; ++data_item) {
+      // Retrive (aka, search) for target address and compare results from
+      // AddressMap and StaticAddressMap.
+
+      // First, assign the search target to be one of original testdata that is
+      // known to exist in the map.
+      target = testdata[testcase][data_item];
+      CompareRetrieveResult(testcase, target);
+      // Then, add +2 / -1 bias to target value, in order to test searching for
+      // a target address not stored in the map.
+      target -= 1;
+      CompareRetrieveResult(testcase, target);
+      target += 3;
+      CompareRetrieveResult(testcase, target);
+      // Repeatedly test searching for random target addresses.
+      target = rand();
+      CompareRetrieveResult(testcase, target);
+    }
+  }
+
+  // Test data sets:
+  static const int kNumberTestCases = 4;
+  static const int testsize[];
+  int* testdata[kNumberTestCases];
+
+  AddrMap addr_map[kNumberTestCases];
+  TestMap test_map[kNumberTestCases];
+  char* map_data[kNumberTestCases];
+  google_breakpad::AddressMapSerializer<int, string> serializer;
 };
 
 const int TestStaticAddressMap::testsize[] = {0, 1, 6, 1000};
 
-TEST_F(TestStaticAddressMap, TestEmptyMap
-) {
-int testcase = 0;
-int target;
-target = INT_MIN;
-CompareRetrieveResult(testcase, target
-);
-target = INT_MAX;
-CompareRetrieveResult(testcase, target
-);
-for (
-int data_item = 0;
-data_item<testsize[testcase];
-++data_item) {
-target = testdata[testcase][data_item];
-CompareRetrieveResult(testcase, target
-);
-target -= 1;
-CompareRetrieveResult(testcase, target
-);
-target += 3;
-CompareRetrieveResult(testcase, target
-);
-target = rand();
-CompareRetrieveResult(testcase, target
-);
-}
+TEST_F(TestStaticAddressMap, TestEmptyMap) {
+  int testcase = 0;
+  int target;
+  target = INT_MIN;
+  CompareRetrieveResult(testcase, target);
+  target = INT_MAX;
+  CompareRetrieveResult(testcase, target);
+  for (int data_item = 0; data_item < testsize[testcase]; ++data_item) {
+    target = testdata[testcase][data_item];
+    CompareRetrieveResult(testcase, target);
+    target -= 1;
+    CompareRetrieveResult(testcase, target);
+    target += 3;
+    CompareRetrieveResult(testcase, target);
+    target = rand();
+    CompareRetrieveResult(testcase, target);
+  }
 }
 
-TEST_F(TestStaticAddressMap, TestOneElementMap
-) {
-int testcase = 1;
-int target;
-target = INT_MIN;
-CompareRetrieveResult(testcase, target
-);
-target = INT_MAX;
-CompareRetrieveResult(testcase, target
-);
-for (
-int data_item = 0;
-data_item<testsize[testcase];
-++data_item) {
-target = testdata[testcase][data_item];
-CompareRetrieveResult(testcase, target
-);
-target -= 1;
-CompareRetrieveResult(testcase, target
-);
-target += 3;
-CompareRetrieveResult(testcase, target
-);
-target = rand();
-CompareRetrieveResult(testcase, target
-);
-}
+TEST_F(TestStaticAddressMap, TestOneElementMap) {
+  int testcase = 1;
+  int target;
+  target = INT_MIN;
+  CompareRetrieveResult(testcase, target);
+  target = INT_MAX;
+  CompareRetrieveResult(testcase, target);
+  for (int data_item = 0; data_item < testsize[testcase]; ++data_item) {
+    target = testdata[testcase][data_item];
+    CompareRetrieveResult(testcase, target);
+    target -= 1;
+    CompareRetrieveResult(testcase, target);
+    target += 3;
+    CompareRetrieveResult(testcase, target);
+    target = rand();
+    CompareRetrieveResult(testcase, target);
+  }
 }
 
-TEST_F(TestStaticAddressMap, TestSixElementsMap
-) {
-int testcase = 2;
-int target;
-target = INT_MIN;
-CompareRetrieveResult(testcase, target
-);
-target = INT_MAX;
-CompareRetrieveResult(testcase, target
-);
-for (
-int data_item = 0;
-data_item<testsize[testcase];
-++data_item) {
-target = testdata[testcase][data_item];
-CompareRetrieveResult(testcase, target
-);
-target -= 1;
-CompareRetrieveResult(testcase, target
-);
-target += 3;
-CompareRetrieveResult(testcase, target
-);
-target = rand();
-CompareRetrieveResult(testcase, target
-);
-}
+TEST_F(TestStaticAddressMap, TestSixElementsMap) {
+  int testcase = 2;
+  int target;
+  target = INT_MIN;
+  CompareRetrieveResult(testcase, target);
+  target = INT_MAX;
+  CompareRetrieveResult(testcase, target);
+  for (int data_item = 0; data_item < testsize[testcase]; ++data_item) {
+    target = testdata[testcase][data_item];
+    CompareRetrieveResult(testcase, target);
+    target -= 1;
+    CompareRetrieveResult(testcase, target);
+    target += 3;
+    CompareRetrieveResult(testcase, target);
+    target = rand();
+    CompareRetrieveResult(testcase, target);
+  }
 }
 
-TEST_F(TestStaticAddressMap, Test1000RandomElementsMap
-) {
-int testcase = 3;
-int target;
-target = INT_MIN;
-CompareRetrieveResult(testcase, target
-);
-target = INT_MAX;
-CompareRetrieveResult(testcase, target
-);
-for (
-int data_item = 0;
-data_item<testsize[testcase];
-++data_item) {
-target = testdata[testcase][data_item];
-CompareRetrieveResult(testcase, target
-);
-target -= 1;
-CompareRetrieveResult(testcase, target
-);
-target += 3;
-CompareRetrieveResult(testcase, target
-);
-target = rand();
-CompareRetrieveResult(testcase, target
-);
-}
+TEST_F(TestStaticAddressMap, Test1000RandomElementsMap) {
+  int testcase = 3;
+  int target;
+  target = INT_MIN;
+  CompareRetrieveResult(testcase, target);
+  target = INT_MAX;
+  CompareRetrieveResult(testcase, target);
+  for (int data_item = 0; data_item < testsize[testcase]; ++data_item) {
+    target = testdata[testcase][data_item];
+    CompareRetrieveResult(testcase, target);
+    target -= 1;
+    CompareRetrieveResult(testcase, target);
+    target += 3;
+    CompareRetrieveResult(testcase, target);
+    target = rand();
+    CompareRetrieveResult(testcase, target);
+  }
 }
 
-int main(int argc, char *argv[]) {
-    ::testing::InitGoogleTest(&argc, argv);
+int main(int argc, char* argv[]) {
+  ::testing::InitGoogleTest(&argc, argv);
 
-    return RUN_ALL_TESTS();
+  return RUN_ALL_TESTS();
 }

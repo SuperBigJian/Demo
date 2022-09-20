@@ -50,38 +50,38 @@ namespace google_breakpad {
 //
 // Clients must avoid using the same suffixes as their key's suffix when
 // LongStringDictionary is used.
-    class LongStringDictionary : public SimpleStringDictionary {
-    public:
-        // Stores |value| into |key|, or segment values into segment keys. The maxium
-        // number of segments is 10. If |value| can not be stored in 10 segments, it
-        // will be truncated. Replacing the existing value if |key| is already present
-        // and replacing the existing segment values if segment keys are already
-        // present.
-        //
-        // |key| must not be NULL. If the |value| need to be divided into segments,
-        // the lengh of |key| must be smaller enough so that lengths of segment keys
-        // which are key with suffixes are all samller than (key_size - 1). Currently,
-        // the max length of suffixes are 4.
-        //
-        // If |value| is NULL, the key and its corresponding segment keys are removed
-        // from the map. If there is no more space in the map, then the operation
-        // silently fails.
-        void SetKeyValue(const char *key, const char *value);
+class LongStringDictionary : public SimpleStringDictionary {
+ public:
+  // Stores |value| into |key|, or segment values into segment keys. The maxium
+  // number of segments is 10. If |value| can not be stored in 10 segments, it
+  // will be truncated. Replacing the existing value if |key| is already present
+  // and replacing the existing segment values if segment keys are already
+  // present.
+  //
+  // |key| must not be NULL. If the |value| need to be divided into segments,
+  // the lengh of |key| must be smaller enough so that lengths of segment keys
+  // which are key with suffixes are all samller than (key_size - 1). Currently,
+  // the max length of suffixes are 4.
+  //
+  // If |value| is NULL, the key and its corresponding segment keys are removed
+  // from the map. If there is no more space in the map, then the operation
+  // silently fails.
+  void SetKeyValue(const char* key, const char* value);
 
-        // Given |key|, removes any associated value or associated segment values.
-        // |key| must not be NULL. If the key is not found, searchs its segment keys
-        // and removes corresponding segment values if found.
-        bool RemoveKey(const char *key);
+  // Given |key|, removes any associated value or associated segment values.
+  // |key| must not be NULL. If the key is not found, searchs its segment keys
+  // and removes corresponding segment values if found.
+  bool RemoveKey(const char* key);
 
-        // Given |key|, returns its corresponding |value|. |key| must not be NULL. If
-        // the key is found, its corresponding |value| is returned.
-        //
-        // If no corresponding |value| is found, segment keys of the given |key| will
-        // be used to search for corresponding segment values. If segment values
-        // exist, assembled value from them is returned. If no segment value exists,
-        // NULL is returned.
-        const std::string GetValueForKey(const char *key) const;
-    };
+  // Given |key|, returns its corresponding |value|. |key| must not be NULL. If
+  // the key is found, its corresponding |value| is returned.
+  //
+  // If no corresponding |value| is found, segment keys of the given |key| will
+  // be used to search for corresponding segment values. If segment values
+  // exist, assembled value from them is returned. If no segment value exists,
+  // NULL is returned.
+  const std::string GetValueForKey(const char* key) const;
+};
 } // namespace google_breakpad
 
 #endif // COMMON_LONG_STRING_DICTIONARY_H_

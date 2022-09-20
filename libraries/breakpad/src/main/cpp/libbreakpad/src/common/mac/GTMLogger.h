@@ -53,8 +53,7 @@
 #import "GTMDefines.h"
 
 // Predeclaration of used protocols that are declared later in this file.
-@
-protocol GTMLogWriter, GTMLogFormatter, GTMLogFilter;
+@protocol GTMLogWriter, GTMLogFormatter, GTMLogFilter;
 
 // GTMLogger
 //
@@ -207,13 +206,11 @@ protocol GTMLogWriter, GTMLogFormatter, GTMLogFilter;
 // definitions in its prefix header (see GTMDefines.h for how one would do
 // that).
 //
-@
-interface GTMLogger
-: NSObject {
-@private
-id <GTMLogWriter> writer_;
-id <GTMLogFormatter> formatter_;
-id <GTMLogFilter> filter_;
+@interface GTMLogger : NSObject {
+ @private
+  id<GTMLogWriter> writer_;
+  id<GTMLogFormatter> formatter_;
+  id<GTMLogFilter> filter_;
 }
 
 //
@@ -224,13 +221,11 @@ id <GTMLogFilter> filter_;
 // use this method to get a GTMLogger instance, unless they explicitly want
 // their own instance to configure for their own needs. This is the only method
 // that returns a shared instance; all the rest return new GTMLogger instances.
-+ (id)
-sharedLogger;
++ (id)sharedLogger;
 
 // Sets the shared logger instance to |logger|. Future calls to +sharedLogger
 // will return |logger| instead.
-+ (void)setSharedLogger:(GTMLogger *)
-logger;
++ (void)setSharedLogger:(GTMLogger *)logger;
 
 //
 // Creation methods
@@ -238,54 +233,39 @@ logger;
 
 // Returns a new autoreleased GTMLogger instance that will log to stdout, using
 // the GTMLogStandardFormatter, and the GTMLogLevelFilter filter.
-+ (id)
-standardLogger;
++ (id)standardLogger;
 
 // Same as +standardLogger, but logs to stderr.
-+ (id)
-standardLoggerWithStderr;
++ (id)standardLoggerWithStderr;
 
 // Same as +standardLogger but levels >= kGTMLoggerLevelError are routed to
 // stderr, everything else goes to stdout.
-+ (id)
-standardLoggerWithStdoutAndStderr;
++ (id)standardLoggerWithStdoutAndStderr;
 
 // Returns a new standard GTMLogger instance with a log writer that will
 // write to the file at |path|, and will use the GTMLogStandardFormatter and
 // GTMLogLevelFilter classes. If |path| does not exist, it will be created.
-+ (id)standardLoggerWithPath:(NSString *)
-path;
++ (id)standardLoggerWithPath:(NSString *)path;
 
 // Returns an autoreleased GTMLogger instance that will use the specified
 // |writer|, |formatter|, and |filter|.
-+ (id)loggerWithWriter:(id <GTMLogWriter>)
-writer
-        formatter
-:(id <GTMLogFormatter>)
-formatter
-        filter
-:(id <GTMLogFilter>)
-filter;
++ (id)loggerWithWriter:(id<GTMLogWriter>)writer
+             formatter:(id<GTMLogFormatter>)formatter
+                filter:(id<GTMLogFilter>)filter;
 
 // Returns an autoreleased GTMLogger instance that logs to stdout, with the
 // basic formatter, and no filter. The returned logger differs from the logger
 // returned by +standardLogger because this one does not do any filtering and
 // does not do any special log formatting; this is the difference between a
 // "regular" logger and a "standard" logger.
-+ (id)
-logger;
++ (id)logger;
 
 // Designated initializer. This method returns a GTMLogger initialized with the
 // specified |writer|, |formatter|, and |filter|. See the setter methods below
 // for what values will be used if nil is passed for a parameter.
-- (id)initWithWriter:(id <GTMLogWriter>)
-writer
-        formatter
-:(id <GTMLogFormatter>)
-formatter
-        filter
-:(id <GTMLogFilter>)
-filter;
+- (id)initWithWriter:(id<GTMLogWriter>)writer
+           formatter:(id<GTMLogFormatter>)formatter
+              filter:(id<GTMLogFilter>)filter;
 
 //
 // Logging  methods
@@ -307,53 +287,35 @@ filter;
 
 // Accessor methods for the log writer. If the log writer is set to nil,
 // [NSFileHandle fileHandleWithStandardOutput] is used.
-- (id <GTMLogWriter>)
-writer;
-- (void)setWriter:(id <GTMLogWriter>)
-writer;
+- (id<GTMLogWriter>)writer;
+- (void)setWriter:(id<GTMLogWriter>)writer;
 
 // Accessor methods for the log formatter. If the log formatter is set to nil,
 // GTMLogBasicFormatter is used. This formatter will format log messages in a
 // plain printf style.
-- (id <GTMLogFormatter>)
-formatter;
-- (void)setFormatter:(id <GTMLogFormatter>)
-formatter;
+- (id<GTMLogFormatter>)formatter;
+- (void)setFormatter:(id<GTMLogFormatter>)formatter;
 
 // Accessor methods for the log filter. If the log filter is set to nil,
 // GTMLogNoFilter is used, which allows all log messages through.
-- (id <GTMLogFilter>)
-filter;
-- (void)setFilter:(id <GTMLogFilter>)
-filter;
+- (id<GTMLogFilter>)filter;
+- (void)setFilter:(id<GTMLogFilter>)filter;
 
 @end  // GTMLogger
 
 
 // Helper functions that are used by the convenience GTMLogger*() macros that
 // enable the logging of function names.
-@
-
-interface GTMLogger(GTMLoggerMacroHelpers)
-
-- (void)logFuncDebug:(const char *)
-func msg
-:(NSString *)fmt, ...
-NS_FORMAT_FUNCTION(2, 3);
-- (void)logFuncInfo:(const char *)
-func msg
-:(NSString *)fmt, ...
-NS_FORMAT_FUNCTION(2, 3);
-- (void)logFuncError:(const char *)
-func msg
-:(NSString *)fmt, ...
-NS_FORMAT_FUNCTION(2, 3);
-- (void)logFuncAssert:(const char *)
-func msg
-:(NSString *)fmt, ...
-NS_FORMAT_FUNCTION(2, 3);
-@
-end  // GTMLoggerMacroHelpers
+@interface GTMLogger (GTMLoggerMacroHelpers)
+- (void)logFuncDebug:(const char *)func msg:(NSString *)fmt, ...
+  NS_FORMAT_FUNCTION(2, 3);
+- (void)logFuncInfo:(const char *)func msg:(NSString *)fmt, ...
+  NS_FORMAT_FUNCTION(2, 3);
+- (void)logFuncError:(const char *)func msg:(NSString *)fmt, ...
+  NS_FORMAT_FUNCTION(2, 3);
+- (void)logFuncAssert:(const char *)func msg:(NSString *)fmt, ...
+  NS_FORMAT_FUNCTION(2, 3);
+@end  // GTMLoggerMacroHelpers
 
 
 // The convenience macros are only defined if they haven't already been defined.
@@ -382,11 +344,11 @@ end  // GTMLoggerMacroHelpers
 
 // Log levels.
 typedef enum {
-    kGTMLoggerLevelUnknown,
-    kGTMLoggerLevelDebug,
-    kGTMLoggerLevelInfo,
-    kGTMLoggerLevelError,
-    kGTMLoggerLevelAssert,
+  kGTMLoggerLevelUnknown,
+  kGTMLoggerLevelDebug,
+  kGTMLoggerLevelInfo,
+  kGTMLoggerLevelError,
+  kGTMLoggerLevelAssert,
 } GTMLoggerLevel;
 
 
@@ -395,13 +357,9 @@ typedef enum {
 //
 
 // Protocol to be implemented by a GTMLogWriter instance.
-@
-protocol GTMLogWriter<NSObject>
+@protocol GTMLogWriter <NSObject>
 // Writes the given log message to where the log writer is configured to write.
-- (void)logMessage:(NSString *)
-msg level
-:(GTMLoggerLevel)
-level;
+- (void)logMessage:(NSString *)msg level:(GTMLoggerLevel)level;
 @end  // GTMLogWriter
 
 
@@ -409,17 +367,10 @@ level;
 // This is convenient because something like, say, +fileHandleWithStandardError
 // now becomes a valid log writer. Log messages are written to the file handle
 // with a newline appended.
-@
-
-interface NSFileHandle(GTMFileHandleLogWriter)
-
-<GTMLogWriter>
+@interface NSFileHandle (GTMFileHandleLogWriter) <GTMLogWriter>
 // Opens the file at |path| in append mode, and creates the file with |mode|
 // if it didn't previously exist.
-+ (id)fileHandleForLoggingAtPath:(NSString *)
-path mode
-:(mode_t)
-mode;
++ (id)fileHandleForLoggingAtPath:(NSString *)path mode:(mode_t)mode;
 @end  // NSFileHandle
 
 
@@ -433,11 +384,7 @@ mode;
 // multiple log writers at the same time. Simply create an NSArray of the log
 // writers you wish to use, then set the array as the "writer" for your
 // GTMLogger instance.
-@
-
-interface NSArray(GTMArrayCompositeLogWriter)
-
-<GTMLogWriter>
+@interface NSArray (GTMArrayCompositeLogWriter) <GTMLogWriter>
 @end  // GTMArrayCompositeLogWriter
 
 
@@ -448,11 +395,7 @@ interface NSArray(GTMArrayCompositeLogWriter)
 // writer with a specific formatter and/or filter. But you want to also compose
 // that with a different log writer that may have its own formatter and/or
 // filter.
-@
-
-interface GTMLogger(GTMLoggerLogWriter)
-
-<GTMLogWriter>
+@interface GTMLogger (GTMLoggerLogWriter) <GTMLogWriter>
 @end  // GTMLoggerLogWriter
 
 
@@ -461,34 +404,23 @@ interface GTMLogger(GTMLoggerLogWriter)
 //
 
 // Protocol to be implemented by a GTMLogFormatter instance.
-@
-protocol GTMLogFormatter<NSObject>
+@protocol GTMLogFormatter <NSObject>
 // Returns a formatted string using the format specified in |fmt| and the va
 // args specified in |args|.
-- (NSString *)stringForFunc:(NSString *)
-func
-        withFormat
-:(NSString *)
-fmt
-        valist
-:(va_list)
-args
-        level
-:(GTMLoggerLevel)
-level NS_FORMAT_FUNCTION(2, 0);
+- (NSString *)stringForFunc:(NSString *)func
+                 withFormat:(NSString *)fmt
+                     valist:(va_list)args
+                      level:(GTMLoggerLevel)level NS_FORMAT_FUNCTION(2, 0);
 @end  // GTMLogFormatter
 
 
 // A basic log formatter that formats a string the same way that NSLog (or
 // printf) would. It does not do anything fancy, nor does it add any data of its
 // own.
-@
-interface GTMLogBasicFormatter
-: NSObject <GTMLogFormatter>
+@interface GTMLogBasicFormatter : NSObject <GTMLogFormatter>
 
 // Helper method for prettying C99 __func__ and GCC __PRETTY_FUNCTION__
-- (NSString *)prettyNameForFunc:(NSString *)
-func;
+- (NSString *)prettyNameForFunc:(NSString *)func;
 
 @end  // GTMLogBasicFormatter
 
@@ -497,13 +429,11 @@ func;
 // also prepends a timestamp and some basic process info to the message, as
 // shown in the following sample output.
 //   2007-12-30 10:29:24.177 myapp[4588/0xa07d0f60] [lvl=1] log mesage here
-@
-interface GTMLogStandardFormatter
-: GTMLogBasicFormatter {
-@private
-NSDateFormatter *dateFormatter_;  // yyyy-MM-dd HH:mm:ss.SSS
-NSString *pname_;
-pid_t pid_;
+@interface GTMLogStandardFormatter : GTMLogBasicFormatter {
+ @private
+  NSDateFormatter *dateFormatter_;  // yyyy-MM-dd HH:mm:ss.SSS
+  NSString *pname_;
+  pid_t pid_;
 }
 @end  // GTMLogStandardFormatter
 
@@ -513,13 +443,9 @@ pid_t pid_;
 //
 
 // Protocol to be imlemented by a GTMLogFilter instance.
-@
-protocol GTMLogFilter<NSObject>
+@protocol GTMLogFilter <NSObject>
 // Returns YES if |msg| at |level| should be filtered out; NO otherwise.
-- (BOOL)filterAllowsMessage:(NSString *)
-msg level
-:(GTMLoggerLevel)
-level;
+- (BOOL)filterAllowsMessage:(NSString *)msg level:(GTMLoggerLevel)level;
 @end  // GTMLogFilter
 
 
@@ -528,72 +454,51 @@ level;
 // out of non-debug builds unless GTMVerboseLogging is set in the environment or
 // the processes's defaults. Messages at the kGTMLoggerLevelError level are
 // never filtered.
-@
-interface GTMLogLevelFilter
-: NSObject <GTMLogFilter>
+@interface GTMLogLevelFilter : NSObject <GTMLogFilter>
 @end  // GTMLogLevelFilter
 
 // A simple log filter that does NOT filter anything out;
 // -filterAllowsMessage:level will always return YES. This can be a convenient
 // way to enable debug-level logging in release builds (if you so desire).
-@
-interface GTMLogNoFilter
-: NSObject <GTMLogFilter>
+@interface GTMLogNoFilter : NSObject <GTMLogFilter>
 @end  // GTMLogNoFilter
 
 
 // Base class for custom level filters. Not for direct use, use the minimum
 // or maximum level subclasses below.
-@
-interface GTMLogAllowedLevelFilter
-: NSObject <GTMLogFilter> {
-@private
-NSIndexSet *allowedLevels_;
+@interface GTMLogAllowedLevelFilter : NSObject <GTMLogFilter> {
+ @private
+  NSIndexSet *allowedLevels_;
 }
 @end
 
 // A log filter that allows you to set a minimum log level. Messages below this
 // level will be filtered.
-@
-interface GTMLogMininumLevelFilter
-: GTMLogAllowedLevelFilter
+@interface GTMLogMininumLevelFilter : GTMLogAllowedLevelFilter
 
 // Designated initializer, logs at levels < |level| will be filtered.
-- (id)initWithMinimumLevel:(GTMLoggerLevel)
-level;
+- (id)initWithMinimumLevel:(GTMLoggerLevel)level;
 
 @end
 
 // A log filter that allows you to set a maximum log level. Messages whose level
 // exceeds this level will be filtered. This is really only useful if you have
 // a composite GTMLogger that is sending the other messages elsewhere.
-@
-interface GTMLogMaximumLevelFilter
-: GTMLogAllowedLevelFilter
+@interface GTMLogMaximumLevelFilter : GTMLogAllowedLevelFilter
 
 // Designated initializer, logs at levels > |level| will be filtered.
-- (id)initWithMaximumLevel:(GTMLoggerLevel)
-level;
+- (id)initWithMaximumLevel:(GTMLoggerLevel)level;
 
 @end
 
 
 // For subclasses only
-@
+@interface GTMLogger (PrivateMethods)
 
-interface GTMLogger(PrivateMethods)
-
-- (void)logInternalFunc:(const char *)
-func
-        format
-:(NSString *)
-fmt
-        valist
-:(va_list)
-args
-        level
-:(GTMLoggerLevel)
-level NS_FORMAT_FUNCTION(2, 0);
+- (void)logInternalFunc:(const char *)func
+                 format:(NSString *)fmt
+                 valist:(va_list)args
+                  level:(GTMLoggerLevel)level NS_FORMAT_FUNCTION(2, 0);
 
 @end
 

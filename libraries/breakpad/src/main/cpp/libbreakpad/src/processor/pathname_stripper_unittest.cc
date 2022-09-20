@@ -42,46 +42,46 @@
 
 namespace {
 
-    using google_breakpad::PathnameStripper;
+using google_breakpad::PathnameStripper;
 
-    static bool RunTests() {
-        ASSERT_EQ(PathnameStripper::File("/dir/file"), "file");
-        ASSERT_EQ(PathnameStripper::File("\\dir\\file"), "file");
-        ASSERT_EQ(PathnameStripper::File("/dir\\file"), "file");
-        ASSERT_EQ(PathnameStripper::File("\\dir/file"), "file");
-        ASSERT_EQ(PathnameStripper::File("dir/file"), "file");
-        ASSERT_EQ(PathnameStripper::File("dir\\file"), "file");
-        ASSERT_EQ(PathnameStripper::File("dir/\\file"), "file");
-        ASSERT_EQ(PathnameStripper::File("dir\\/file"), "file");
-        ASSERT_EQ(PathnameStripper::File("file"), "file");
-        ASSERT_EQ(PathnameStripper::File("dir/"), "");
-        ASSERT_EQ(PathnameStripper::File("dir\\"), "");
-        ASSERT_EQ(PathnameStripper::File("dir/dir/"), "");
-        ASSERT_EQ(PathnameStripper::File("dir\\dir\\"), "");
-        ASSERT_EQ(PathnameStripper::File("dir1/dir2/file"), "file");
-        ASSERT_EQ(PathnameStripper::File("dir1\\dir2\\file"), "file");
-        ASSERT_EQ(PathnameStripper::File("dir1/dir2\\file"), "file");
-        ASSERT_EQ(PathnameStripper::File("dir1\\dir2/file"), "file");
-        ASSERT_EQ(PathnameStripper::File(""), "");
-        ASSERT_EQ(PathnameStripper::File("1"), "1");
-        ASSERT_EQ(PathnameStripper::File("1/2"), "2");
-        ASSERT_EQ(PathnameStripper::File("1\\2"), "2");
-        ASSERT_EQ(PathnameStripper::File("/1/2"), "2");
-        ASSERT_EQ(PathnameStripper::File("\\1\\2"), "2");
-        ASSERT_EQ(PathnameStripper::File("dir//file"), "file");
-        ASSERT_EQ(PathnameStripper::File("dir\\\\file"), "file");
-        ASSERT_EQ(PathnameStripper::File("/dir//file"), "file");
-        ASSERT_EQ(PathnameStripper::File("\\dir\\\\file"), "file");
-        ASSERT_EQ(PathnameStripper::File("c:\\dir\\file"), "file");
-        ASSERT_EQ(PathnameStripper::File("c:\\dir\\file.ext"), "file.ext");
+static bool RunTests() {
+  ASSERT_EQ(PathnameStripper::File("/dir/file"), "file");
+  ASSERT_EQ(PathnameStripper::File("\\dir\\file"), "file");
+  ASSERT_EQ(PathnameStripper::File("/dir\\file"), "file");
+  ASSERT_EQ(PathnameStripper::File("\\dir/file"), "file");
+  ASSERT_EQ(PathnameStripper::File("dir/file"), "file");
+  ASSERT_EQ(PathnameStripper::File("dir\\file"), "file");
+  ASSERT_EQ(PathnameStripper::File("dir/\\file"), "file");
+  ASSERT_EQ(PathnameStripper::File("dir\\/file"), "file");
+  ASSERT_EQ(PathnameStripper::File("file"), "file");
+  ASSERT_EQ(PathnameStripper::File("dir/"), "");
+  ASSERT_EQ(PathnameStripper::File("dir\\"), "");
+  ASSERT_EQ(PathnameStripper::File("dir/dir/"), "");
+  ASSERT_EQ(PathnameStripper::File("dir\\dir\\"), "");
+  ASSERT_EQ(PathnameStripper::File("dir1/dir2/file"), "file");
+  ASSERT_EQ(PathnameStripper::File("dir1\\dir2\\file"), "file");
+  ASSERT_EQ(PathnameStripper::File("dir1/dir2\\file"), "file");
+  ASSERT_EQ(PathnameStripper::File("dir1\\dir2/file"), "file");
+  ASSERT_EQ(PathnameStripper::File(""), "");
+  ASSERT_EQ(PathnameStripper::File("1"), "1");
+  ASSERT_EQ(PathnameStripper::File("1/2"), "2");
+  ASSERT_EQ(PathnameStripper::File("1\\2"), "2");
+  ASSERT_EQ(PathnameStripper::File("/1/2"), "2");
+  ASSERT_EQ(PathnameStripper::File("\\1\\2"), "2");
+  ASSERT_EQ(PathnameStripper::File("dir//file"), "file");
+  ASSERT_EQ(PathnameStripper::File("dir\\\\file"), "file");
+  ASSERT_EQ(PathnameStripper::File("/dir//file"), "file");
+  ASSERT_EQ(PathnameStripper::File("\\dir\\\\file"), "file");
+  ASSERT_EQ(PathnameStripper::File("c:\\dir\\file"), "file");
+  ASSERT_EQ(PathnameStripper::File("c:\\dir\\file.ext"), "file.ext");
 
-        return true;
-    }
+  return true;
+}
 
 }  // namespace
 
-int main(int argc, char **argv) {
-    BPLOG_INIT(&argc, &argv);
+int main(int argc, char** argv) {
+  BPLOG_INIT(&argc, &argv);
 
-    return RunTests() ? 0 : 1;
+  return RunTests() ? 0 : 1;
 }

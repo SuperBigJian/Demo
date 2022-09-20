@@ -50,97 +50,83 @@
 
 namespace google_breakpad {
 
-    using std::map;
-    using std::set;
+using std::map;
+using std::set;
 
 // Forward declaration.
 // ModuleFactory is a simple factory interface for creating a Module instance
 // at run-time.
-    class ModuleFactory;
+class ModuleFactory;
 
-    class SourceLineResolverBase : public SourceLineResolverInterface {
-    public:
-        // Read the symbol_data from a file with given file_name.
-        // The part of code was originally in BasicSourceLineResolver::Module's
-        // LoadMap() method.
-        // Place dynamically allocated heap buffer in symbol_data. Caller has the
-        // ownership of the buffer, and should call delete [] to free the buffer.
-        static bool ReadSymbolFile(const string &file_name,
-                                   char **symbol_data,
-                                   size_t *symbol_data_size);
+class SourceLineResolverBase : public SourceLineResolverInterface {
+ public:
+  // Read the symbol_data from a file with given file_name.
+  // The part of code was originally in BasicSourceLineResolver::Module's
+  // LoadMap() method.
+  // Place dynamically allocated heap buffer in symbol_data. Caller has the
+  // ownership of the buffer, and should call delete [] to free the buffer.
+  static bool ReadSymbolFile(const string& file_name,
+                             char** symbol_data,
+                             size_t* symbol_data_size);
 
-    protected:
-        // Users are not allowed create SourceLineResolverBase instance directly.
-        SourceLineResolverBase(ModuleFactory *module_factory);
+ protected:
+  // Users are not allowed create SourceLineResolverBase instance directly.
+  SourceLineResolverBase(ModuleFactory* module_factory);
+  virtual ~SourceLineResolverBase();
 
-        virtual ~SourceLineResolverBase();
+  // Virtual methods inherited from SourceLineResolverInterface.
+  virtual bool LoadModule(const CodeModule* module, const string& map_file);
+  virtual bool LoadModuleUsingMapBuffer(const CodeModule* module,
+                                        const string& map_buffer);
+  virtual bool LoadModuleUsingMemoryBuffer(const CodeModule* module,
+                                           char* memory_buffer,
+                                           size_t memory_buffer_size);
+  virtual bool ShouldDeleteMemoryBufferAfterLoadModule();
+  virtual void UnloadModule(const CodeModule* module);
+  virtual bool HasModule(const CodeModule* module);
+  virtual bool IsModuleCorrupt(const CodeModule* module);
+  virtual void FillSourceLineInfo(
+      StackFrame* frame,
+      std::deque<std::unique_ptr<StackFrame>>* inlined_frames);
+  virtual WindowsFrameInfo* FindWindowsFrameInfo(const StackFrame* frame);
+  virtual CFIFrameInfo* FindCFIFrameInfo(const StackFrame* frame);
 
-        // Virtual methods inherited from SourceLineResolverInterface.
-        virtual bool LoadModule(const CodeModule *module, const string &map_file);
+  // Nested structs and classes.
+  struct InlineOrigin;
+  struct Inline;
+  struct Line;
+  struct Function;
+  struct PublicSymbol;
+  struct CompareString {
+    bool operator()(const string& s1, const string& s2) const;
+  };
+  // Module is an interface for an in-memory symbol file.
+  class Module;
+  class AutoFileCloser;
 
-        virtual bool LoadModuleUsingMapBuffer(const CodeModule *module,
-                                              const string &map_buffer);
+  // All of the modules that are loaded.
+  typedef map<string, Module*, CompareString> ModuleMap;
+  ModuleMap* modules_;
 
-        virtual bool LoadModuleUsingMemoryBuffer(const CodeModule *module,
-                                                 char *memory_buffer,
-                                                 size_t memory_buffer_size);
+  // The loaded modules that were detecting to be corrupt during load.
+  typedef set<string, CompareString> ModuleSet;
+  ModuleSet* corrupt_modules_;
 
-        virtual bool ShouldDeleteMemoryBufferAfterLoadModule();
+  // All of heap-allocated buffers that are owned locally by resolver.
+  typedef std::map<string, char*, CompareString> MemoryMap;
+  MemoryMap* memory_buffers_;
 
-        virtual void UnloadModule(const CodeModule *module);
+  // Creates a concrete module at run-time.
+  ModuleFactory* module_factory_;
 
-        virtual bool HasModule(const CodeModule *module);
+ private:
+  // ModuleFactory needs to have access to protected type Module.
+  friend class ModuleFactory;
 
-        virtual bool IsModuleCorrupt(const CodeModule *module);
-
-        virtual void FillSourceLineInfo(
-                StackFrame *frame,
-                std::deque <std::unique_ptr<StackFrame>> *inlined_frames);
-
-        virtual WindowsFrameInfo *FindWindowsFrameInfo(const StackFrame *frame);
-
-        virtual CFIFrameInfo *FindCFIFrameInfo(const StackFrame *frame);
-
-        // Nested structs and classes.
-        struct InlineOrigin;
-        struct Inline;
-        struct Line;
-        struct Function;
-        struct PublicSymbol;
-
-        struct CompareString {
-            bool operator()(const string &s1, const string &s2) const;
-        };
-
-        // Module is an interface for an in-memory symbol file.
-        class Module;
-
-        class AutoFileCloser;
-
-        // All of the modules that are loaded.
-        typedef map<string, Module *, CompareString> ModuleMap;
-        ModuleMap *modules_;
-
-        // The loaded modules that were detecting to be corrupt during load.
-        typedef set <string, CompareString> ModuleSet;
-        ModuleSet *corrupt_modules_;
-
-        // All of heap-allocated buffers that are owned locally by resolver.
-        typedef std::map<string, char *, CompareString> MemoryMap;
-        MemoryMap *memory_buffers_;
-
-        // Creates a concrete module at run-time.
-        ModuleFactory *module_factory_;
-
-    private:
-        // ModuleFactory needs to have access to protected type Module.
-        friend class ModuleFactory;
-
-        // Disallow unwanted copy ctor and assignment operator
-        SourceLineResolverBase(const SourceLineResolverBase &);
-
-        void operator=(const SourceLineResolverBase &);
-    };
+  // Disallow unwanted copy ctor and assignment operator
+  SourceLineResolverBase(const SourceLineResolverBase&);
+  void operator=(const SourceLineResolverBase&);
+};
 
 }  // namespace google_breakpad
 

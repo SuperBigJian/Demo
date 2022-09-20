@@ -19,7 +19,6 @@
 #import "GTMSenTestCase.h"
 
 #import <unistd.h>
-
 #if GTM_IPHONE_SIMULATOR
 #import <objc/message.h>
 #endif
@@ -398,32 +397,32 @@ static int MethodSort(id a, id b, void *context) {
 
 @implementation GTMTestCase : SenTestCase
 - (void)invokeTest {
-    NSAutoreleasePool *localPool = [[NSAutoreleasePool alloc] init];
-    Class devLogClass = NSClassFromString(@"GTMUnitTestDevLog");
-    if (devLogClass) {
-        [devLogClass performSelector:@selector(enableTracking)];
-        [devLogClass performSelector:@selector(verifyNoMoreLogsExpected)];
+  NSAutoreleasePool *localPool = [[NSAutoreleasePool alloc] init];
+  Class devLogClass = NSClassFromString(@"GTMUnitTestDevLog");
+  if (devLogClass) {
+    [devLogClass performSelector:@selector(enableTracking)];
+    [devLogClass performSelector:@selector(verifyNoMoreLogsExpected)];
 
-    }
-    [super invokeTest];
-    if (devLogClass) {
-        [devLogClass performSelector:@selector(verifyNoMoreLogsExpected)];
-        [devLogClass performSelector:@selector(disableTracking)];
-    }
-    [localPool drain];
+  }
+  [super invokeTest];
+  if (devLogClass) {
+    [devLogClass performSelector:@selector(verifyNoMoreLogsExpected)];
+    [devLogClass performSelector:@selector(disableTracking)];
+  }
+  [localPool drain];
 }
 
 + (BOOL)isAbstractTestCase {
-    NSString *name = NSStringFromClass(self);
-    return [name rangeOfString:@"AbstractTest"].location != NSNotFound;
+  NSString *name = NSStringFromClass(self);
+  return [name rangeOfString:@"AbstractTest"].location != NSNotFound;
 }
 
 + (NSArray *)testInvocations {
-    NSArray *invocations = nil;
-    if (![self isAbstractTestCase]) {
-        invocations = [super testInvocations];
-    }
-    return invocations;
+  NSArray *invocations = nil;
+  if (![self isAbstractTestCase]) {
+    invocations = [super testInvocations];
+  }
+  return invocations;
 }
 
 @end

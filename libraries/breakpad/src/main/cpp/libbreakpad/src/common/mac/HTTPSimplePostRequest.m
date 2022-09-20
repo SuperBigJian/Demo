@@ -33,37 +33,37 @@
 
 //=============================================================================
 - (void)dealloc {
-    [contentType_ release];
-    [body_ release];
+  [contentType_ release];
+  [body_ release];
 
-    [super dealloc];
+  [super dealloc];
 }
 
 //=============================================================================
-- (void)setContentType:(NSString *)contentType {
-    contentType_ = [contentType copy];
+- (void)setContentType:(NSString*)contentType {
+  contentType_ = [contentType copy];
 }
 
 //=============================================================================
-- (void)setBody:(NSString *)body {
-    body_ = [body copy];
+- (void)setBody:(NSString*)body {
+  body_ = [body copy];
 }
 
 //=============================================================================
-- (NSString *)HTTPMethod {
-    return @"POST";
+- (NSString*)HTTPMethod {
+  return @"POST";
 }
 
 //=============================================================================
-- (NSString *)contentType {
-    return contentType_;
+- (NSString*)contentType {
+  return contentType_;
 }
 
 //=============================================================================
-- (NSData *)bodyData {
-    NSMutableData *data = [NSMutableData data];
-    [data appendData:[body_ dataUsingEncoding:NSUTF8StringEncoding]];
-    return data;
+- (NSData*)bodyData {
+  NSMutableData* data = [NSMutableData data];
+  [data appendData:[body_ dataUsingEncoding:NSUTF8StringEncoding]];
+  return data;
 }
 
 @end

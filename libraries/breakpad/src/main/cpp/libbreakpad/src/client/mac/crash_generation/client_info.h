@@ -32,15 +32,15 @@
 
 namespace google_breakpad {
 
-    class ClientInfo {
-    public:
-        explicit ClientInfo(pid_t pid) : pid_(pid) {}
+class ClientInfo {
+ public:
+  explicit ClientInfo(pid_t pid) : pid_(pid) {}
 
-        pid_t pid() const { return pid_; }
+  pid_t pid() const { return pid_; }
 
-    private:
-        pid_t pid_;
-    };
+ private:
+  pid_t pid_;
+};
 
 }  // namespace google_breakpad
 

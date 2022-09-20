@@ -36,20 +36,20 @@
 
 namespace google_breakpad {
 
-    string BaseName(const string &path) {
-        char *path_tmp = strdup(path.c_str());
-        assert(path_tmp);
-        string result(basename(path_tmp));
-        free(path_tmp);
-        return result;
-    }
+string BaseName(const string& path) {
+  char* path_tmp = strdup(path.c_str());
+  assert(path_tmp);
+  string result(basename(path_tmp));
+  free(path_tmp);
+  return result;
+}
 
-    string DirName(const string &path) {
-        char *path_tmp = strdup(path.c_str());
-        assert(path_tmp);
-        string result(dirname(path_tmp));
-        free(path_tmp);
-        return result;
-    }
+string DirName(const string& path) {
+  char* path_tmp = strdup(path.c_str());
+  assert(path_tmp);
+  string result(dirname(path_tmp));
+  free(path_tmp);
+  return result;
+}
 
 }  // namespace google_breakpad

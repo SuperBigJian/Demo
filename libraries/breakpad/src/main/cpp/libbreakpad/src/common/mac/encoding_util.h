@@ -36,6 +36,6 @@
 // deprecated with iOS 9.0 / OS X 10.11 SDKs, this function re-implements it
 // using -[NSString stringByAddingPercentEncodingWithAllowedCharacters:] when
 // using those SDKs.
-NSString *PercentEncodeNSString(NSString *key);
+NSString* PercentEncodeNSString(NSString* key);
 
 #endif  // GOOGLE_BREAKPAD_COMMON_MAC_ENCODING_UTIL_H

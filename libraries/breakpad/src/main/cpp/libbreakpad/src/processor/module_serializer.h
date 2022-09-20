@@ -57,72 +57,72 @@ namespace google_breakpad {
 // memory, convert ASCII format symbol data into serialized binary data, and
 // convert loaded BasicSourceLineResolver::Module into
 // FastSourceLineResolver::Module.
-    class ModuleSerializer {
-    public:
-        // Compute the size of memory required to serialize a module.  Return the
-        // total size needed for serialization.
-        size_t SizeOf(const BasicSourceLineResolver::Module &module);
+class ModuleSerializer {
+ public:
+  // Compute the size of memory required to serialize a module.  Return the
+  // total size needed for serialization.
+  size_t SizeOf(const BasicSourceLineResolver::Module& module);
 
-        // Write a module into an allocated memory chunk with required size.
-        // Return the "end" of data, i.e., the address after the final byte of data.
-        char *Write(const BasicSourceLineResolver::Module &module, char *dest);
+  // Write a module into an allocated memory chunk with required size.
+  // Return the "end" of data, i.e., the address after the final byte of data.
+  char* Write(const BasicSourceLineResolver::Module& module, char* dest);
 
-        // Serializes a loaded Module object into a chunk of memory data and returns
-        // the address of memory chunk.  If size != NULL, *size is set to the memory
-        // size allocated for the serialized data.
-        // Caller takes the ownership of the memory chunk (allocated on heap), and
-        // owner should call delete [] to free the memory after use.
-        char *Serialize(const BasicSourceLineResolver::Module &module,
-                        unsigned int *size = NULL);
+  // Serializes a loaded Module object into a chunk of memory data and returns
+  // the address of memory chunk.  If size != NULL, *size is set to the memory
+  // size allocated for the serialized data.
+  // Caller takes the ownership of the memory chunk (allocated on heap), and
+  // owner should call delete [] to free the memory after use.
+  char* Serialize(const BasicSourceLineResolver::Module& module,
+                  unsigned int* size = NULL);
 
-        // Given the string format symbol_data, produces a chunk of serialized data.
-        // Caller takes ownership of the serialized data (on heap), and owner should
-        // call delete [] to free the memory after use.
-        char *SerializeSymbolFileData(const string &symbol_data,
-                                      unsigned int *size = NULL);
+  // Given the string format symbol_data, produces a chunk of serialized data.
+  // Caller takes ownership of the serialized data (on heap), and owner should
+  // call delete [] to free the memory after use.
+  char* SerializeSymbolFileData(const string& symbol_data,
+                                unsigned int* size = NULL);
 
-        // Serializes one loaded module with given moduleid in the basic source line
-        // resolver, and loads the serialized data into the fast source line resolver.
-        // Return false if the basic source line doesn't have a module with the given
-        // moduleid.
-        bool ConvertOneModule(const string &moduleid,
-                              const BasicSourceLineResolver *basic_resolver,
-                              FastSourceLineResolver *fast_resolver);
+  // Serializes one loaded module with given moduleid in the basic source line
+  // resolver, and loads the serialized data into the fast source line resolver.
+  // Return false if the basic source line doesn't have a module with the given
+  // moduleid.
+  bool ConvertOneModule(const string& moduleid,
+                        const BasicSourceLineResolver* basic_resolver,
+                        FastSourceLineResolver* fast_resolver);
 
-        // Serializes all the loaded modules in a basic source line resolver, and
-        // loads the serialized data into a fast source line resolver.
-        void ConvertAllModules(const BasicSourceLineResolver *basic_resolver,
-                               FastSourceLineResolver *fast_resolver);
+  // Serializes all the loaded modules in a basic source line resolver, and
+  // loads the serialized data into a fast source line resolver.
+  void ConvertAllModules(const BasicSourceLineResolver* basic_resolver,
+                         FastSourceLineResolver* fast_resolver);
 
-    private:
-        // Convenient type names.
-        typedef BasicSourceLineResolver::Line Line;
-        typedef BasicSourceLineResolver::Function Function;
-        typedef BasicSourceLineResolver::PublicSymbol PublicSymbol;
-        typedef BasicSourceLineResolver::InlineOrigin InlineOrigin;
+ private:
+  // Convenient type names.
+  typedef BasicSourceLineResolver::Line Line;
+  typedef BasicSourceLineResolver::Function Function;
+  typedef BasicSourceLineResolver::PublicSymbol PublicSymbol;
+  typedef BasicSourceLineResolver::InlineOrigin InlineOrigin;
 
-        // Internal implementation for ConvertOneModule and ConvertAllModules methods.
-        bool SerializeModuleAndLoadIntoFastResolver(
-                const BasicSourceLineResolver::ModuleMap::const_iterator &iter,
-                FastSourceLineResolver *fast_resolver);
+  // Internal implementation for ConvertOneModule and ConvertAllModules methods.
+  bool SerializeModuleAndLoadIntoFastResolver(
+      const BasicSourceLineResolver::ModuleMap::const_iterator& iter,
+      FastSourceLineResolver* fast_resolver);
 
-        // Number of Maps that Module class contains.
-        static const int32_t kNumberMaps_ =
-                FastSourceLineResolver::Module::kNumberMaps_;
+  // Number of Maps that Module class contains.
+  static const int32_t kNumberMaps_ =
+      FastSourceLineResolver::Module::kNumberMaps_;
 
-        // Memory sizes required to serialize map components in Module.
-        uint32_t map_sizes_[kNumberMaps_];
+  // Memory sizes required to serialize map components in Module.
+  uint32_t map_sizes_[kNumberMaps_];
 
-        // Serializers for each individual map component in Module class.
-        StdMapSerializer<int, string> files_serializer_;
-        RangeMapSerializer <MemAddr, linked_ptr<Function>> functions_serializer_;
-        AddressMapSerializer <MemAddr, linked_ptr<PublicSymbol>> pubsym_serializer_;
-        ContainedRangeMapSerializer <MemAddr,
-        linked_ptr<WindowsFrameInfo>> wfi_serializer_;
-        RangeMapSerializer <MemAddr, string> cfi_init_rules_serializer_;
-        StdMapSerializer <MemAddr, string> cfi_delta_rules_serializer_;
-        StdMapSerializer<int, linked_ptr<InlineOrigin>> inline_origin_serializer_;
-    };
+  // Serializers for each individual map component in Module class.
+  StdMapSerializer<int, string> files_serializer_;
+  RangeMapSerializer<MemAddr, linked_ptr<Function> > functions_serializer_;
+  AddressMapSerializer<MemAddr, linked_ptr<PublicSymbol> > pubsym_serializer_;
+  ContainedRangeMapSerializer<MemAddr,
+                              linked_ptr<WindowsFrameInfo> > wfi_serializer_;
+  RangeMapSerializer<MemAddr, string> cfi_init_rules_serializer_;
+  StdMapSerializer<MemAddr, string> cfi_delta_rules_serializer_;
+  StdMapSerializer<int, linked_ptr<InlineOrigin>> inline_origin_serializer_;
+};
 
 }  // namespace google_breakpad
 

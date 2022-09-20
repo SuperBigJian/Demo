@@ -39,18 +39,18 @@
 
 namespace google_breakpad {
 
-    void DwarfRangeListHandler::AddRange(uint64_t begin, uint64_t end) {
-        Module::Range r(begin, end - begin);
+void DwarfRangeListHandler::AddRange(uint64_t begin, uint64_t end) {
+  Module::Range r(begin, end - begin);
 
-        ranges_->push_back(r);
-    }
+  ranges_->push_back(r);
+}
 
-    void DwarfRangeListHandler::Finish() {
-        std::sort(ranges_->begin(), ranges_->end(),
-                  [](const Module::Range &a, const Module::Range &b) {
-                      return a.address < b.address;
-                  }
-        );
+void DwarfRangeListHandler::Finish() {
+  std::sort(ranges_->begin(), ranges_->end(),
+    [](const Module::Range& a, const Module::Range& b) {
+      return a.address < b.address;
     }
+  );
+}
 
 } // namespace google_breakpad

@@ -32,68 +32,64 @@
 #import "TestClass.h"
 
 struct AStruct {
-    int x;
-    float y;
-    double z;
+  int x;
+  float y;
+  double z;
 };
 
 class InternalTestClass {
-public:
-    InternalTestClass(int a) : a_(a) {}
+ public:
+  InternalTestClass(int a) : a_(a) {}
+  ~InternalTestClass() {}
 
-    ~InternalTestClass() {}
+  void snooze(float a);
+  void snooze(int a);
+  int snooze(int a, float b);
 
-    void snooze(float a);
+ protected:
+  int a_;
+  AStruct s_;
 
-    void snooze(int a);
-
-    int snooze(int a, float b);
-
-protected:
-    int a_;
-    AStruct s_;
-
-    static void InternalFunction(AStruct &s);
-
-    static float kStaticFloatValue;
+  static void InternalFunction(AStruct &s);
+  static float kStaticFloatValue;
 };
 
 void InternalTestClass::snooze(float a) {
-    InternalFunction(s_);
-    sleep(a_ * a);
+  InternalFunction(s_);
+  sleep(a_ * a);
 }
 
 void InternalTestClass::snooze(int a) {
-    InternalFunction(s_);
-    sleep(a_ * a);
+  InternalFunction(s_);
+  sleep(a_ * a);
 }
 
 int InternalTestClass::snooze(int a, float b) {
-    InternalFunction(s_);
-    sleep(a_ * a * b);
+  InternalFunction(s_);
+  sleep(a_ * a * b);
 
-    return 33;
+  return 33;
 }
 
 void InternalTestClass::InternalFunction(AStruct &s) {
-    s.x = InternalTestClass::kStaticFloatValue;
+  s.x = InternalTestClass::kStaticFloatValue;
 }
 
 float InternalTestClass::kStaticFloatValue = 42;
 
 static float PlainOldFunction() {
-    return 3.14145f;
+  return 3.14145f;
 }
 
 @implementation TestClass
 
 - (void)wait {
-    InternalTestClass t(10);
-    float z = PlainOldFunction();
+  InternalTestClass t(10);
+  float z = PlainOldFunction();
 
-    while (1) {
-        t.snooze(z);
-    }
+  while (1) {
+    t.snooze(z);
+  }
 }
 
 @end

@@ -25,10 +25,10 @@
  * 
  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
  */
-#ifndef    _BSD_I386__TYPES_H_
-#define    _BSD_I386__TYPES_H_
+#ifndef	_BSD_I386__TYPES_H_
+#define	_BSD_I386__TYPES_H_
 
-typedef long __darwin_intptr_t;
-typedef unsigned int __darwin_natural_t;
+typedef long			__darwin_intptr_t;
+typedef unsigned int		__darwin_natural_t;
 
-#endif    /* _BSD_I386__TYPES_H_ */
+#endif	/* _BSD_I386__TYPES_H_ */

@@ -44,118 +44,113 @@ namespace google_breakpad {
 
 // A class encapsulating an ELF core dump file mapped into memory, which
 // provides methods for accessing program headers and the note section.
-    class ElfCoreDump {
-    public:
-        // ELF types based on the native word size.
-        typedef ElfW(Ehdr)
-        Ehdr;
-        typedef ElfW(Nhdr)
-        Nhdr;
-        typedef ElfW(Phdr)
-        Phdr;
-        typedef ElfW(Word)
-        Word;
-        typedef ElfW(Addr)
-        Addr;
+class ElfCoreDump {
+ public:
+  // ELF types based on the native word size.
+  typedef ElfW(Ehdr) Ehdr;
+  typedef ElfW(Nhdr) Nhdr;
+  typedef ElfW(Phdr) Phdr;
+  typedef ElfW(Word) Word;
+  typedef ElfW(Addr) Addr;
 #if ULONG_MAX == 0xffffffff
-        static const int kClass = ELFCLASS32;
+  static const int kClass = ELFCLASS32;
 #elif ULONG_MAX == 0xffffffffffffffff
-        static const int kClass = ELFCLASS64;
+  static const int kClass = ELFCLASS64;
 #else
 #error "Unsupported word size for ElfCoreDump."
 #endif
 
-        // A class encapsulating the note content in a core dump, which provides
-        // methods for accessing the name and description of a note.
-        class Note {
-        public:
-            Note();
+  // A class encapsulating the note content in a core dump, which provides
+  // methods for accessing the name and description of a note.
+  class Note {
+   public:
+    Note();
 
-            // Constructor that takes the note content from |content|.
-            explicit Note(const MemoryRange &content);
+    // Constructor that takes the note content from |content|.
+    explicit Note(const MemoryRange& content);
 
-            // Returns true if this note is valid, i,e. a note header is found in
-            // |content_|, or false otherwise.
-            bool IsValid() const;
+    // Returns true if this note is valid, i,e. a note header is found in
+    // |content_|, or false otherwise.
+    bool IsValid() const;
 
-            // Returns the note header, or NULL if no note header is found in
-            // |content_|.
-            const Nhdr *GetHeader() const;
+    // Returns the note header, or NULL if no note header is found in
+    // |content_|.
+    const Nhdr* GetHeader() const;
 
-            // Returns the note type, or 0 if no note header is found in |content_|.
-            Word GetType() const;
+    // Returns the note type, or 0 if no note header is found in |content_|.
+    Word GetType() const;
 
-            // Returns a memory range covering the note name, or an empty range
-            // if no valid note name is found in |content_|.
-            MemoryRange GetName() const;
+    // Returns a memory range covering the note name, or an empty range
+    // if no valid note name is found in |content_|.
+    MemoryRange GetName() const;
 
-            // Returns a memory range covering the note description, or an empty
-            // range if no valid note description is found in |content_|.
-            MemoryRange GetDescription() const;
+    // Returns a memory range covering the note description, or an empty
+    // range if no valid note description is found in |content_|.
+    MemoryRange GetDescription() const;
 
-            // Returns the note following this note, or an empty note if no valid
-            // note is found after this note.
-            Note GetNextNote() const;
+    // Returns the note following this note, or an empty note if no valid
+    // note is found after this note.
+    Note GetNextNote() const;
 
-        private:
-            // Returns the size in bytes round up to the word alignment, specified
-            // for the note section, of a given size in bytes.
-            static size_t AlignedSize(size_t size);
+   private:
+    // Returns the size in bytes round up to the word alignment, specified
+    // for the note section, of a given size in bytes.
+    static size_t AlignedSize(size_t size);
 
-            // Note content.
-            MemoryRange content_;
-        };
+    // Note content.
+    MemoryRange content_;
+  };
 
-        ElfCoreDump();
+  ElfCoreDump();
 
-        // Constructor that takes the core dump content from |content|.
-        explicit ElfCoreDump(const MemoryRange &content);
+  // Constructor that takes the core dump content from |content|.
+  explicit ElfCoreDump(const MemoryRange& content);
 
-        ~ElfCoreDump();
+  ~ElfCoreDump();
 
-        // Sets the core dump content to |content|.
-        void SetContent(const MemoryRange &content);
+  // Sets the core dump content to |content|.
+  void SetContent(const MemoryRange& content);
 
-        // Returns true if a valid ELF header in the core dump, or false otherwise.
-        bool IsValid() const;
+  // Returns true if a valid ELF header in the core dump, or false otherwise.
+  bool IsValid() const;
 
-        // Returns the ELF header in the core dump, or NULL if no ELF header
-        // is found in |content_|.
-        const Ehdr *GetHeader() const;
+  // Returns the ELF header in the core dump, or NULL if no ELF header
+  // is found in |content_|.
+  const Ehdr* GetHeader() const;
 
-        // Returns the |index|-th program header in the core dump, or NULL if no
-        // ELF header is found in |content_| or |index| is out of bounds.
-        const Phdr *GetProgramHeader(unsigned index) const;
+  // Returns the |index|-th program header in the core dump, or NULL if no
+  // ELF header is found in |content_| or |index| is out of bounds.
+  const Phdr* GetProgramHeader(unsigned index) const;
 
-        // Returns the first program header of |type| in the core dump, or NULL if
-        // no ELF header is found in |content_| or no program header of |type| is
-        // found.
-        const Phdr *GetFirstProgramHeaderOfType(Word type) const;
+  // Returns the first program header of |type| in the core dump, or NULL if
+  // no ELF header is found in |content_| or no program header of |type| is
+  // found.
+  const Phdr* GetFirstProgramHeaderOfType(Word type) const;
 
-        // Returns the number of program headers in the core dump, or 0 if no
-        // ELF header is found in |content_|.
-        unsigned GetProgramHeaderCount() const;
+  // Returns the number of program headers in the core dump, or 0 if no
+  // ELF header is found in |content_|.
+  unsigned GetProgramHeaderCount() const;
 
-        // Copies |length| bytes of data starting at |virtual_address| in the core
-        // dump to |buffer|. |buffer| should be a valid pointer to a buffer of at
-        // least |length| bytes. Returns true if the data to be copied is found in
-        // the core dump, or false otherwise.
-        bool CopyData(void *buffer, Addr virtual_address, size_t length);
+  // Copies |length| bytes of data starting at |virtual_address| in the core
+  // dump to |buffer|. |buffer| should be a valid pointer to a buffer of at
+  // least |length| bytes. Returns true if the data to be copied is found in
+  // the core dump, or false otherwise.
+  bool CopyData(void* buffer, Addr virtual_address, size_t length);
 
-        // Returns the first note found in the note section of the core dump, or
-        // an empty note if no note is found.
-        Note GetFirstNote() const;
+  // Returns the first note found in the note section of the core dump, or
+  // an empty note if no note is found.
+  Note GetFirstNote() const;
 
-        // Sets the mem fd.
-        void SetProcMem(const int fd);
+  // Sets the mem fd.
+  void SetProcMem(const int fd);
 
-    private:
-        // Core dump content.
-        MemoryRange content_;
+ private:
+  // Core dump content.
+  MemoryRange content_;
 
-        // Descriptor for /proc/<pid>/mem.
-        int proc_mem_fd_;
-    };
+  // Descriptor for /proc/<pid>/mem.
+  int proc_mem_fd_;
+};
 
 }  // namespace google_breakpad
 

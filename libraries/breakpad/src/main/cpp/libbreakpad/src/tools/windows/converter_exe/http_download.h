@@ -35,28 +35,27 @@
 
 namespace crash {
 
-    using std::map;
-    using std::string;
-    using std::wstring;
+using std::map;
+using std::string;
+using std::wstring;
 
-    class HTTPDownload {
-    public:
-        // Retrieves the resource located at |url|, a http or https URL, via WinInet.
-        // The request is fetched with GET request; the optional |parameters| are
-        // appended to the URL.  Returns true on success, placing the content of the
-        // retrieved resource in |content|.  Returns false on failure.  HTTP status
-        // codes other than 200 cause Download to return false.  If |status_code| is
-        // supplied, it will be set to the value of the HTTP status code, if an HTTP
-        // transaction occurs.  If Download fails before a transaction can occur,
-        // |status_code| will be set to 0.  Any failures will result in messages
-        // being printed to stderr.
-        static bool Download(const wstring &url,
-                             const map <wstring, wstring> *parameters,
-                             string *content, int *status_code);
-
-    private:
-        static HttpClient *CreateHttpClient(const wchar_t *);
-    };
+class HTTPDownload {
+ public:
+  // Retrieves the resource located at |url|, a http or https URL, via WinInet.
+  // The request is fetched with GET request; the optional |parameters| are
+  // appended to the URL.  Returns true on success, placing the content of the
+  // retrieved resource in |content|.  Returns false on failure.  HTTP status
+  // codes other than 200 cause Download to return false.  If |status_code| is
+  // supplied, it will be set to the value of the HTTP status code, if an HTTP
+  // transaction occurs.  If Download fails before a transaction can occur,
+  // |status_code| will be set to 0.  Any failures will result in messages
+  // being printed to stderr.
+  static bool Download(const wstring& url,
+                       const map<wstring, wstring>* parameters,
+                       string *content, int *status_code);
+ private:
+  static HttpClient* CreateHttpClient(const wchar_t*);
+};
 
 }  // namespace crash
 

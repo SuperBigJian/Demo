@@ -36,53 +36,53 @@
 #include "common/using_std_string.h"
 
 namespace google_breakpad {
-    namespace sym_upload {
+namespace sym_upload {
 
-        struct UploadUrlResponse {
-            string upload_url;
-            string upload_key;
-        };
+struct UploadUrlResponse {
+  string upload_url;
+  string upload_key;
+};
 
-        enum SymbolStatus {
-            Found,
-            Missing,
-            Unknown
-        };
+enum SymbolStatus {
+  Found,
+  Missing,
+  Unknown
+};
 
-        enum CompleteUploadResult {
-            Ok,
-            DuplicateData,
-            Error
-        };
+enum CompleteUploadResult {
+  Ok,
+  DuplicateData,
+  Error
+};
 
 // Helper class to communicate with a sym-upload-v2 service over HTTP/REST,
 // via libcurl.
-        class SymbolCollectorClient {
-        public:
-            static bool CreateUploadUrl(
-                    LibcurlWrapper *libcurl_wrapper,
-                    const string &api_url,
-                    const string &api_key,
-                    UploadUrlResponse *uploadUrlResponse);
+class SymbolCollectorClient {
+ public:
+  static bool CreateUploadUrl(
+      LibcurlWrapper* libcurl_wrapper,
+      const string& api_url,
+      const string& api_key,
+      UploadUrlResponse* uploadUrlResponse);
 
-            static CompleteUploadResult CompleteUpload(
-                    LibcurlWrapper *libcurl_wrapper,
-                    const string &api_url,
-                    const string &api_key,
-                    const string &upload_key,
-                    const string &debug_file,
-                    const string &debug_id,
-                    const string &type);
+  static CompleteUploadResult CompleteUpload(
+      LibcurlWrapper* libcurl_wrapper,
+      const string& api_url,
+      const string& api_key,
+      const string& upload_key,
+      const string& debug_file,
+      const string& debug_id,
+      const string& type);
 
-            static SymbolStatus CheckSymbolStatus(
-                    LibcurlWrapper *libcurl_wrapper,
-                    const string &api_url,
-                    const string &api_key,
-                    const string &debug_file,
-                    const string &debug_id);
-        };
+  static SymbolStatus CheckSymbolStatus(
+      LibcurlWrapper* libcurl_wrapper,
+      const string& api_url,
+      const string& api_key,
+      const string& debug_file,
+      const string& debug_id);
+};
 
-    }  // namespace sym_upload
+}  // namespace sym_upload
 }  // namespace google_breakpad
 
 #endif  // COMMON_LINUX_SYMBOL_COLLECTOR_CLIENT_H_

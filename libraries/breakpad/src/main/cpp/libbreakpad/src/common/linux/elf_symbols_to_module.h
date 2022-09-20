@@ -42,15 +42,15 @@
 
 namespace google_breakpad {
 
-    class Module;
+class Module;
 
-    bool ELFSymbolsToModule(const uint8_t *symtab_section,
-                            size_t symtab_size,
-                            const uint8_t *string_section,
-                            size_t string_size,
-                            const bool big_endian,
-                            size_t value_size,
-                            Module *module);
+bool ELFSymbolsToModule(const uint8_t* symtab_section,
+                        size_t symtab_size,
+                        const uint8_t* string_section,
+                        size_t string_size,
+                        const bool big_endian,
+                        size_t value_size,
+                        Module* module);
 
 }  // namespace google_breakpad
 

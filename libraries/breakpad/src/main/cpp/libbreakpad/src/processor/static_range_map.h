@@ -46,63 +46,60 @@ namespace google_breakpad {
 
 // AddressType is basic type, e.g.: integer types, pointers etc
 // EntryType could be a complex type, so we retrieve its pointer instead.
-    template<typename AddressType, typename EntryType>
-    class StaticRangeMap {
-    public:
-        StaticRangeMap() : map_() {}
+template<typename AddressType, typename EntryType>
+class StaticRangeMap {
+ public:
+  StaticRangeMap(): map_() { }
+  explicit StaticRangeMap(const char* memory): map_(memory) { }
 
-        explicit StaticRangeMap(const char *memory) : map_(memory) {}
+  // Locates the range encompassing the supplied address.  If there is
+  // no such range, returns false.  entry_base and entry_size, if non-NULL,
+  // are set to the base and size of the entry's range.
+  bool RetrieveRange(const AddressType& address, const EntryType*& entry,
+                     AddressType* entry_base, AddressType* entry_size) const;
 
-        // Locates the range encompassing the supplied address.  If there is
-        // no such range, returns false.  entry_base and entry_size, if non-NULL,
-        // are set to the base and size of the entry's range.
-        bool RetrieveRange(const AddressType &address, const EntryType *&entry,
-                           AddressType *entry_base, AddressType *entry_size) const;
+  // Locates the range encompassing the supplied address, if one exists.
+  // If no range encompasses the supplied address, locates the nearest range
+  // to the supplied address that is lower than the address.  Returns false
+  // if no range meets these criteria.  entry_base and entry_size, if
+  // non-NULL, are set to the base and size of the entry's range.
+  bool RetrieveNearestRange(const AddressType& address, const EntryType*& entry,
+                            AddressType* entry_base, AddressType* entry_size)
+                            const;
 
-        // Locates the range encompassing the supplied address, if one exists.
-        // If no range encompasses the supplied address, locates the nearest range
-        // to the supplied address that is lower than the address.  Returns false
-        // if no range meets these criteria.  entry_base and entry_size, if
-        // non-NULL, are set to the base and size of the entry's range.
-        bool RetrieveNearestRange(const AddressType &address, const EntryType *&entry,
-                                  AddressType *entry_base, AddressType *entry_size)
-        const;
+  // Treating all ranges as a list ordered by the address spaces that they
+  // occupy, locates the range at the index specified by index.  Returns
+  // false if index is larger than the number of ranges stored.  entry_base
+  // and entry_size, if non-NULL, are set to the base and size of the entry's
+  // range.
+  //
+  // RetrieveRangeAtIndex is not optimized for speedy operation.
+  bool RetrieveRangeAtIndex(int index, const EntryType*& entry,
+                            AddressType* entry_base, AddressType* entry_size)
+                            const;
 
-        // Treating all ranges as a list ordered by the address spaces that they
-        // occupy, locates the range at the index specified by index.  Returns
-        // false if index is larger than the number of ranges stored.  entry_base
-        // and entry_size, if non-NULL, are set to the base and size of the entry's
-        // range.
-        //
-        // RetrieveRangeAtIndex is not optimized for speedy operation.
-        bool RetrieveRangeAtIndex(int index, const EntryType *&entry,
-                                  AddressType *entry_base, AddressType *entry_size)
-        const;
+  // Returns the number of ranges stored in the RangeMap.
+  inline int GetCount() const { return map_.size(); }
 
-        // Returns the number of ranges stored in the RangeMap.
-        inline int GetCount() const { return map_.size(); }
+ private:
+  friend class ModuleComparer;
+  class Range {
+   public:
+    AddressType base() const {
+      return *(reinterpret_cast<const AddressType*>(this));
+    }
+    const EntryType* entryptr() const {
+      return reinterpret_cast<const EntryType*>(this + sizeof(AddressType));
+    }
+  };
 
-    private:
-        friend class ModuleComparer;
+  // Convenience types.
+  typedef StaticRangeMap* SelfPtr;
+  typedef StaticMap<AddressType, Range> AddressToRangeMap;
+  typedef typename AddressToRangeMap::const_iterator MapConstIterator;
 
-        class Range {
-        public:
-            AddressType base() const {
-                return *(reinterpret_cast<const AddressType *>(this));
-            }
-
-            const EntryType *entryptr() const {
-                return reinterpret_cast<const EntryType *>(this + sizeof(AddressType));
-            }
-        };
-
-        // Convenience types.
-        typedef StaticRangeMap *SelfPtr;
-        typedef StaticMap <AddressType, Range> AddressToRangeMap;
-        typedef typename AddressToRangeMap::const_iterator MapConstIterator;
-
-        AddressToRangeMap map_;
-    };
+  AddressToRangeMap map_;
+};
 
 }  // namespace google_breakpad
 

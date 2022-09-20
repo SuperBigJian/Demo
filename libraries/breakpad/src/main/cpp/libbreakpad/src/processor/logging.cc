@@ -47,69 +47,68 @@
 
 namespace google_breakpad {
 
-    LogStream::LogStream(std::ostream &stream, Severity severity,
-                         const char *file, int line)
-            : stream_(stream) {
-        time_t clock;
-        time(&clock);
-        struct tm tm_struct;
+LogStream::LogStream(std::ostream& stream, Severity severity,
+                     const char* file, int line)
+    : stream_(stream) {
+  time_t clock;
+  time(&clock);
+  struct tm tm_struct;
 #ifdef _WIN32
-        localtime_s(&tm_struct, &clock);
+  localtime_s(&tm_struct, &clock);
 #else
-        localtime_r(&clock, &tm_struct);
+  localtime_r(&clock, &tm_struct);
 #endif
-        char time_string[20];
-        strftime(time_string, sizeof(time_string), "%Y-%m-%d %H:%M:%S", &tm_struct);
+  char time_string[20];
+  strftime(time_string, sizeof(time_string), "%Y-%m-%d %H:%M:%S", &tm_struct);
 
-        const char *severity_string = "UNKNOWN_SEVERITY";
-        switch (severity) {
-            case SEVERITY_INFO:
-                severity_string = "INFO";
-                break;
-            case SEVERITY_ERROR:
-                severity_string = "ERROR";
-                break;
-            case SEVERITY_CRITICAL:
-                severity_string = "CRITICAL";
-                break;
-        }
+  const char* severity_string = "UNKNOWN_SEVERITY";
+  switch (severity) {
+    case SEVERITY_INFO:
+      severity_string = "INFO";
+      break;
+    case SEVERITY_ERROR:
+      severity_string = "ERROR";
+      break;
+    case SEVERITY_CRITICAL:
+      severity_string = "CRITICAL";
+      break;
+  }
 
-        stream_ << time_string << ": " << PathnameStripper::File(file) << ":" <<
-                line << ": " << severity_string << ": ";
-    }
+  stream_ << time_string << ": " << PathnameStripper::File(file) << ":" <<
+             line << ": " << severity_string << ": ";
+}
 
-    LogStream::~LogStream() {
-        stream_ << std::endl;
-    }
+LogStream::~LogStream() {
+  stream_ << std::endl;
+}
 
-    string HexString(uint32_t number) {
-        char buffer[11];
-        snprintf(buffer, sizeof(buffer), "0x%x", number);
-        return string(buffer);
-    }
+string HexString(uint32_t number) {
+  char buffer[11];
+  snprintf(buffer, sizeof(buffer), "0x%x", number);
+  return string(buffer);
+}
 
-    string HexString(uint64_t number) {
-        char buffer[19];
-        snprintf(buffer, sizeof(buffer), "0x%"
-        PRIx64, number);
-        return string(buffer);
-    }
+string HexString(uint64_t number) {
+  char buffer[19];
+  snprintf(buffer, sizeof(buffer), "0x%" PRIx64, number);
+  return string(buffer);
+}
 
-    string HexString(int number) {
-        char buffer[19];
-        snprintf(buffer, sizeof(buffer), "0x%x", number);
-        return string(buffer);
-    }
+string HexString(int number) {
+  char buffer[19];
+  snprintf(buffer, sizeof(buffer), "0x%x", number);
+  return string(buffer);
+}
 
-    int ErrnoString(string *error_string) {
-        assert(error_string);
+int ErrnoString(string* error_string) {
+  assert(error_string);
 
-        // strerror isn't necessarily thread-safe.  strerror_r would be preferrable,
-        // but GNU libc uses a nonstandard strerror_r by default, which returns a
-        // char* (rather than an int success indicator) and doesn't necessarily
-        // use the supplied buffer.
-        error_string->assign(strerror(errno));
-        return errno;
-    }
+  // strerror isn't necessarily thread-safe.  strerror_r would be preferrable,
+  // but GNU libc uses a nonstandard strerror_r by default, which returns a
+  // char* (rather than an int success indicator) and doesn't necessarily
+  // use the supplied buffer.
+  error_string->assign(strerror(errno));
+  return errno;
+}
 
 }  // namespace google_breakpad

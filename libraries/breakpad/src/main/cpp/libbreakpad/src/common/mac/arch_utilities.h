@@ -38,10 +38,9 @@ namespace google_breakpad {
 
 // Custom implementation of |NXGetArchInfoFromName| and
 // |NXGetArchInfoFromCpuType| that handle newer CPU on older OSes.
-    const NXArchInfo *BreakpadGetArchInfoFromName(const char *arch_name);
-
-    const NXArchInfo *BreakpadGetArchInfoFromCpuType(cpu_type_t cpu_type,
-                                                     cpu_subtype_t cpu_subtype);
+const NXArchInfo* BreakpadGetArchInfoFromName(const char* arch_name);
+const NXArchInfo* BreakpadGetArchInfoFromCpuType(cpu_type_t cpu_type,
+                                                 cpu_subtype_t cpu_subtype);
 
 }  // namespace google_breakpad
 

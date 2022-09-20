@@ -35,8 +35,8 @@ namespace google_breakpad {
 // Launch the crash dump sender app.
 // |reporter_executable_path| is the path to the sender executable.
 // |config_file_path| is the path to the config file.
-    void LaunchReporter(const char *reporter_executable_path,
-                        const char *config_file_path);
+void LaunchReporter(const char *reporter_executable_path,
+                    const char *config_file_path);
 
 }  // namespace google_breakpad
 

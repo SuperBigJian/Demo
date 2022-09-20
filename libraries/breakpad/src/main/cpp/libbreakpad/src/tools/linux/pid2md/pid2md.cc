@@ -36,24 +36,24 @@
 #include "client/linux/minidump_writer/minidump_writer.h"
 #include "common/path_helper.h"
 
-int main(int argc, char *argv[]) {
-    if (argc != 3) {
-        fprintf(stderr, "Usage: %s <process id> <minidump file>\n\n",
-                google_breakpad::BaseName(argv[0]).c_str());
-        fprintf(stderr,
-                "A tool to generate a minidump from a running process. The process "
-                "resumes its\nactivity once the operation is completed. Permission "
-                "to trace the process is\nrequired.\n");
-        return EXIT_FAILURE;
-    }
+int main(int argc, char* argv[]) {
+  if (argc != 3) {
+    fprintf(stderr, "Usage: %s <process id> <minidump file>\n\n",
+            google_breakpad::BaseName(argv[0]).c_str());
+    fprintf(stderr,
+            "A tool to generate a minidump from a running process. The process "
+            "resumes its\nactivity once the operation is completed. Permission "
+            "to trace the process is\nrequired.\n");
+    return EXIT_FAILURE;
+  }
 
-    pid_t process_id = atoi(argv[1]);
-    const char *minidump_file = argv[2];
+  pid_t process_id = atoi(argv[1]);
+  const char* minidump_file = argv[2];
 
-    if (!google_breakpad::WriteMinidump(minidump_file, process_id, process_id)) {
-        fprintf(stderr, "Unable to generate minidump.\n");
-        return EXIT_FAILURE;
-    }
+  if (!google_breakpad::WriteMinidump(minidump_file, process_id, process_id)) {
+    fprintf(stderr, "Unable to generate minidump.\n");
+    return EXIT_FAILURE;
+  }
 
-    return EXIT_SUCCESS;
+  return EXIT_SUCCESS;
 }

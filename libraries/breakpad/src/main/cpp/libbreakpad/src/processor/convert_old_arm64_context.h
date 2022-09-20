@@ -34,8 +34,8 @@
 
 namespace google_breakpad {
 
-    void ConvertOldARM64Context(const MDRawContextARM64_Old &old,
-                                MDRawContextARM64 *context);
+void ConvertOldARM64Context(const MDRawContextARM64_Old& old,
+                            MDRawContextARM64* context);
 
 }  // namespace google_breakpad
 

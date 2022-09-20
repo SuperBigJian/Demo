@@ -37,25 +37,25 @@
 
 namespace {
 
-    const char kFoo[] = "foo";
-    const char kBar[] = "bar";
+const char kFoo[] = "foo";
+const char kBar[] = "bar";
 
-    const char kStartOfLine[] = "^";
-    const char kEndOfLine[] = "$";
+const char kStartOfLine[] = "^";
+const char kEndOfLine[] = "$";
 
-    const char kFilterReturnsTrue[] = "filter_returns_true";
-    const char kFilterReturnsFalse[] = "filter_returns_false";
+const char kFilterReturnsTrue[] = "filter_returns_true";
+const char kFilterReturnsFalse[] = "filter_returns_false";
 
-    const char kCallbackReturnsTrue[] = "callback_returns_true";
-    const char kCallbackReturnsFalse[] = "callback_returns_false";
+const char kCallbackReturnsTrue[] = "callback_returns_true";
+const char kCallbackReturnsFalse[] = "callback_returns_false";
 
-    bool DoesPathExist(const wchar_t *path_name) {
-        DWORD flags = GetFileAttributes(path_name);
-        if (flags == INVALID_FILE_ATTRIBUTES) {
-            return false;
-        }
-        return true;
-    }
+bool DoesPathExist(const wchar_t* path_name) {
+  DWORD flags = GetFileAttributes(path_name);
+  if (flags == INVALID_FILE_ATTRIBUTES) {
+    return false;
+  }
+  return true;
+}
 
 // A callback function to run before Breakpad performs any substantial
 // processing of an exception.  A FilterCallback is called before writing
@@ -68,19 +68,19 @@ namespace {
 // attempting to write a minidump.  If a FilterCallback returns false,
 // Breakpad will immediately report the exception as unhandled without
 // writing a minidump, allowing another handler the opportunity to handle it.
-    template<bool filter_return_value>
-    bool CrashHandlerFilter(void *context,
-                            EXCEPTION_POINTERS *exinfo,
-                            MDRawAssertionInfo *assertion) {
-        if (filter_return_value) {
-            fprintf(stderr, kFilterReturnsTrue);
-        } else {
-            fprintf(stderr, kFilterReturnsFalse);
-        }
-        fflush(stderr);
+template <bool filter_return_value>
+bool CrashHandlerFilter(void* context,
+                        EXCEPTION_POINTERS* exinfo,
+                        MDRawAssertionInfo* assertion) {
+  if (filter_return_value) {
+    fprintf(stderr, kFilterReturnsTrue);
+  } else {
+    fprintf(stderr, kFilterReturnsFalse);
+  }
+  fflush(stderr);
 
-        return filter_return_value;
-    }
+  return filter_return_value;
+}
 
 // A callback function to run after the minidump has been written.
 // minidump_id is a unique id for the dump, so the minidump
@@ -106,280 +106,222 @@ namespace {
 // be NULL. In case of out-of-process dump generation, the dump path and
 // minidump id are controlled by the server process and are not communicated
 // back to the crashing process.
-    template<bool callback_return_value>
-    bool MinidumpWrittenCallback(const wchar_t *dump_path,
-                                 const wchar_t *minidump_id,
-                                 void *context,
-                                 EXCEPTION_POINTERS *exinfo,
-                                 MDRawAssertionInfo *assertion,
-                                 bool succeeded) {
-        bool rv = false;
-        if (callback_return_value &&
-            succeeded &&
-            DoesPathExist(dump_path)) {
-            rv = true;
-            fprintf(stderr, kCallbackReturnsTrue);
-        } else {
-            fprintf(stderr, kCallbackReturnsFalse);
-        }
-        fflush(stderr);
+template <bool callback_return_value>
+bool MinidumpWrittenCallback(const wchar_t* dump_path,
+                             const wchar_t* minidump_id,
+                             void* context,
+                             EXCEPTION_POINTERS* exinfo,
+                             MDRawAssertionInfo* assertion,
+                             bool succeeded) {
+  bool rv = false;
+  if (callback_return_value &&
+      succeeded &&
+      DoesPathExist(dump_path)) {
+    rv = true;
+    fprintf(stderr, kCallbackReturnsTrue);
+  } else {
+    fprintf(stderr, kCallbackReturnsFalse);
+  }
+  fflush(stderr);
 
-        return rv;
-    }
-
-
-    void DoCrash(const char *message) {
-        if (message) {
-            fprintf(stderr, "%s", message);
-            fflush(stderr);
-        }
-        int *i = NULL;
-        (*i)++;
-
-        ASSERT_TRUE(false);
-    }
-
-    void InstallExceptionHandlerAndCrash(bool install_filter,
-                                         bool filter_return_value,
-                                         bool install_callback,
-                                         bool callback_return_value) {
-        wchar_t temp_path[MAX_PATH] = {'\0'};
-        GetTempPath(MAX_PATH, temp_path);
-
-        ASSERT_TRUE(DoesPathExist(temp_path));
-        google_breakpad::ExceptionHandler exc(
-                temp_path,
-                install_filter ?
-                (filter_return_value ?
-                 &CrashHandlerFilter<true> :
-                 &CrashHandlerFilter<false>) :
-                NULL,
-                install_callback ?
-                (callback_return_value ?
-                 &MinidumpWrittenCallback<true> :
-                 &MinidumpWrittenCallback<false>) :
-                NULL,
-                NULL,  // callback_context
-                google_breakpad::ExceptionHandler::HANDLER_EXCEPTION);
-
-        // Disable GTest SEH handler
-        testing::DisableExceptionHandlerInScope disable_exception_handler;
-
-        DoCrash(NULL);
-    }
-
-    TEST(AssertDeathSanity, Simple
-    ) {
-    ASSERT_DEATH(DoCrash(NULL),
-
-    "");
+  return rv;
 }
 
-TEST(AssertDeathSanity, Regex
-) {
-ASSERT_DEATH(DoCrash(kFoo),
-        std::string(kStartOfLine)
-+
-std::string(kFoo)
-+
-std::string(kEndOfLine)
-);
 
-ASSERT_DEATH(DoCrash(kBar),
-        std::string(kStartOfLine)
-+
-std::string(kBar)
-+
-std::string(kEndOfLine)
-);
+void DoCrash(const char* message) {
+  if (message) {
+    fprintf(stderr, "%s", message);
+    fflush(stderr);
+  }
+  int* i = NULL;
+  (*i)++;
+
+  ASSERT_TRUE(false);
 }
 
-TEST(ExceptionHandlerCallbacks, FilterTrue_No_Callback
-) {
-ASSERT_DEATH(
-        InstallExceptionHandlerAndCrash(true,    // install_filter
-                                        true,    // filter_return_value
-                                        false,   // install_callback
-                                        false),  // callback_return_value
-std::string(kStartOfLine)
-+
-std::string(kFilterReturnsTrue)
-+
-std::string(kEndOfLine)
-);
+void InstallExceptionHandlerAndCrash(bool install_filter,
+                                     bool filter_return_value,
+                                     bool install_callback,
+                                     bool callback_return_value) {
+  wchar_t temp_path[MAX_PATH] = { '\0' };
+  GetTempPath(MAX_PATH, temp_path);
+
+  ASSERT_TRUE(DoesPathExist(temp_path));
+  google_breakpad::ExceptionHandler exc(
+      temp_path,
+      install_filter ?
+        (filter_return_value ?
+          &CrashHandlerFilter<true> :
+          &CrashHandlerFilter<false>) :
+        NULL,
+      install_callback ?
+        (callback_return_value ?
+          &MinidumpWrittenCallback<true> :
+          &MinidumpWrittenCallback<false>) :
+        NULL,
+      NULL,  // callback_context
+      google_breakpad::ExceptionHandler::HANDLER_EXCEPTION);
+
+  // Disable GTest SEH handler
+  testing::DisableExceptionHandlerInScope disable_exception_handler;
+
+  DoCrash(NULL);
 }
 
-TEST(ExceptionHandlerCallbacks, FilterTrue_Callback
-) {
-ASSERT_DEATH(
-        InstallExceptionHandlerAndCrash(true,    // install_filter
-                                        true,    // filter_return_value
-                                        true,    // install_callback
-                                        false),  // callback_return_value
-std::string(kStartOfLine)
-+
-std::string(kFilterReturnsTrue)
-+
-std::string(kCallbackReturnsFalse)
-+
-std::string(kEndOfLine)
-);
+TEST(AssertDeathSanity, Simple) {
+  ASSERT_DEATH(DoCrash(NULL), "");
 }
 
-TEST(ExceptionHandlerCallbacks, FilterFalse_No_Callback
-) {
-ASSERT_DEATH(
-        InstallExceptionHandlerAndCrash(true,    // install_filter
-                                        false,   // filter_return_value
-                                        false,   // install_callback
-                                        false),  // callback_return_value
-std::string(kStartOfLine)
-+
-std::string(kFilterReturnsFalse)
-+
-std::string(kEndOfLine)
-);
+TEST(AssertDeathSanity, Regex) {
+  ASSERT_DEATH(DoCrash(kFoo),
+    std::string(kStartOfLine) +
+      std::string(kFoo) +
+      std::string(kEndOfLine));
+
+  ASSERT_DEATH(DoCrash(kBar),
+    std::string(kStartOfLine) +
+      std::string(kBar) +
+      std::string(kEndOfLine));
+}
+
+TEST(ExceptionHandlerCallbacks, FilterTrue_No_Callback) {
+  ASSERT_DEATH(
+    InstallExceptionHandlerAndCrash(true,    // install_filter
+                                    true,    // filter_return_value
+                                    false,   // install_callback
+                                    false),  // callback_return_value
+    std::string(kStartOfLine) +
+      std::string(kFilterReturnsTrue) +
+      std::string(kEndOfLine));
+}
+
+TEST(ExceptionHandlerCallbacks, FilterTrue_Callback) {
+  ASSERT_DEATH(
+    InstallExceptionHandlerAndCrash(true,    // install_filter
+                                    true,    // filter_return_value
+                                    true,    // install_callback
+                                    false),  // callback_return_value
+    std::string(kStartOfLine) +
+      std::string(kFilterReturnsTrue) +
+      std::string(kCallbackReturnsFalse) +
+      std::string(kEndOfLine));
+}
+
+TEST(ExceptionHandlerCallbacks, FilterFalse_No_Callback) {
+  ASSERT_DEATH(
+    InstallExceptionHandlerAndCrash(true,    // install_filter
+                                    false,   // filter_return_value
+                                    false,   // install_callback
+                                    false),  // callback_return_value
+    std::string(kStartOfLine) +
+      std::string(kFilterReturnsFalse) +
+      std::string(kEndOfLine));
 }
 
 // Callback shouldn't be executed when filter returns false
-TEST(ExceptionHandlerCallbacks, FilterFalse_Callback
-) {
-ASSERT_DEATH(
-        InstallExceptionHandlerAndCrash(true,    // install_filter
-                                        false,   // filter_return_value
-                                        true,    // install_callback
-                                        false),  // callback_return_value
-std::string(kStartOfLine)
-+
-std::string(kFilterReturnsFalse)
-+
-std::string(kEndOfLine)
-);
+TEST(ExceptionHandlerCallbacks, FilterFalse_Callback) {
+  ASSERT_DEATH(
+    InstallExceptionHandlerAndCrash(true,    // install_filter
+                                    false,   // filter_return_value
+                                    true,    // install_callback
+                                    false),  // callback_return_value
+    std::string(kStartOfLine) +
+      std::string(kFilterReturnsFalse) +
+      std::string(kEndOfLine));
 }
 
-TEST(ExceptionHandlerCallbacks, No_Filter_No_Callback
-) {
-ASSERT_DEATH(
-        InstallExceptionHandlerAndCrash(false,   // install_filter
-                                        true,    // filter_return_value
-                                        false,   // install_callback
-                                        false),  // callback_return_value
-std::string(kStartOfLine)
-+
-std::string(kEndOfLine)
-);
+TEST(ExceptionHandlerCallbacks, No_Filter_No_Callback) {
+  ASSERT_DEATH(
+    InstallExceptionHandlerAndCrash(false,   // install_filter
+                                    true,    // filter_return_value
+                                    false,   // install_callback
+                                    false),  // callback_return_value
+    std::string(kStartOfLine) +
+      std::string(kEndOfLine));
 }
 
-TEST(ExceptionHandlerCallbacks, No_Filter_Callback
-) {
-ASSERT_DEATH(
-        InstallExceptionHandlerAndCrash(false,   // install_filter
-                                        true,    // filter_return_value
-                                        true,    // install_callback
-                                        false),  // callback_return_value
-std::string(kStartOfLine)
-+
-std::string(kCallbackReturnsFalse)
-+
-std::string(kEndOfLine)
-);
+TEST(ExceptionHandlerCallbacks, No_Filter_Callback) {
+  ASSERT_DEATH(
+    InstallExceptionHandlerAndCrash(false,   // install_filter
+                                    true,    // filter_return_value
+                                    true,    // install_callback
+                                    false),  // callback_return_value
+    std::string(kStartOfLine) +
+      std::string(kCallbackReturnsFalse) +
+      std::string(kEndOfLine));
 }
 
 
-TEST(ExceptionHandlerNesting, Skip_From_Inner_Filter
-) {
-wchar_t temp_path[MAX_PATH] = {'\0'};
-GetTempPath(MAX_PATH, temp_path
-);
+TEST(ExceptionHandlerNesting, Skip_From_Inner_Filter) {
+  wchar_t temp_path[MAX_PATH] = { '\0' };
+  GetTempPath(MAX_PATH, temp_path);
 
-ASSERT_TRUE(DoesPathExist(temp_path)
-);
-google_breakpad::ExceptionHandler exc(
-        temp_path,
-        &CrashHandlerFilter<true>,
-        &MinidumpWrittenCallback<false>,
-        NULL,  // callback_context
-        google_breakpad::ExceptionHandler::HANDLER_EXCEPTION);
+  ASSERT_TRUE(DoesPathExist(temp_path));
+  google_breakpad::ExceptionHandler exc(
+      temp_path,
+      &CrashHandlerFilter<true>,
+      &MinidumpWrittenCallback<false>,
+      NULL,  // callback_context
+      google_breakpad::ExceptionHandler::HANDLER_EXCEPTION);
 
-ASSERT_DEATH(
-        InstallExceptionHandlerAndCrash(true,   // install_filter
-                                        false,  // filter_return_value
-                                        true,   // install_callback
-                                        true),  // callback_return_value
-std::string(kStartOfLine)
-+
-std::string(kFilterReturnsFalse)
-+    // inner filter
-std::string(kFilterReturnsTrue)
-+     // outer filter
-std::string(kCallbackReturnsFalse)
-+  // outer callback
-std::string(kEndOfLine)
-);
+  ASSERT_DEATH(
+    InstallExceptionHandlerAndCrash(true,   // install_filter
+                                    false,  // filter_return_value
+                                    true,   // install_callback
+                                    true),  // callback_return_value
+    std::string(kStartOfLine) +
+      std::string(kFilterReturnsFalse) +    // inner filter
+      std::string(kFilterReturnsTrue) +     // outer filter
+      std::string(kCallbackReturnsFalse) +  // outer callback
+      std::string(kEndOfLine));
 }
 
-TEST(ExceptionHandlerNesting, Skip_From_Inner_Callback
-) {
-wchar_t temp_path[MAX_PATH] = {'\0'};
-GetTempPath(MAX_PATH, temp_path
-);
+TEST(ExceptionHandlerNesting, Skip_From_Inner_Callback) {
+  wchar_t temp_path[MAX_PATH] = { '\0' };
+  GetTempPath(MAX_PATH, temp_path);
 
-ASSERT_TRUE(DoesPathExist(temp_path)
-);
-google_breakpad::ExceptionHandler exc(
-        temp_path,
-        &CrashHandlerFilter<true>,
-        &MinidumpWrittenCallback<false>,
-        NULL,  // callback_context
-        google_breakpad::ExceptionHandler::HANDLER_EXCEPTION);
+  ASSERT_TRUE(DoesPathExist(temp_path));
+  google_breakpad::ExceptionHandler exc(
+      temp_path,
+      &CrashHandlerFilter<true>,
+      &MinidumpWrittenCallback<false>,
+      NULL,  // callback_context
+      google_breakpad::ExceptionHandler::HANDLER_EXCEPTION);
 
-ASSERT_DEATH(
-        InstallExceptionHandlerAndCrash(true,    // install_filter
-                                        true,    // filter_return_value
-                                        true,    // install_callback
-                                        false),  // callback_return_value
-std::string(kStartOfLine)
-+
-std::string(kFilterReturnsTrue)
-+      // inner filter
-std::string(kCallbackReturnsFalse)
-+   // inner callback
-std::string(kFilterReturnsTrue)
-+      // outer filter
-std::string(kCallbackReturnsFalse)
-+   // outer callback
-std::string(kEndOfLine)
-);
+  ASSERT_DEATH(
+    InstallExceptionHandlerAndCrash(true,    // install_filter
+                                    true,    // filter_return_value
+                                    true,    // install_callback
+                                    false),  // callback_return_value
+    std::string(kStartOfLine) +
+      std::string(kFilterReturnsTrue) +      // inner filter
+      std::string(kCallbackReturnsFalse) +   // inner callback
+      std::string(kFilterReturnsTrue) +      // outer filter
+      std::string(kCallbackReturnsFalse) +   // outer callback
+      std::string(kEndOfLine));
 }
 
-TEST(ExceptionHandlerNesting, Handled_By_Inner_Handler
-) {
-wchar_t temp_path[MAX_PATH] = {'\0'};
-GetTempPath(MAX_PATH, temp_path
-);
+TEST(ExceptionHandlerNesting, Handled_By_Inner_Handler) {
+  wchar_t temp_path[MAX_PATH] = { '\0' };
+  GetTempPath(MAX_PATH, temp_path);
 
-ASSERT_TRUE(DoesPathExist(temp_path)
-);
-google_breakpad::ExceptionHandler exc(
-        temp_path,
-        &CrashHandlerFilter<true>,
-        &MinidumpWrittenCallback<true>,
-        NULL,  // callback_context
-        google_breakpad::ExceptionHandler::HANDLER_EXCEPTION);
+  ASSERT_TRUE(DoesPathExist(temp_path));
+  google_breakpad::ExceptionHandler exc(
+      temp_path,
+      &CrashHandlerFilter<true>,
+      &MinidumpWrittenCallback<true>,
+      NULL,  // callback_context
+      google_breakpad::ExceptionHandler::HANDLER_EXCEPTION);
 
-ASSERT_DEATH(
-        InstallExceptionHandlerAndCrash(true,   // install_filter
-                                        true,   // filter_return_value
-                                        true,   // install_callback
-                                        true),  // callback_return_value
-std::string(kStartOfLine)
-+
-std::string(kFilterReturnsTrue)
-+    // inner filter
-std::string(kCallbackReturnsTrue)
-+  // inner callback
-std::string(kEndOfLine)
-);
+  ASSERT_DEATH(
+    InstallExceptionHandlerAndCrash(true,   // install_filter
+                                    true,   // filter_return_value
+                                    true,   // install_callback
+                                    true),  // callback_return_value
+    std::string(kStartOfLine) +
+      std::string(kFilterReturnsTrue) +    // inner filter
+      std::string(kCallbackReturnsTrue) +  // inner callback
+      std::string(kEndOfLine));
 }
 
 }  // namespace

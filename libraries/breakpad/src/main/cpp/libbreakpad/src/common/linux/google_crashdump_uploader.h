@@ -40,69 +40,68 @@
 
 namespace google_breakpad {
 
-    class GoogleCrashdumpUploader {
-    public:
-        GoogleCrashdumpUploader(const string &product,
-                                const string &version,
-                                const string &guid,
-                                const string &ptime,
-                                const string &ctime,
-                                const string &email,
-                                const string &comments,
-                                const string &minidump_pathname,
-                                const string &crash_server,
-                                const string &proxy_host,
-                                const string &proxy_userpassword);
+class GoogleCrashdumpUploader {
+ public:
+  GoogleCrashdumpUploader(const string& product,
+                          const string& version,
+                          const string& guid,
+                          const string& ptime,
+                          const string& ctime,
+                          const string& email,
+                          const string& comments,
+                          const string& minidump_pathname,
+                          const string& crash_server,
+                          const string& proxy_host,
+                          const string& proxy_userpassword);
 
-        GoogleCrashdumpUploader(const string &product,
-                                const string &version,
-                                const string &guid,
-                                const string &ptime,
-                                const string &ctime,
-                                const string &email,
-                                const string &comments,
-                                const string &minidump_pathname,
-                                const string &crash_server,
-                                const string &proxy_host,
-                                const string &proxy_userpassword,
-                                std::unique_ptr <LibcurlWrapper> http_layer);
+  GoogleCrashdumpUploader(const string& product,
+                          const string& version,
+                          const string& guid,
+                          const string& ptime,
+                          const string& ctime,
+                          const string& email,
+                          const string& comments,
+                          const string& minidump_pathname,
+                          const string& crash_server,
+                          const string& proxy_host,
+                          const string& proxy_userpassword,
+                          std::unique_ptr<LibcurlWrapper> http_layer);
 
-        void Init(const string &product,
-                  const string &version,
-                  const string &guid,
-                  const string &ptime,
-                  const string &ctime,
-                  const string &email,
-                  const string &comments,
-                  const string &minidump_pathname,
-                  const string &crash_server,
-                  const string &proxy_host,
-                  const string &proxy_userpassword,
-                  std::unique_ptr <LibcurlWrapper> http_layer);
+  void Init(const string& product,
+            const string& version,
+            const string& guid,
+            const string& ptime,
+            const string& ctime,
+            const string& email,
+            const string& comments,
+            const string& minidump_pathname,
+            const string& crash_server,
+            const string& proxy_host,
+            const string& proxy_userpassword,
+            std::unique_ptr<LibcurlWrapper> http_layer);
+  bool Upload(int* http_status_code,
+              string* http_response_header,
+              string* http_response_body);
 
-        bool Upload(int *http_status_code,
-                    string *http_response_header,
-                    string *http_response_body);
+ private:
+  bool CheckRequiredParametersArePresent();
 
-    private:
-        bool CheckRequiredParametersArePresent();
+  std::unique_ptr<LibcurlWrapper> http_layer_;
+  string product_;
+  string version_;
+  string guid_;
+  string ptime_;
+  string ctime_;
+  string email_;
+  string comments_;
+  string minidump_pathname_;
 
-        std::unique_ptr <LibcurlWrapper> http_layer_;
-        string product_;
-        string version_;
-        string guid_;
-        string ptime_;
-        string ctime_;
-        string email_;
-        string comments_;
-        string minidump_pathname_;
+  string crash_server_;
+  string proxy_host_;
+  string proxy_userpassword_;
 
-        string crash_server_;
-        string proxy_host_;
-        string proxy_userpassword_;
-
-        std::map <string, string> parameters_;
-    };
+  std::map<string, string> parameters_;
+};
 }
 
 #endif  // COMMON_LINUX_GOOGLE_CRASHDUMP_UPLOADER_H_

@@ -44,81 +44,80 @@
 
 namespace google_breakpad {
 
-    class AutoTestFile {
-    public:
-        // Create a new empty test file.
-        // test_prefix: (input) test-specific prefix, can't be NULL.
-        explicit AutoTestFile(const char *test_prefix) {
-            Init(test_prefix);
-        }
+class AutoTestFile {
+ public:
+  // Create a new empty test file.
+  // test_prefix: (input) test-specific prefix, can't be NULL.
+  explicit AutoTestFile(const char* test_prefix) {
+    Init(test_prefix);
+  }
 
-        // Create a new test file, and fill it with initial data from a C string.
-        // The terminating zero is not written.
-        // test_prefix: (input) test-specific prefix, can't be NULL.
-        // text: (input) initial content.
-        AutoTestFile(const char *test_prefix, const char *text) {
-            Init(test_prefix);
-            if (fd_ >= 0)
-                WriteText(text, static_cast<size_t>(strlen(text)));
-        }
+  // Create a new test file, and fill it with initial data from a C string.
+  // The terminating zero is not written.
+  // test_prefix: (input) test-specific prefix, can't be NULL.
+  // text: (input) initial content.
+  AutoTestFile(const char* test_prefix, const char* text) {
+    Init(test_prefix);
+    if (fd_ >= 0)
+      WriteText(text, static_cast<size_t>(strlen(text)));
+  }
 
-        AutoTestFile(const char *test_prefix, const char *text, size_t text_len) {
-            Init(test_prefix);
-            if (fd_ >= 0)
-                WriteText(text, text_len);
-        }
+  AutoTestFile(const char* test_prefix, const char* text, size_t text_len) {
+    Init(test_prefix);
+    if (fd_ >= 0)
+      WriteText(text, text_len);
+  }
 
-        // Destroy test file on scope exit.
-        ~AutoTestFile() {
-            if (fd_ >= 0) {
-                close(fd_);
-                fd_ = -1;
-            }
-        }
+  // Destroy test file on scope exit.
+  ~AutoTestFile() {
+    if (fd_ >= 0) {
+      close(fd_);
+      fd_ = -1;
+    }
+  }
 
-        // Returns true iff the test file could be created properly.
-        // Useful in tests inside EXPECT_TRUE(file.IsOk());
-        bool IsOk() {
-            return fd_ >= 0;
-        }
+  // Returns true iff the test file could be created properly.
+  // Useful in tests inside EXPECT_TRUE(file.IsOk());
+  bool IsOk() {
+    return fd_ >= 0;
+  }
 
-        // Returns the Posix file descriptor for the test file, or -1
-        // If IsOk() returns false. Note: on Windows, this always returns -1.
-        int GetFd() {
-            return fd_;
-        }
+  // Returns the Posix file descriptor for the test file, or -1
+  // If IsOk() returns false. Note: on Windows, this always returns -1.
+  int GetFd() {
+    return fd_;
+  }
 
-    private:
-        void Init(const char *test_prefix) {
-            fd_ = -1;
-            char path_templ[PATH_MAX];
-            int ret = snprintf(path_templ, sizeof(path_templ),
-            TEMPDIR
-            "/%s-unittest.XXXXXX",
-                    test_prefix);
-            if (ret >= static_cast<int>(sizeof(path_templ)))
-                return;
+ private:
+  void Init(const char* test_prefix) {
+    fd_ = -1;
+    char path_templ[PATH_MAX];
+    int ret = snprintf(path_templ, sizeof(path_templ),
+                       TEMPDIR "/%s-unittest.XXXXXX",
+                       test_prefix);
+    if (ret >= static_cast<int>(sizeof(path_templ)))
+      return;
 
-            fd_ = mkstemp(path_templ);
-            if (fd_ < 0)
-                return;
+    fd_ = mkstemp(path_templ);
+    if (fd_ < 0)
+      return;
 
-            unlink(path_templ);
-        }
+    unlink(path_templ);
+  }
 
-        void WriteText(const char *text, size_t text_len) {
-            ssize_t r = HANDLE_EINTR(write(fd_, text, text_len));
-            if (r != static_cast<ssize_t>(text_len)) {
-                close(fd_);
-                fd_ = -1;
-                return;
-            }
+  void WriteText(const char* text, size_t text_len) {
+    ssize_t r = HANDLE_EINTR(write(fd_, text, text_len));
+    if (r != static_cast<ssize_t>(text_len)) {
+      close(fd_);
+      fd_ = -1;
+      return;
+    }
 
-            lseek(fd_, 0, SEEK_SET);
-        }
+    lseek(fd_, 0, SEEK_SET);
+  }
 
-        int fd_;
-    };
+  int fd_;
+};
 
 }  // namespace google_breakpad
 

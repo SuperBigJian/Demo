@@ -32,20 +32,20 @@
 
 namespace google_breakpad {
 
-    struct MicrodumpExtraInfo {
-        // Strings pointed to by this struct are not copied, and are
-        // expected to remain valid for the lifetime of the process.
-        const char *build_fingerprint;
-        const char *product_info;
-        const char *gpu_fingerprint;
-        const char *process_type;
+struct MicrodumpExtraInfo {
+  // Strings pointed to by this struct are not copied, and are
+  // expected to remain valid for the lifetime of the process.
+  const char* build_fingerprint;
+  const char* product_info;
+  const char* gpu_fingerprint;
+  const char* process_type;
 
-        MicrodumpExtraInfo()
-                : build_fingerprint(NULL),
-                  product_info(NULL),
-                  gpu_fingerprint(NULL),
-                  process_type(NULL) {}
-    };
+  MicrodumpExtraInfo()
+      : build_fingerprint(NULL),
+        product_info(NULL),
+        gpu_fingerprint(NULL),
+        process_type(NULL) {}
+};
 
 }
 

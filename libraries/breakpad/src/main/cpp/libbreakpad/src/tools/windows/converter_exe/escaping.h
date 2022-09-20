@@ -35,7 +35,7 @@
 
 namespace strings {
 
-    using std::string;
+using std::string;
 
 // ----------------------------------------------------------------------
 // Base64Escape()
@@ -49,25 +49,20 @@ namespace strings {
 //    to escape them.  It also has an extra parameter "do_padding",
 //    which when set to false will prevent padding with "=".
 // ----------------------------------------------------------------------
-    void Base64Escape(const string &src, string *dest);
-
-    int Base64Escape(const unsigned char *src, int slen, char *dest, int szdest);
-
+void Base64Escape(const string& src, string* dest);
+int Base64Escape(const unsigned char* src, int slen, char* dest, int szdest);
 // Encode src into dest with padding.
-    void Base64Escape(const unsigned char *src, int szsrc,
-                      string *dest, bool do_padding);
+void Base64Escape(const unsigned char* src, int szsrc,
+                  string* dest, bool do_padding);
 
-    int WebSafeBase64Escape(const unsigned char *src, int slen, char *dest,
-                            int szdest, bool do_padding);
-
+int WebSafeBase64Escape(const unsigned char* src, int slen, char* dest,
+                        int szdest, bool do_padding);
 // Encode src into dest web-safely without padding.
-    void WebSafeBase64Escape(const string &src, string *dest);
-
+void WebSafeBase64Escape(const string& src, string* dest);
 // Encode src into dest web-safely with padding.
-    void WebSafeBase64EscapeWithPadding(const string &src, string *dest);
-
-    void WebSafeBase64Escape(const unsigned char *src, int szsrc,
-                             string *dest, bool do_padding);
+void WebSafeBase64EscapeWithPadding(const string& src, string* dest);
+void WebSafeBase64Escape(const unsigned char* src, int szsrc,
+                         string* dest, bool do_padding);
 
 // ----------------------------------------------------------------------
 // Base64Unescape()
@@ -81,29 +76,24 @@ namespace strings {
 //    return false (with dest empty) if src contains invalid chars; for
 //    these versions src and dest must be different strings.
 // ----------------------------------------------------------------------
-    int Base64Unescape(const char *src, int slen, char *dest, int szdest);
-
-    bool Base64Unescape(const char *src, int slen, string *dest);
-
-    inline bool Base64Unescape(const string &src, string *dest) {
-        return Base64Unescape(src.data(), src.size(), dest);
-    }
+int Base64Unescape(const char* src, int slen, char* dest, int szdest);
+bool Base64Unescape(const char* src, int slen, string* dest);
+inline bool Base64Unescape(const string& src, string* dest) {
+  return Base64Unescape(src.data(), src.size(), dest);
+}
 
 
-    int WebSafeBase64Unescape(const char *src, int slen, char *dest, int szdest);
-
-    bool WebSafeBase64Unescape(const char *src, int slen, string *dest);
-
-    bool WebSafeBase64Unescape(const string &src, string *dest);
+int WebSafeBase64Unescape(const char* src, int slen, char* dest, int szdest);
+bool WebSafeBase64Unescape(const char* src, int slen, string* dest);
+bool WebSafeBase64Unescape(const string& src, string* dest);
 
 // Return the length to use for the output buffer given to the base64 escape
 // routines. Make sure to use the same value for do_padding in both.
 // This function may return incorrect results if given input_len values that
 // are extremely high, which should happen rarely.
-    int CalculateBase64EscapedLen(int input_len, bool do_padding);
-
+int CalculateBase64EscapedLen(int input_len, bool do_padding);
 // Use this version when calling Base64Escape without a do_padding arg.
-    int CalculateBase64EscapedLen(int input_len);
+int CalculateBase64EscapedLen(int input_len);
 }  // namespace strings
 
 #endif  // TOOLS_WINDOWS_CONVERTER_EXE_ESCAPING_H_

@@ -46,39 +46,39 @@
 // we don't expect crash to happen very offen.
 //
 class GUIDGenerator {
-public:
-    GUIDGenerator() {
-        srandom(time(NULL));
-    }
+ public:
+  GUIDGenerator() {
+    srandom(time(NULL));
+  }
 
-    bool CreateGUID(GUID *guid) const {
-        guid->data1 = random();
-        guid->data2 = (uint16_t)(random());
-        guid->data3 = (uint16_t)(random());
-        *reinterpret_cast<uint32_t *>(&guid->data4[0]) = random();
-        *reinterpret_cast<uint32_t *>(&guid->data4[4]) = random();
-        return true;
-    }
+  bool CreateGUID(GUID *guid) const {
+    guid->data1 = random();
+    guid->data2 = (uint16_t)(random());
+    guid->data3 = (uint16_t)(random());
+    *reinterpret_cast<uint32_t*>(&guid->data4[0]) = random();
+    *reinterpret_cast<uint32_t*>(&guid->data4[4]) = random();
+    return true;
+  }
 };
 
 // Guid generator.
 const GUIDGenerator kGuidGenerator;
 
 bool CreateGUID(GUID *guid) {
-    return kGuidGenerator.CreateGUID(guid);
+  return kGuidGenerator.CreateGUID(guid);
 }
 
 // Parse guid to string.
 bool GUIDToString(const GUID *guid, char *buf, int buf_len) {
-    // Should allow more space the the max length of GUID.
-    assert(buf_len > kGUIDStringLength);
-    int num = snprintf(buf, buf_len, kGUIDFormatString,
-                       guid->data1, guid->data2, guid->data3,
-                       *reinterpret_cast<const uint32_t *>(&(guid->data4[0])),
-                       *reinterpret_cast<const uint32_t *>(&(guid->data4[4])));
-    if (num != kGUIDStringLength)
-        return false;
+  // Should allow more space the the max length of GUID.
+  assert(buf_len > kGUIDStringLength);
+  int num = snprintf(buf, buf_len, kGUIDFormatString,
+                     guid->data1, guid->data2, guid->data3,
+                     *reinterpret_cast<const uint32_t*>(&(guid->data4[0])),
+                     *reinterpret_cast<const uint32_t*>(&(guid->data4[4])));
+  if (num != kGUIDStringLength)
+    return false;
 
-    buf[num] = '\0';
-    return true;
+  buf[num] = '\0';
+  return true;
 }

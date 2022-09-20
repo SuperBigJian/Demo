@@ -34,26 +34,23 @@ namespace google_breakpad {
 
 // Dummy classes to help generate a pure call violation.
 
-    class Derived;
+class Derived;
 
-    class Base {
-    public:
-        Base(Derived *derived);
+class Base {
+ public:
+  Base(Derived* derived);
+  virtual ~Base();
+  virtual void DoSomething() = 0;
 
-        virtual ~Base();
+ private:
+  Derived* derived_;
+};
 
-        virtual void DoSomething() = 0;
-
-    private:
-        Derived *derived_;
-    };
-
-    class Derived : public Base {
-    public:
-        Derived();
-
-        virtual void DoSomething();
-    };
+class Derived : public Base {
+ public:
+  Derived();
+  virtual void DoSomething();
+};
 
 }  // namespace google_breakpad
 

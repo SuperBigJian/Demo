@@ -35,7 +35,7 @@
 
 #include <stdint.h>
 
-typedef intptr_t intptr;
-typedef uintptr_t uintptr;
+typedef intptr_t           intptr;
+typedef uintptr_t          uintptr;
 
 #endif // _COMMON_DWARF_TYPES_H__

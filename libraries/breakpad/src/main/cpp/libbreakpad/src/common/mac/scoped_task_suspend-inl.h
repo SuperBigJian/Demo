@@ -37,19 +37,19 @@
 
 namespace google_breakpad {
 
-    class ScopedTaskSuspend {
-    public:
-        explicit ScopedTaskSuspend(mach_port_t target) : target_(target) {
-            task_suspend(target_);
-        }
+class ScopedTaskSuspend {
+ public:
+  explicit ScopedTaskSuspend(mach_port_t target) : target_(target) {
+    task_suspend(target_);
+  }
 
-        ~ScopedTaskSuspend() {
-            task_resume(target_);
-        }
+  ~ScopedTaskSuspend() {
+    task_resume(target_);
+  }
 
-    private:
-        mach_port_t target_;
-    };
+ private:
+  mach_port_t target_;
+};
 
 }  // namespace google_breakpad
 

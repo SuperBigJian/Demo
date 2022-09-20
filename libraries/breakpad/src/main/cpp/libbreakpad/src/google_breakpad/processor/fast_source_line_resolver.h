@@ -52,55 +52,50 @@
 
 namespace google_breakpad {
 
-    using std::map;
+using std::map;
 
-    class FastSourceLineResolver : public SourceLineResolverBase {
-    public:
-        FastSourceLineResolver();
+class FastSourceLineResolver : public SourceLineResolverBase {
+ public:
+  FastSourceLineResolver();
+  virtual ~FastSourceLineResolver() { }
 
-        virtual ~FastSourceLineResolver() {}
+  using SourceLineResolverBase::FillSourceLineInfo;
+  using SourceLineResolverBase::FindCFIFrameInfo;
+  using SourceLineResolverBase::FindWindowsFrameInfo;
+  using SourceLineResolverBase::HasModule;
+  using SourceLineResolverBase::IsModuleCorrupt;
+  using SourceLineResolverBase::LoadModule;
+  using SourceLineResolverBase::LoadModuleUsingMapBuffer;
+  using SourceLineResolverBase::LoadModuleUsingMemoryBuffer;
+  using SourceLineResolverBase::UnloadModule;
 
-        using SourceLineResolverBase::FillSourceLineInfo;
-        using SourceLineResolverBase::FindCFIFrameInfo;
-        using SourceLineResolverBase::FindWindowsFrameInfo;
-        using SourceLineResolverBase::HasModule;
-        using SourceLineResolverBase::IsModuleCorrupt;
-        using SourceLineResolverBase::LoadModule;
-        using SourceLineResolverBase::LoadModuleUsingMapBuffer;
-        using SourceLineResolverBase::LoadModuleUsingMemoryBuffer;
-        using SourceLineResolverBase::UnloadModule;
+ private:
+  // Friend declarations.
+  friend class ModuleComparer;
+  friend class ModuleSerializer;
+  friend class FastModuleFactory;
 
-    private:
-        // Friend declarations.
-        friend class ModuleComparer;
+  // Nested types that will derive from corresponding nested types defined in
+  // SourceLineResolverBase.
+  struct Line;
+  struct Function;
+  struct Inline;
+  struct InlineOrigin;
+  struct PublicSymbol;
+  class Module;
 
-        friend class ModuleSerializer;
+  // Deserialize raw memory data to construct a WindowsFrameInfo object.
+  static WindowsFrameInfo CopyWFI(const char *raw_memory);
 
-        friend class FastModuleFactory;
+  // FastSourceLineResolver requires the memory buffer stays alive during the
+  // lifetime of a corresponding module, therefore it needs to redefine this
+  // virtual method.
+  virtual bool ShouldDeleteMemoryBufferAfterLoadModule();
 
-        // Nested types that will derive from corresponding nested types defined in
-        // SourceLineResolverBase.
-        struct Line;
-        struct Function;
-        struct Inline;
-        struct InlineOrigin;
-        struct PublicSymbol;
-
-        class Module;
-
-        // Deserialize raw memory data to construct a WindowsFrameInfo object.
-        static WindowsFrameInfo CopyWFI(const char *raw_memory);
-
-        // FastSourceLineResolver requires the memory buffer stays alive during the
-        // lifetime of a corresponding module, therefore it needs to redefine this
-        // virtual method.
-        virtual bool ShouldDeleteMemoryBufferAfterLoadModule();
-
-        // Disallow unwanted copy ctor and assignment operator
-        FastSourceLineResolver(const FastSourceLineResolver &);
-
-        void operator=(const FastSourceLineResolver &);
-    };
+  // Disallow unwanted copy ctor and assignment operator
+  FastSourceLineResolver(const FastSourceLineResolver&);
+  void operator=(const FastSourceLineResolver&);
+};
 
 }  // namespace google_breakpad
 

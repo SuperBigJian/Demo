@@ -40,17 +40,17 @@
 
 extern "C" {
 
-extern size_t my_strlen(const char *s);
+extern size_t my_strlen(const char* s);
 
-extern int my_strcmp(const char *a, const char *b);
+extern int my_strcmp(const char* a, const char* b);
 
-extern int my_strncmp(const char *a, const char *b, size_t len);
+extern int my_strncmp(const char* a, const char* b, size_t len);
 
 // Parse a non-negative integer.
 //   result: (output) the resulting non-negative integer
 //   s: a NUL terminated string
 // Return true iff successful.
-extern bool my_strtoui(int *result, const char *s);
+extern bool my_strtoui(int* result, const char* s);
 
 // Return the length of the given unsigned integer when expressed in base 10.
 extern unsigned my_uint_len(uintmax_t i);
@@ -61,23 +61,23 @@ extern unsigned my_uint_len(uintmax_t i);
 //     required length.
 //   i: the unsigned integer to serialise.
 //   i_len: the length of the integer in base 10 (see |my_uint_len|).
-extern void my_uitos(char *output, uintmax_t i, unsigned i_len);
+extern void my_uitos(char* output, uintmax_t i, unsigned i_len);
 
-extern const char *my_strchr(const char *haystack, char needle);
+extern const char* my_strchr(const char* haystack, char needle);
 
-extern const char *my_strrchr(const char *haystack, char needle);
+extern const char* my_strrchr(const char* haystack, char needle);
 
 // Read a hex value
 //   result: (output) the resulting value
 //   s: a string
 // Returns a pointer to the first invalid charactor.
-extern const char *my_read_hex_ptr(uintptr_t *result, const char *s);
+extern const char* my_read_hex_ptr(uintptr_t* result, const char* s);
 
-extern const char *my_read_decimal_ptr(uintptr_t *result, const char *s);
+extern const char* my_read_decimal_ptr(uintptr_t* result, const char* s);
 
-extern void my_memset(void *ip, char c, size_t len);
+extern void my_memset(void* ip, char c, size_t len);
 
-extern void *my_memchr(const void *src, int c, size_t len);
+extern void* my_memchr(const void* src, int c, size_t len);
 
 // The following are considered safe to use in a compromised environment.
 // Besides, this gives the compiler an opportunity to optimize their calls.
@@ -85,9 +85,9 @@ extern void *my_memchr(const void *src, int c, size_t len);
 #define my_memmove memmove
 #define my_memcmp  memcmp
 
-extern size_t my_strlcpy(char *s1, const char *s2, size_t len);
+extern size_t my_strlcpy(char* s1, const char* s2, size_t len);
 
-extern size_t my_strlcat(char *s1, const char *s2, size_t len);
+extern size_t my_strlcat(char* s1, const char* s2, size_t len);
 
 extern int my_isspace(int ch);
 

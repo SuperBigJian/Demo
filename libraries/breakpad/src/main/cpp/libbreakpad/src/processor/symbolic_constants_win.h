@@ -44,7 +44,7 @@
 namespace google_breakpad {
 
 /* Converts a NTSTATUS code to a reason string. */
-    string NTStatusToString(uint32_t ntstatus);
+string NTStatusToString(uint32_t ntstatus);
 
 }  // namespace google_breakpad
 

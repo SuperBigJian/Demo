@@ -46,47 +46,47 @@
 
 namespace google_breakpad {
 
-    StackwalkerAddressList::StackwalkerAddressList(
-            const uint64_t *frames,
-            size_t frame_count,
-            const CodeModules *modules,
-            StackFrameSymbolizer *frame_symbolizer)
-            : Stackwalker(NULL, NULL, modules, frame_symbolizer),
-              frames_(frames),
-              frame_count_(frame_count) {
-        assert(frames);
-        assert(frame_symbolizer);
-    }
+StackwalkerAddressList::StackwalkerAddressList(
+    const uint64_t* frames,
+    size_t frame_count,
+    const CodeModules* modules,
+    StackFrameSymbolizer* frame_symbolizer)
+    : Stackwalker(NULL, NULL, modules, frame_symbolizer),
+      frames_(frames),
+      frame_count_(frame_count) {
+  assert(frames);
+  assert(frame_symbolizer);
+}
 
-    StackFrame *StackwalkerAddressList::GetContextFrame() {
-        if (frame_count_ == 0)
-            return NULL;
+StackFrame* StackwalkerAddressList::GetContextFrame() {
+  if (frame_count_ == 0)
+    return NULL;
 
-        StackFrame *frame = new StackFrame();
-        frame->instruction = frames_[0];
-        frame->trust = StackFrame::FRAME_TRUST_PREWALKED;
-        return frame;
-    }
+  StackFrame* frame = new StackFrame();
+  frame->instruction = frames_[0];
+  frame->trust = StackFrame::FRAME_TRUST_PREWALKED;
+  return frame;
+}
 
-    StackFrame *StackwalkerAddressList::GetCallerFrame(const CallStack *stack,
-                                                       bool stack_scan_allowed) {
-        if (!stack) {
-            BPLOG(ERROR) << "Can't get caller frame without stack";
-            return NULL;
-        }
+StackFrame* StackwalkerAddressList::GetCallerFrame(const CallStack* stack,
+                                                   bool stack_scan_allowed) {
+  if (!stack) {
+    BPLOG(ERROR) << "Can't get caller frame without stack";
+    return NULL;
+  }
 
-        size_t frame_index = stack->frames()->size();
+  size_t frame_index = stack->frames()->size();
 
-        // There are no more frames to fetch.
-        if (frame_index >= frame_count_)
-            return NULL;
+  // There are no more frames to fetch.
+  if (frame_index >= frame_count_)
+    return NULL;
 
-        // All frames have the highest level of trust because they were
-        // explicitly provided.
-        StackFrame *frame = new StackFrame();
-        frame->instruction = frames_[frame_index];
-        frame->trust = StackFrame::FRAME_TRUST_PREWALKED;
-        return frame;
-    }
+  // All frames have the highest level of trust because they were
+  // explicitly provided.
+  StackFrame* frame = new StackFrame();
+  frame->instruction = frames_[frame_index];
+  frame->trust = StackFrame::FRAME_TRUST_PREWALKED;
+  return frame;
+}
 
 }  // namespace google_breakpad

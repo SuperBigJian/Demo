@@ -51,53 +51,46 @@
 
 namespace google_breakpad {
 
-    class BasicCodeModules : public CodeModules {
-    public:
-        // Creates a new BasicCodeModules object given any existing CodeModules
-        // implementation.  This is useful to make a copy of the data relevant to
-        // the CodeModules and CodeModule interfaces without requiring all of the
-        // resources that other implementations may require.  A copy will be
-        // made of each contained CodeModule using CodeModule::Copy.
-        BasicCodeModules(const CodeModules *that, MergeRangeStrategy strategy);
+class BasicCodeModules : public CodeModules {
+ public:
+  // Creates a new BasicCodeModules object given any existing CodeModules
+  // implementation.  This is useful to make a copy of the data relevant to
+  // the CodeModules and CodeModule interfaces without requiring all of the
+  // resources that other implementations may require.  A copy will be
+  // made of each contained CodeModule using CodeModule::Copy.
+  BasicCodeModules(const CodeModules *that, MergeRangeStrategy strategy);
 
-        virtual ~BasicCodeModules();
+  virtual ~BasicCodeModules();
 
-        // See code_modules.h for descriptions of these methods.
-        virtual unsigned int module_count() const;
+  // See code_modules.h for descriptions of these methods.
+  virtual unsigned int module_count() const;
+  virtual const CodeModule* GetModuleForAddress(uint64_t address) const;
+  virtual const CodeModule* GetMainModule() const;
+  virtual const CodeModule* GetModuleAtSequence(unsigned int sequence) const;
+  virtual const CodeModule* GetModuleAtIndex(unsigned int index) const;
+  virtual const CodeModules* Copy() const;
+  virtual std::vector<linked_ptr<const CodeModule> >
+  GetShrunkRangeModules() const;
 
-        virtual const CodeModule *GetModuleForAddress(uint64_t address) const;
+ protected:
+  BasicCodeModules();
 
-        virtual const CodeModule *GetMainModule() const;
+  // The base address of the main module.
+  uint64_t main_address_;
 
-        virtual const CodeModule *GetModuleAtSequence(unsigned int sequence) const;
+  // The map used to contain each CodeModule, keyed by each CodeModule's
+  // address range.
+  RangeMap<uint64_t, linked_ptr<const CodeModule> > map_;
 
-        virtual const CodeModule *GetModuleAtIndex(unsigned int index) const;
+  // A vector of all CodeModules that were shrunk downs due to
+  // address range conflicts.
+  std::vector<linked_ptr<const CodeModule> > shrunk_range_modules_;
 
-        virtual const CodeModules *Copy() const;
-
-        virtual std::vector <linked_ptr<const CodeModule>>
-        GetShrunkRangeModules() const;
-
-    protected:
-        BasicCodeModules();
-
-        // The base address of the main module.
-        uint64_t main_address_;
-
-        // The map used to contain each CodeModule, keyed by each CodeModule's
-        // address range.
-        RangeMap <uint64_t, linked_ptr<const CodeModule>> map_;
-
-        // A vector of all CodeModules that were shrunk downs due to
-        // address range conflicts.
-        std::vector <linked_ptr<const CodeModule>> shrunk_range_modules_;
-
-    private:
-        // Disallow copy constructor and assignment operator.
-        BasicCodeModules(const BasicCodeModules &that);
-
-        void operator=(const BasicCodeModules &that);
-    };
+ private:
+  // Disallow copy constructor and assignment operator.
+  BasicCodeModules(const BasicCodeModules& that);
+  void operator=(const BasicCodeModules& that);
+};
 
 }  // namespace google_breakpad
 

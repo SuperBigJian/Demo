@@ -34,59 +34,59 @@
 
 namespace google_breakpad {
 
-    using std::wstring;
+  using std::wstring;
 
-    struct UploadUrlResponse {
-        // URL at which to HTTP PUT symbol file.
-        wstring upload_url;
-        // Unique key used to complete upload of symbol file.
-        wstring upload_key;
-    };
+  struct UploadUrlResponse {
+    // URL at which to HTTP PUT symbol file.
+    wstring upload_url;
+    // Unique key used to complete upload of symbol file.
+    wstring upload_key;
+  };
 
-    enum SymbolStatus {
-        Found,
-        Missing,
-        Unknown
-    };
+  enum SymbolStatus {
+    Found,
+    Missing,
+    Unknown
+  };
 
-    enum CompleteUploadResult {
-        Ok,
-        DuplicateData,
-        Error
-    };
+  enum CompleteUploadResult {
+    Ok,
+    DuplicateData,
+    Error
+  };
 
-    // Client to interact with sym-upload-v2 API server via HTTP/REST.
-    class SymbolCollectorClient {
-    public:
-        // Returns a URL at which a symbol file can be HTTP PUT without
-        // authentication, along with an upload key that can be used to
-        // complete the upload process with CompleteUpload.
-        static bool CreateUploadUrl(
-                wstring &api_url,
-                wstring &api_key,
-                int *timeout_ms,
-                UploadUrlResponse *uploadUrlResponse);
+  // Client to interact with sym-upload-v2 API server via HTTP/REST.
+  class SymbolCollectorClient {
+  public:
+    // Returns a URL at which a symbol file can be HTTP PUT without
+    // authentication, along with an upload key that can be used to
+    // complete the upload process with CompleteUpload.
+    static bool CreateUploadUrl(
+        wstring& api_url,
+        wstring& api_key,
+        int* timeout_ms,
+        UploadUrlResponse *uploadUrlResponse);
 
-        // Notify the API that symbol file upload is finished and its contents
-        // are ready to be read and/or used for further processing.
-        static CompleteUploadResult CompleteUpload(wstring &api_url,
-                                                   wstring &api_key,
-                                                   int *timeout_ms,
-                                                   const wstring &upload_key,
-                                                   const wstring &debug_file,
-                                                   const wstring &debug_id,
-                                                   const wstring &type,
-                                                   const wstring &product_name);
+    // Notify the API that symbol file upload is finished and its contents
+    // are ready to be read and/or used for further processing.
+    static CompleteUploadResult CompleteUpload(wstring& api_url,
+                                               wstring& api_key,
+                                               int* timeout_ms,
+                                               const wstring& upload_key,
+                                               const wstring& debug_file,
+                                               const wstring& debug_id,
+                                               const wstring& type,
+                                               const wstring& product_name);
 
-        // Returns whether or not a symbol file corresponding to the debug_file/
-        // debug_id pair is already present in symbol storage.
-        static SymbolStatus CheckSymbolStatus(
-                wstring &api_url,
-                wstring &api_key,
-                int *timeout_ms,
-                const wstring &debug_file,
-                const wstring &debug_id);
-    };
+    // Returns whether or not a symbol file corresponding to the debug_file/
+    // debug_id pair is already present in symbol storage.
+    static SymbolStatus CheckSymbolStatus(
+        wstring& api_url,
+        wstring& api_key,
+        int* timeout_ms,
+        const wstring& debug_file,
+        const wstring& debug_id);
+  };
 
 }  // namespace google_breakpad
 

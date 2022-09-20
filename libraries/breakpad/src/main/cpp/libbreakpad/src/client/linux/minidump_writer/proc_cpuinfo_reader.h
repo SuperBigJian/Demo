@@ -42,88 +42,88 @@ namespace google_breakpad {
 
 // A class for reading /proc/cpuinfo without using fopen/fgets or other
 // functions which may allocate memory.
-    class ProcCpuInfoReader {
-    public:
-        ProcCpuInfoReader(int fd)
-                : line_reader_(fd), pop_count_(-1) {
-        }
+class ProcCpuInfoReader {
+public:
+  ProcCpuInfoReader(int fd)
+    : line_reader_(fd), pop_count_(-1) {
+  }
 
-        // Return the next field name, or NULL in case of EOF.
-        // field: (output) Pointer to zero-terminated field name.
-        // Returns true on success, or false on EOF or error (line too long).
-        bool GetNextField(const char **field) {
-            for (;;) {
-                const char *line;
-                unsigned line_len;
+  // Return the next field name, or NULL in case of EOF.
+  // field: (output) Pointer to zero-terminated field name.
+  // Returns true on success, or false on EOF or error (line too long).
+  bool GetNextField(const char** field) {
+    for (;;) {
+      const char* line;
+      unsigned line_len;
 
-                // Try to read next line.
-                if (pop_count_ >= 0) {
-                    line_reader_.PopLine(pop_count_);
-                    pop_count_ = -1;
-                }
+      // Try to read next line.
+      if (pop_count_ >= 0) {
+        line_reader_.PopLine(pop_count_);
+        pop_count_ = -1;
+      }
 
-                if (!line_reader_.GetNextLine(&line, &line_len))
-                    return false;
+      if (!line_reader_.GetNextLine(&line, &line_len))
+        return false;
 
-                pop_count_ = static_cast<int>(line_len);
+      pop_count_ = static_cast<int>(line_len);
 
-                const char *line_end = line + line_len;
+      const char* line_end = line + line_len;
 
-                // Expected format: <field-name> <space>+ ':' <space> <value>
-                // Note that:
-                //   - empty lines happen.
-                //   - <field-name> can contain spaces.
-                //   - some fields have an empty <value>
-                char *sep = static_cast<char *>(my_memchr(line, ':', line_len));
-                if (sep == NULL)
-                    continue;
+      // Expected format: <field-name> <space>+ ':' <space> <value>
+      // Note that:
+      //   - empty lines happen.
+      //   - <field-name> can contain spaces.
+      //   - some fields have an empty <value>
+      char* sep = static_cast<char*>(my_memchr(line, ':', line_len));
+      if (sep == NULL)
+        continue;
 
-                // Record the value. Skip leading space after the column to get
-                // its start.
-                const char *val = sep + 1;
-                while (val < line_end && my_isspace(*val))
-                    val++;
+      // Record the value. Skip leading space after the column to get
+      // its start.
+      const char* val = sep+1;
+      while (val < line_end && my_isspace(*val))
+        val++;
 
-                value_ = val;
-                value_len_ = static_cast<size_t>(line_end - val);
+      value_ = val;
+      value_len_ = static_cast<size_t>(line_end - val);
 
-                // Remove trailing spaces before the column to properly 0-terminate
-                // the field name.
-                while (sep > line && my_isspace(sep[-1]))
-                    sep--;
+      // Remove trailing spaces before the column to properly 0-terminate
+      // the field name.
+      while (sep > line && my_isspace(sep[-1]))
+        sep--;
 
-                if (sep == line)
-                    continue;
+      if (sep == line)
+        continue;
 
-                // zero-terminate field name.
-                *sep = '\0';
+      // zero-terminate field name.
+      *sep = '\0';
 
-                *field = line;
-                return true;
-            }
-        }
+      *field = line;
+      return true;
+    }
+  }
 
-        // Return the field value. This must be called after a succesful
-        // call to GetNextField().
-        const char *GetValue() {
-            assert(value_);
-            return value_;
-        }
+  // Return the field value. This must be called after a succesful
+  // call to GetNextField().
+  const char* GetValue() {
+    assert(value_);
+    return value_;
+  }
 
-        // Same as GetValue(), but also returns the length in characters of
-        // the value.
-        const char *GetValueAndLen(size_t *length) {
-            assert(value_);
-            *length = value_len_;
-            return value_;
-        }
+  // Same as GetValue(), but also returns the length in characters of
+  // the value.
+  const char* GetValueAndLen(size_t* length) {
+    assert(value_);
+    *length = value_len_;
+    return value_;
+  }
 
-    private:
-        LineReader line_reader_;
-        int pop_count_;
-        const char *value_;
-        size_t value_len_;
-    };
+private:
+  LineReader line_reader_;
+  int pop_count_;
+  const char* value_;
+  size_t value_len_;
+};
 
 }  // namespace google_breakpad
 

@@ -34,39 +34,39 @@
 
 namespace google_breakpad {
 
-    bool CrashGenerationClient::RequestDumpForException(
-            int exception_type,
-            int exception_code,
-            int exception_subcode,
-            mach_port_t crashing_thread) {
-        // The server will send a message to this port indicating that it
-        // has finished its work.
-        ReceivePort acknowledge_port;
+bool CrashGenerationClient::RequestDumpForException(
+    int exception_type,
+    int exception_code,
+    int exception_subcode,
+    mach_port_t crashing_thread) {
+  // The server will send a message to this port indicating that it
+  // has finished its work.
+  ReceivePort acknowledge_port;
 
-        MachSendMessage message(kDumpRequestMessage);
-        message.AddDescriptor(mach_task_self());            // this task
-        message.AddDescriptor(crashing_thread);             // crashing thread
-        message.AddDescriptor(mach_thread_self());          // handler thread
-        message.AddDescriptor(acknowledge_port.GetPort());  // message receive port
+  MachSendMessage message(kDumpRequestMessage);
+  message.AddDescriptor(mach_task_self());            // this task
+  message.AddDescriptor(crashing_thread);             // crashing thread
+  message.AddDescriptor(mach_thread_self());          // handler thread
+  message.AddDescriptor(acknowledge_port.GetPort());  // message receive port
 
-        ExceptionInfo info;
-        info.exception_type = exception_type;
-        info.exception_code = exception_code;
-        info.exception_subcode = exception_subcode;
-        message.SetData(&info, sizeof(info));
+  ExceptionInfo info;
+  info.exception_type = exception_type;
+  info.exception_code = exception_code;
+  info.exception_subcode = exception_subcode;
+  message.SetData(&info, sizeof(info));
 
-        const mach_msg_timeout_t kSendTimeoutMs = 2 * 1000;
-        kern_return_t result = sender_.SendMessage(message, kSendTimeoutMs);
-        if (result != KERN_SUCCESS)
-            return false;
+  const mach_msg_timeout_t kSendTimeoutMs = 2 * 1000;
+  kern_return_t result = sender_.SendMessage(message, kSendTimeoutMs);
+  if (result != KERN_SUCCESS)
+    return false;
 
-        // Give the server slightly longer to reply since it has to
-        // inspect this task and write the minidump.
-        const mach_msg_timeout_t kReceiveTimeoutMs = 5 * 1000;
-        MachReceiveMessage acknowledge_message;
-        result = acknowledge_port.WaitForMessage(&acknowledge_message,
-                                                 kReceiveTimeoutMs);
-        return result == KERN_SUCCESS;
-    }
+  // Give the server slightly longer to reply since it has to
+  // inspect this task and write the minidump.
+  const mach_msg_timeout_t kReceiveTimeoutMs = 5 * 1000;
+  MachReceiveMessage acknowledge_message;
+  result = acknowledge_port.WaitForMessage(&acknowledge_message,
+					   kReceiveTimeoutMs);
+  return result == KERN_SUCCESS;
+}
 
 }  // namespace google_breakpad

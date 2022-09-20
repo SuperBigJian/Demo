@@ -46,73 +46,68 @@
 #include "google_breakpad/processor/code_module.h"
 
 namespace google_breakpad {
-    class CFIFrameInfo;
+class CFIFrameInfo;
+class CodeModules;
+class SymbolSupplier;
+class SourceLineResolverInterface;
+struct StackFrame;
+struct SystemInfo;
+struct WindowsFrameInfo;
 
-    class CodeModules;
+class StackFrameSymbolizer {
+ public:
+  enum SymbolizerResult {
+    // Symbol data was found and successfully loaded in resolver.
+    // This does NOT guarantee source line info is found within symbol file.
+    kNoError,
+    // This indicates non-critical error, such as, no code module found for
+    // frame's instruction, no symbol file, or resolver failed to load symbol.
+    kError,
+    // This indicates error for which stack walk should be interrupted
+    // and retried in future.
+    kInterrupt,
+    // Symbol data was found and loaded in resolver however some corruptions
+    // were detected.
+    kWarningCorruptSymbols,
+  };
 
-    class SymbolSupplier;
+  StackFrameSymbolizer(SymbolSupplier* supplier,
+                       SourceLineResolverInterface* resolver);
 
-    class SourceLineResolverInterface;
+  virtual ~StackFrameSymbolizer() { }
 
-    struct StackFrame;
-    struct SystemInfo;
-    struct WindowsFrameInfo;
+  // Encapsulate the step of resolving source line info for a stack frame.
+  // "frame" must not be NULL.
+  virtual SymbolizerResult FillSourceLineInfo(
+      const CodeModules* modules,
+      const CodeModules* unloaded_modules,
+      const SystemInfo* system_info,
+      StackFrame* stack_frame,
+      std::deque<std::unique_ptr<StackFrame>>* inlined_frames);
 
-    class StackFrameSymbolizer {
-    public:
-        enum SymbolizerResult {
-            // Symbol data was found and successfully loaded in resolver.
-            // This does NOT guarantee source line info is found within symbol file.
-            kNoError,
-            // This indicates non-critical error, such as, no code module found for
-            // frame's instruction, no symbol file, or resolver failed to load symbol.
-            kError,
-            // This indicates error for which stack walk should be interrupted
-            // and retried in future.
-            kInterrupt,
-            // Symbol data was found and loaded in resolver however some corruptions
-            // were detected.
-            kWarningCorruptSymbols,
-        };
+  virtual WindowsFrameInfo* FindWindowsFrameInfo(const StackFrame* frame);
 
-        StackFrameSymbolizer(SymbolSupplier *supplier,
-                             SourceLineResolverInterface *resolver);
+  virtual CFIFrameInfo* FindCFIFrameInfo(const StackFrame* frame);
 
-        virtual ~StackFrameSymbolizer() {}
+  // Reset internal (locally owned) data as if the helper is re-instantiated.
+  // A typical case is to call Reset() after processing an individual report
+  // before start to process next one, in order to reset internal information
+  // about missing symbols found so far.
+  virtual void Reset() { no_symbol_modules_.clear(); }
 
-        // Encapsulate the step of resolving source line info for a stack frame.
-        // "frame" must not be NULL.
-        virtual SymbolizerResult FillSourceLineInfo(
-                const CodeModules *modules,
-                const CodeModules *unloaded_modules,
-                const SystemInfo *system_info,
-                StackFrame *stack_frame,
-                std::deque <std::unique_ptr<StackFrame>> *inlined_frames);
+  // Returns true if there is valid implementation for stack symbolization.
+  virtual bool HasImplementation() { return resolver_ && supplier_; }
 
-        virtual WindowsFrameInfo *FindWindowsFrameInfo(const StackFrame *frame);
+  SourceLineResolverInterface* resolver() { return resolver_; }
+  SymbolSupplier* supplier() { return supplier_; }
 
-        virtual CFIFrameInfo *FindCFIFrameInfo(const StackFrame *frame);
-
-        // Reset internal (locally owned) data as if the helper is re-instantiated.
-        // A typical case is to call Reset() after processing an individual report
-        // before start to process next one, in order to reset internal information
-        // about missing symbols found so far.
-        virtual void Reset() { no_symbol_modules_.clear(); }
-
-        // Returns true if there is valid implementation for stack symbolization.
-        virtual bool HasImplementation() { return resolver_ && supplier_; }
-
-        SourceLineResolverInterface *resolver() { return resolver_; }
-
-        SymbolSupplier *supplier() { return supplier_; }
-
-    protected:
-        SymbolSupplier *supplier_;
-        SourceLineResolverInterface *resolver_;
-        // A list of modules known to have symbols missing. This helps avoid
-        // repeated lookups for the missing symbols within one minidump.
-        std::set <string> no_symbol_modules_;
-    };
+ protected:
+  SymbolSupplier* supplier_;
+  SourceLineResolverInterface* resolver_;
+  // A list of modules known to have symbols missing. This helps avoid
+  // repeated lookups for the missing symbols within one minidump.
+  std::set<string> no_symbol_modules_;
+};
 
 }  // namespace google_breakpad
 

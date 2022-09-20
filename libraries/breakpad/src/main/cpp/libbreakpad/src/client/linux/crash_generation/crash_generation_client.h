@@ -40,26 +40,25 @@ namespace google_breakpad {
 // dumping.  The default implementation, accessed via the TryCreate() factory,
 // works in conjunction with the CrashGenerationServer to generate a minidump
 // via a remote process.
-    class CrashGenerationClient {
-    public:
-        CrashGenerationClient() {}
+class CrashGenerationClient {
+ public:
+  CrashGenerationClient() {}
+  virtual ~CrashGenerationClient() {}
 
-        virtual ~CrashGenerationClient() {}
+  // Request the crash server to generate a dump.  |blob| is an opaque
+  // CrashContext pointer from exception_handler.h.
+  // Returns true if the dump was successful; false otherwise.
+  virtual bool RequestDump(const void* blob, size_t blob_size) = 0;
 
-        // Request the crash server to generate a dump.  |blob| is an opaque
-        // CrashContext pointer from exception_handler.h.
-        // Returns true if the dump was successful; false otherwise.
-        virtual bool RequestDump(const void *blob, size_t blob_size) = 0;
+  // Returns a new CrashGenerationClient if |server_fd| is valid and
+  // connects to a CrashGenerationServer.  Otherwise, return NULL.
+  // The returned CrashGenerationClient* is owned by the caller of
+  // this function.
+  static CrashGenerationClient* TryCreate(int server_fd);
 
-        // Returns a new CrashGenerationClient if |server_fd| is valid and
-        // connects to a CrashGenerationServer.  Otherwise, return NULL.
-        // The returned CrashGenerationClient* is owned by the caller of
-        // this function.
-        static CrashGenerationClient *TryCreate(int server_fd);
-
-    private:
-        DISALLOW_COPY_AND_ASSIGN(CrashGenerationClient);
-    };
+ private:
+  DISALLOW_COPY_AND_ASSIGN(CrashGenerationClient);
+};
 
 }  // namespace google_breakpad
 

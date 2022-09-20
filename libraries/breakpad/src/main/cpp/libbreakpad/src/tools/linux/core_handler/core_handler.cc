@@ -45,10 +45,10 @@
 
 namespace {
 
-    using google_breakpad::AppMemoryList;
-    using google_breakpad::LinuxCoreDumper;
-    using google_breakpad::MappingList;
-    using google_breakpad::scoped_array;
+using google_breakpad::AppMemoryList;
+using google_breakpad::LinuxCoreDumper;
+using google_breakpad::MappingList;
+using google_breakpad::scoped_array;
 
 // Size of the core dump to read in order to access all the threads
 // descriptions.
@@ -56,93 +56,93 @@ namespace {
 // The first section is the note0 section which contains the thread states. On
 // x86-64 a typical thread description take about 1432B. Reading 1 MB allows
 // several hundreds of threads.
-    const int core_read_size = 1024 * 1024;
+const int core_read_size = 1024 * 1024;
 
-    void ShowUsage(const char *argv0) {
-        fprintf(stderr, "Usage: %s <process id> <minidump file>\n\n",
-                google_breakpad::BaseName(argv0).c_str());
-        fprintf(stderr,
-                "A tool which serves as a core dump handler and produces "
-                "minidump files.\n");
-        fprintf(stderr, "Please refer to the online documentation:\n");
-        fprintf(stderr,
-                "https://chromium.googlesource.com/breakpad/breakpad/+/HEAD"
-                "/docs/linux_core_handler.md\n");
+void ShowUsage(const char* argv0) {
+  fprintf(stderr, "Usage: %s <process id> <minidump file>\n\n",
+          google_breakpad::BaseName(argv0).c_str());
+  fprintf(stderr,
+          "A tool which serves as a core dump handler and produces "
+          "minidump files.\n");
+  fprintf(stderr, "Please refer to the online documentation:\n");
+  fprintf(stderr,
+          "https://chromium.googlesource.com/breakpad/breakpad/+/HEAD"
+          "/docs/linux_core_handler.md\n");
+}
+
+bool WriteMinidumpFromCore(const char* filename,
+                           const char* core_path,
+                           const char* procfs_override) {
+  MappingList mappings;
+  AppMemoryList memory_list;
+  LinuxCoreDumper dumper(0, core_path, procfs_override);
+  return google_breakpad::WriteMinidump(filename, mappings, memory_list,
+                                        &dumper);
+}
+
+bool HandleCrash(pid_t pid, const char* procfs_dir, const char* md_filename) {
+  int r = 0;
+  scoped_array<char> buf(new char[core_read_size]);
+  while (r != core_read_size) {
+    int ret = read(STDIN_FILENO, &buf[r], core_read_size - r);
+    if (ret == 0) {
+      break;
+    } else if (ret == -1) {
+      return false;
     }
+    r += ret;
+  }
 
-    bool WriteMinidumpFromCore(const char *filename,
-                               const char *core_path,
-                               const char *procfs_override) {
-        MappingList mappings;
-        AppMemoryList memory_list;
-        LinuxCoreDumper dumper(0, core_path, procfs_override);
-        return google_breakpad::WriteMinidump(filename, mappings, memory_list,
-                                              &dumper);
-    }
+  int fd = memfd_create("core_file", MFD_CLOEXEC);
+  if (fd == -1) {
+    return false;
+  }
 
-    bool HandleCrash(pid_t pid, const char *procfs_dir, const char *md_filename) {
-        int r = 0;
-        scoped_array<char> buf(new char[core_read_size]);
-        while (r != core_read_size) {
-            int ret = read(STDIN_FILENO, &buf[r], core_read_size - r);
-            if (ret == 0) {
-                break;
-            } else if (ret == -1) {
-                return false;
-            }
-            r += ret;
-        }
+  int w = write(fd, &buf[0], r);
+  if (w != r) {
+    close(fd);
+    return false;
+  }
 
-        int fd = memfd_create("core_file", MFD_CLOEXEC);
-        if (fd == -1) {
-            return false;
-        }
+  std::stringstream core_file_ss;
+  core_file_ss << "/proc/self/fd/" << fd;
+  std::string core_file(core_file_ss.str());
 
-        int w = write(fd, &buf[0], r);
-        if (w != r) {
-            close(fd);
-            return false;
-        }
+  if (!WriteMinidumpFromCore(md_filename, core_file.c_str(), procfs_dir)) {
+    close(fd);
+    return false;
+  }
+  close(fd);
 
-        std::stringstream core_file_ss;
-        core_file_ss << "/proc/self/fd/" << fd;
-        std::string core_file(core_file_ss.str());
-
-        if (!WriteMinidumpFromCore(md_filename, core_file.c_str(), procfs_dir)) {
-            close(fd);
-            return false;
-        }
-        close(fd);
-
-        return true;
-    }
+  return true;
+}
 
 }  // namespace
 
-int main(int argc, char *argv[]) {
-    int ret = EXIT_FAILURE;
+int main(int argc, char* argv[]) {
+  int ret = EXIT_FAILURE;
 
-    if (argc != 3) {
-        ShowUsage(argv[0]);
-        return ret;
-    }
-
-    const char *pid_str = argv[1];
-    const char *md_filename = argv[2];
-    pid_t pid = atoi(pid_str);
-
-    std::stringstream proc_dir_ss;
-    proc_dir_ss << "/proc/" << pid_str;
-    std::string proc_dir(proc_dir_ss.str());
-
-    openlog("core_handler", 0, 0);
-    if (HandleCrash(pid, proc_dir.c_str(), md_filename)) {
-        syslog(LOG_NOTICE, "Minidump generated at %s\n", md_filename);
-        ret = EXIT_SUCCESS;
-    } else {
-        syslog(LOG_ERR, "Cannot generate minidump %s\n", md_filename);
-    }
-    closelog();
-
+  if (argc != 3) {
+    ShowUsage(argv[0]);
     return ret;
+  }
+
+  const char* pid_str = argv[1];
+  const char* md_filename = argv[2];
+  pid_t pid = atoi(pid_str);
+
+  std::stringstream proc_dir_ss;
+  proc_dir_ss << "/proc/" << pid_str;
+  std::string proc_dir(proc_dir_ss.str());
+
+  openlog("core_handler", 0, 0);
+  if (HandleCrash(pid, proc_dir.c_str(), md_filename)) {
+    syslog(LOG_NOTICE, "Minidump generated at %s\n", md_filename);
+    ret = EXIT_SUCCESS;
+  } else {
+    syslog(LOG_ERR, "Cannot generate minidump %s\n", md_filename);
+  }
+  closelog();
+
+  return ret;
 }

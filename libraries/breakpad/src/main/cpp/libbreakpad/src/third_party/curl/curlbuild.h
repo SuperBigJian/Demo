@@ -61,52 +61,52 @@
 
 #ifdef CURL_SIZEOF_LONG
 #  error "CURL_SIZEOF_LONG shall not be defined except in curlbuild.h"
-Error Compilation_aborted_CURL_SIZEOF_LONG_already_defined
+   Error Compilation_aborted_CURL_SIZEOF_LONG_already_defined
 #endif
 
 #ifdef CURL_TYPEOF_CURL_SOCKLEN_T
 #  error "CURL_TYPEOF_CURL_SOCKLEN_T shall not be defined except in curlbuild.h"
-Error Compilation_aborted_CURL_TYPEOF_CURL_SOCKLEN_T_already_defined
+   Error Compilation_aborted_CURL_TYPEOF_CURL_SOCKLEN_T_already_defined
 #endif
 
 #ifdef CURL_SIZEOF_CURL_SOCKLEN_T
 #  error "CURL_SIZEOF_CURL_SOCKLEN_T shall not be defined except in curlbuild.h"
-Error Compilation_aborted_CURL_SIZEOF_CURL_SOCKLEN_T_already_defined
+   Error Compilation_aborted_CURL_SIZEOF_CURL_SOCKLEN_T_already_defined
 #endif
 
 #ifdef CURL_TYPEOF_CURL_OFF_T
 #  error "CURL_TYPEOF_CURL_OFF_T shall not be defined except in curlbuild.h"
-Error Compilation_aborted_CURL_TYPEOF_CURL_OFF_T_already_defined
+   Error Compilation_aborted_CURL_TYPEOF_CURL_OFF_T_already_defined
 #endif
 
 #ifdef CURL_FORMAT_CURL_OFF_T
 #  error "CURL_FORMAT_CURL_OFF_T shall not be defined except in curlbuild.h"
-Error Compilation_aborted_CURL_FORMAT_CURL_OFF_T_already_defined
+   Error Compilation_aborted_CURL_FORMAT_CURL_OFF_T_already_defined
 #endif
 
 #ifdef CURL_FORMAT_CURL_OFF_TU
 #  error "CURL_FORMAT_CURL_OFF_TU shall not be defined except in curlbuild.h"
-Error Compilation_aborted_CURL_FORMAT_CURL_OFF_TU_already_defined
+   Error Compilation_aborted_CURL_FORMAT_CURL_OFF_TU_already_defined
 #endif
 
 #ifdef CURL_FORMAT_OFF_T
 #  error "CURL_FORMAT_OFF_T shall not be defined except in curlbuild.h"
-Error Compilation_aborted_CURL_FORMAT_OFF_T_already_defined
+   Error Compilation_aborted_CURL_FORMAT_OFF_T_already_defined
 #endif
 
 #ifdef CURL_SIZEOF_CURL_OFF_T
 #  error "CURL_SIZEOF_CURL_OFF_T shall not be defined except in curlbuild.h"
-Error Compilation_aborted_CURL_SIZEOF_CURL_OFF_T_already_defined
+   Error Compilation_aborted_CURL_SIZEOF_CURL_OFF_T_already_defined
 #endif
 
 #ifdef CURL_SUFFIX_CURL_OFF_T
 #  error "CURL_SUFFIX_CURL_OFF_T shall not be defined except in curlbuild.h"
-Error Compilation_aborted_CURL_SUFFIX_CURL_OFF_T_already_defined
+   Error Compilation_aborted_CURL_SUFFIX_CURL_OFF_T_already_defined
 #endif
 
 #ifdef CURL_SUFFIX_CURL_OFF_TU
 #  error "CURL_SUFFIX_CURL_OFF_TU shall not be defined except in curlbuild.h"
-Error Compilation_aborted_CURL_SUFFIX_CURL_OFF_TU_already_defined
+   Error Compilation_aborted_CURL_SUFFIX_CURL_OFF_TU_already_defined
 #endif
 
 /* ================================================================ */
@@ -129,9 +129,7 @@ Error Compilation_aborted_CURL_SUFFIX_CURL_OFF_TU_already_defined
 /* header file sys/types.h must be included by the external interface. */
 #define CURL_PULL_SYS_TYPES_H 1
 #ifdef CURL_PULL_SYS_TYPES_H
-
 #  include <sys/types.h>
-
 #endif
 
 /* Configure process defines this to 1 when it finds out that system */
@@ -152,14 +150,12 @@ Error Compilation_aborted_CURL_SUFFIX_CURL_OFF_TU_already_defined
 /* header file sys/socket.h must be included by the external interface. */
 #define CURL_PULL_SYS_SOCKET_H 1
 #ifdef CURL_PULL_SYS_SOCKET_H
-
 #  include <sys/socket.h>
-
 #endif
 
 /* The size of `long', as computed by sizeof. */
-#if defined(_M_X64) || (defined(__x86_64__) && !defined(__ILP32__)) || \
-    defined(__aarch64__) || (defined(__mips__) && _MIPS_SIM == _ABI64) || \
+#if defined(_M_X64) || (defined(__x86_64__) && !defined(__ILP32__)) ||      \
+    defined(__aarch64__) || (defined(__mips__) && _MIPS_SIM == _ABI64) ||   \
     defined(__powerpc64__) || defined(__s390x__) || defined(__LP64__)
 #define CURL_SIZEOF_LONG 8
 #else
@@ -176,7 +172,7 @@ Error Compilation_aborted_CURL_SUFFIX_CURL_OFF_TU_already_defined
 typedef CURL_TYPEOF_CURL_SOCKLEN_T curl_socklen_t;
 
 /* Signed integral data type used for curl_off_t. */
-#if defined(_M_X64) || (defined(__x86_64__) && !defined(__ILP32__)) || \
+#if defined(_M_X64) || (defined(__x86_64__) && !defined(__ILP32__)) ||      \
     defined(__aarch64__)
 #define CURL_TYPEOF_CURL_OFF_T long
 #else

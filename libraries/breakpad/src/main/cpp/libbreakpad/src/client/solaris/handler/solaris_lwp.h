@@ -49,9 +49,7 @@
 #define _KERNEL
 #define MUST_UNDEF_KERNEL
 #endif  // _KERNEL
-
 #include <sys/procfs.h>
-
 #ifdef MUST_UNDEF_KERNEL
 #undef _KERNEL
 #undef MUST_UNDEF_KERNEL
@@ -60,45 +58,45 @@
 namespace google_breakpad {
 
 // Max module path name length.
-    static const int kMaxModuleNameLength = 256;
+static const int kMaxModuleNameLength = 256;
 
 // Holding infomaton about a module in the process.
-    struct ModuleInfo {
-        char name[kMaxModuleNameLength];
-        uintptr_t start_addr;
-        int size;
-    };
+struct ModuleInfo {
+  char name[kMaxModuleNameLength];
+  uintptr_t start_addr;
+  int size;
+};
 
 // A callback to run when getting a lwp in the process.
 // Return true will go on to the next lwp while return false will stop the
 // iteration.
-    typedef bool (*LwpCallback)(lwpstatus_t *lsp, void *context);
+typedef bool (*LwpCallback)(lwpstatus_t* lsp, void* context);
 
 // A callback to run when a new module is found in the process.
 // Return true will go on to the next module while return false will stop the
 // iteration.
-    typedef bool (*ModuleCallback)(const ModuleInfo &module_info, void *context);
+typedef bool (*ModuleCallback)(const ModuleInfo& module_info, void* context);
 
 // A callback to run when getting a lwpid in the process.
 // Return true will go on to the next lwp while return false will stop the
 // iteration.
-    typedef bool (*LwpidCallback)(int lwpid, void *context);
+typedef bool (*LwpidCallback)(int lwpid, void* context);
 
 // Holding the callback information.
-    template<class CallbackFunc>
-    struct CallbackParam {
-        // Callback function address.
-        CallbackFunc call_back;
-        // Callback context;
-        void *context;
+template<class CallbackFunc>
+struct CallbackParam {
+  // Callback function address.
+  CallbackFunc call_back;
+  // Callback context;
+  void* context;
 
-        CallbackParam() : call_back(NULL), context(NULL) {
-        }
+  CallbackParam() : call_back(NULL), context(NULL) {
+  }
 
-        CallbackParam(CallbackFunc func, void *func_context) :
-                call_back(func), context(func_context) {
-        }
-    };
+  CallbackParam(CallbackFunc func, void* func_context) :
+    call_back(func), context(func_context) {
+  }
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -110,53 +108,52 @@ namespace google_breakpad {
 //
 // TODO(Alfred): Currently it only supports x86. Add SPARC support.
 //
-    class SolarisLwp {
-    public:
-        // Create a SolarisLwp instance to list all the lwps in a process.
-        explicit SolarisLwp(int pid);
+class SolarisLwp {
+ public:
+  // Create a SolarisLwp instance to list all the lwps in a process.
+  explicit SolarisLwp(int pid);
+  ~SolarisLwp();
 
-        ~SolarisLwp();
+  int getpid() const { return this->pid_; }
 
-        int getpid() const { return this->pid_; }
+  // Control all the lwps in the process.
+  // Return the number of suspended/resumed lwps in the process.
+  // Return -1 means failed to control lwps.
+  int ControlAllLwps(bool suspend);
 
-        // Control all the lwps in the process.
-        // Return the number of suspended/resumed lwps in the process.
-        // Return -1 means failed to control lwps.
-        int ControlAllLwps(bool suspend);
+  // Get the count of lwps in the process.
+  // Return -1 means error.
+  int GetLwpCount() const;
 
-        // Get the count of lwps in the process.
-        // Return -1 means error.
-        int GetLwpCount() const;
+  // Iterate the lwps of process.
+  // Whenever there is a lwp found, the callback will be invoked to process
+  // the information.
+  // Return the callback return value or -1 on error.
+  int Lwp_iter_all(int pid, CallbackParam<LwpCallback>* callback_param) const;
 
-        // Iterate the lwps of process.
-        // Whenever there is a lwp found, the callback will be invoked to process
-        // the information.
-        // Return the callback return value or -1 on error.
-        int Lwp_iter_all(int pid, CallbackParam<LwpCallback> *callback_param) const;
+  // Get the module count of the current process.
+  int GetModuleCount() const;
 
-        // Get the module count of the current process.
-        int GetModuleCount() const;
+  // Get the mapped modules in the address space.
+  // Whenever a module is found, the callback will be invoked to process the
+  // information.
+  // Return how may modules are found.
+  int ListModules(CallbackParam<ModuleCallback>* callback_param) const;
 
-        // Get the mapped modules in the address space.
-        // Whenever a module is found, the callback will be invoked to process the
-        // information.
-        // Return how may modules are found.
-        int ListModules(CallbackParam<ModuleCallback> *callback_param) const;
+  // Get the bottom of the stack from esp.
+  uintptr_t GetLwpStackBottom(uintptr_t current_esp) const;
 
-        // Get the bottom of the stack from esp.
-        uintptr_t GetLwpStackBottom(uintptr_t current_esp) const;
+  // Finds a signal context on the stack given the ebp of our signal handler.
+  bool FindSigContext(uintptr_t sighandler_ebp, ucontext_t** sig_ctx);
 
-        // Finds a signal context on the stack given the ebp of our signal handler.
-        bool FindSigContext(uintptr_t sighandler_ebp, ucontext_t **sig_ctx);
+ private:
+  // Check if the address is a valid virtual address.
+  bool IsAddressMapped(uintptr_t address) const;
 
-    private:
-        // Check if the address is a valid virtual address.
-        bool IsAddressMapped(uintptr_t address) const;
-
-    private:
-        // The pid of the process we are listing lwps.
-        int pid_;
-    };
+ private:
+  // The pid of the process we are listing lwps.
+  int pid_;
+};
 
 }  // namespace google_breakpad
 

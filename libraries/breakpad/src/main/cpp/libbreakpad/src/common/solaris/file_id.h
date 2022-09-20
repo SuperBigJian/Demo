@@ -37,33 +37,32 @@
 #include <limits.h>
 
 namespace google_breakpad {
-    namespace elf {
+namespace elf {
 
-        class FileID {
-        public:
-            FileID(const char *path);
+class FileID {
+ public:
+  FileID(const char *path);
+  ~FileID() {};
 
-            ~FileID() {};
+  // Load the identifier for the elf file path specified in the constructor into
+  // |identifier|.  Return false if the identifier could not be created for the
+  // file.
+  // The current implementation will return the MD5 hash of the file's bytes.
+  bool ElfFileIdentifier(unsigned char identifier[16]);
 
-            // Load the identifier for the elf file path specified in the constructor into
-            // |identifier|.  Return false if the identifier could not be created for the
-            // file.
-            // The current implementation will return the MD5 hash of the file's bytes.
-            bool ElfFileIdentifier(unsigned char identifier[16]);
+  // Convert the |identifier| data to a NULL terminated string.  The string will
+  // be formatted as a MDCVInfoPDB70 struct.
+  // The |buffer| should be at least 34 bytes long to receive all of the data
+  // and termination. Shorter buffers will return false.
+  static bool ConvertIdentifierToString(const unsigned char identifier[16],
+                                        char *buffer, int buffer_length);
 
-            // Convert the |identifier| data to a NULL terminated string.  The string will
-            // be formatted as a MDCVInfoPDB70 struct.
-            // The |buffer| should be at least 34 bytes long to receive all of the data
-            // and termination. Shorter buffers will return false.
-            static bool ConvertIdentifierToString(const unsigned char identifier[16],
-                                                  char *buffer, int buffer_length);
+ private:
+  // Storage for the path specified
+  char path_[PATH_MAX];
+};
 
-        private:
-            // Storage for the path specified
-            char path_[PATH_MAX];
-        };
-
-    }  // elf
+}  // elf
 }  // namespace google_breakpad
 
 #endif  // COMMON_SOLARIS_FILE_ID_H__

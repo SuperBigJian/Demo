@@ -49,314 +49,151 @@ using namespace google_breakpad;
 
 namespace {
 
-    typedef testing::Test ProcCpuInfoReaderTest;
+typedef testing::Test ProcCpuInfoReaderTest;
 
-    class ScopedTestFile : public AutoTestFile {
-    public:
-        explicit ScopedTestFile(const char *text)
-                : AutoTestFile("proc_cpuinfo_reader", text) {
-        }
-    };
+class ScopedTestFile : public AutoTestFile {
+public:
+  explicit ScopedTestFile(const char* text)
+    : AutoTestFile("proc_cpuinfo_reader", text) {
+  }
+};
 
 }
 
-TEST(ProcCpuInfoReaderTest, EmptyFile
-) {
-ScopedTestFile file("");
-ASSERT_TRUE(file
-.
+TEST(ProcCpuInfoReaderTest, EmptyFile) {
+  ScopedTestFile file("");
+  ASSERT_TRUE(file.IsOk());
+  ProcCpuInfoReader reader(file.GetFd());
 
-IsOk()
-
-);
-ProcCpuInfoReader reader(file.GetFd());
-
-const char *field;
-ASSERT_FALSE(reader
-.
-GetNextField(&field)
-);
+  const char* field;
+  ASSERT_FALSE(reader.GetNextField(&field));
 }
 
-TEST(ProcCpuInfoReaderTest, OneLineTerminated
-) {
-ScopedTestFile file("foo : bar\n");
-ASSERT_TRUE(file
-.
+TEST(ProcCpuInfoReaderTest, OneLineTerminated) {
+  ScopedTestFile file("foo : bar\n");
+  ASSERT_TRUE(file.IsOk());
+  ProcCpuInfoReader reader(file.GetFd());
 
-IsOk()
+  const char* field;
+  ASSERT_TRUE(reader.GetNextField(&field));
+  ASSERT_STREQ("foo", field);
+  ASSERT_STREQ("bar", reader.GetValue());
 
-);
-ProcCpuInfoReader reader(file.GetFd());
-
-const char *field;
-ASSERT_TRUE(reader
-.
-GetNextField(&field)
-);
-ASSERT_STREQ("foo", field);
-ASSERT_STREQ("bar", reader.
-
-GetValue()
-
-);
-
-ASSERT_FALSE(reader
-.
-GetNextField(&field)
-);
+  ASSERT_FALSE(reader.GetNextField(&field));
 }
 
-TEST(ProcCpuInfoReaderTest, OneLine
-) {
-ScopedTestFile file("foo : bar");
-ASSERT_TRUE(file
-.
+TEST(ProcCpuInfoReaderTest, OneLine) {
+  ScopedTestFile file("foo : bar");
+  ASSERT_TRUE(file.IsOk());
+  ProcCpuInfoReader reader(file.GetFd());
 
-IsOk()
+  const char* field;
+  size_t value_len;
+  ASSERT_TRUE(reader.GetNextField(&field));
+  ASSERT_STREQ("foo", field);
+  ASSERT_STREQ("bar", reader.GetValueAndLen(&value_len));
+  ASSERT_EQ(3U, value_len);
 
-);
-ProcCpuInfoReader reader(file.GetFd());
-
-const char *field;
-size_t value_len;
-ASSERT_TRUE(reader
-.
-GetNextField(&field)
-);
-ASSERT_STREQ("foo", field);
-ASSERT_STREQ("bar", reader.
-GetValueAndLen(&value_len)
-);
-ASSERT_EQ(3U, value_len);
-
-ASSERT_FALSE(reader
-.
-GetNextField(&field)
-);
+  ASSERT_FALSE(reader.GetNextField(&field));
 }
 
-TEST(ProcCpuInfoReaderTest, TwoLinesTerminated
-) {
-ScopedTestFile file("foo : bar\nzoo : tut\n");
-ASSERT_TRUE(file
-.
+TEST(ProcCpuInfoReaderTest, TwoLinesTerminated) {
+  ScopedTestFile file("foo : bar\nzoo : tut\n");
+  ASSERT_TRUE(file.IsOk());
+  ProcCpuInfoReader reader(file.GetFd());
 
-IsOk()
+  const char* field;
+  ASSERT_TRUE(reader.GetNextField(&field));
+  ASSERT_STREQ("foo", field);
+  ASSERT_STREQ("bar", reader.GetValue());
 
-);
-ProcCpuInfoReader reader(file.GetFd());
+  ASSERT_TRUE(reader.GetNextField(&field));
+  ASSERT_STREQ("zoo", field);
+  ASSERT_STREQ("tut", reader.GetValue());
 
-const char *field;
-ASSERT_TRUE(reader
-.
-GetNextField(&field)
-);
-ASSERT_STREQ("foo", field);
-ASSERT_STREQ("bar", reader.
-
-GetValue()
-
-);
-
-ASSERT_TRUE(reader
-.
-GetNextField(&field)
-);
-ASSERT_STREQ("zoo", field);
-ASSERT_STREQ("tut", reader.
-
-GetValue()
-
-);
-
-ASSERT_FALSE(reader
-.
-GetNextField(&field)
-);
+  ASSERT_FALSE(reader.GetNextField(&field));
 }
 
-TEST(ProcCpuInfoReaderTest, SkipMalformedLine
-) {
-ScopedTestFile file("this line should have a column\nfoo : bar\n");
-ASSERT_TRUE(file
-.
+TEST(ProcCpuInfoReaderTest, SkipMalformedLine) {
+  ScopedTestFile file("this line should have a column\nfoo : bar\n");
+  ASSERT_TRUE(file.IsOk());
+  ProcCpuInfoReader reader(file.GetFd());
 
-IsOk()
+  const char* field;
+  ASSERT_TRUE(reader.GetNextField(&field));
+  ASSERT_STREQ("foo", field);
+  ASSERT_STREQ("bar", reader.GetValue());
 
-);
-ProcCpuInfoReader reader(file.GetFd());
-
-const char *field;
-ASSERT_TRUE(reader
-.
-GetNextField(&field)
-);
-ASSERT_STREQ("foo", field);
-ASSERT_STREQ("bar", reader.
-
-GetValue()
-
-);
-
-ASSERT_FALSE(reader
-.
-GetNextField(&field)
-);
+  ASSERT_FALSE(reader.GetNextField(&field));
 }
 
-TEST(ProcCpuInfoReaderTest, SkipOneEmptyLine
-) {
-ScopedTestFile file("\n\nfoo : bar\n");
-ASSERT_TRUE(file
-.
+TEST(ProcCpuInfoReaderTest, SkipOneEmptyLine) {
+  ScopedTestFile file("\n\nfoo : bar\n");
+  ASSERT_TRUE(file.IsOk());
+  ProcCpuInfoReader reader(file.GetFd());
 
-IsOk()
+  const char* field;
+  ASSERT_TRUE(reader.GetNextField(&field));
+  ASSERT_STREQ("foo", field);
+  ASSERT_STREQ("bar", reader.GetValue());
 
-);
-ProcCpuInfoReader reader(file.GetFd());
-
-const char *field;
-ASSERT_TRUE(reader
-.
-GetNextField(&field)
-);
-ASSERT_STREQ("foo", field);
-ASSERT_STREQ("bar", reader.
-
-GetValue()
-
-);
-
-ASSERT_FALSE(reader
-.
-GetNextField(&field)
-);
+  ASSERT_FALSE(reader.GetNextField(&field));
 }
 
-TEST(ProcCpuInfoReaderTest, SkipEmptyField
-) {
-ScopedTestFile file(" : bar\nzoo : tut\n");
-ASSERT_TRUE(file
-.
+TEST(ProcCpuInfoReaderTest, SkipEmptyField) {
+  ScopedTestFile file(" : bar\nzoo : tut\n");
+  ASSERT_TRUE(file.IsOk());
+  ProcCpuInfoReader reader(file.GetFd());
 
-IsOk()
+  const char* field;
+  ASSERT_TRUE(reader.GetNextField(&field));
+  ASSERT_STREQ("zoo", field);
+  ASSERT_STREQ("tut", reader.GetValue());
 
-);
-ProcCpuInfoReader reader(file.GetFd());
-
-const char *field;
-ASSERT_TRUE(reader
-.
-GetNextField(&field)
-);
-ASSERT_STREQ("zoo", field);
-ASSERT_STREQ("tut", reader.
-
-GetValue()
-
-);
-
-ASSERT_FALSE(reader
-.
-GetNextField(&field)
-);
+  ASSERT_FALSE(reader.GetNextField(&field));
 }
 
-TEST(ProcCpuInfoReaderTest, SkipTwoEmptyLines
-) {
-ScopedTestFile file("foo : bar\n\n\nfoo : bar\n");
-ASSERT_TRUE(file
-.
+TEST(ProcCpuInfoReaderTest, SkipTwoEmptyLines) {
+  ScopedTestFile file("foo : bar\n\n\nfoo : bar\n");
+  ASSERT_TRUE(file.IsOk());
+  ProcCpuInfoReader reader(file.GetFd());
 
-IsOk()
+  const char* field;
+  ASSERT_TRUE(reader.GetNextField(&field));
+  ASSERT_STREQ("foo", field);
+  ASSERT_STREQ("bar", reader.GetValue());
 
-);
-ProcCpuInfoReader reader(file.GetFd());
+  ASSERT_TRUE(reader.GetNextField(&field));
+  ASSERT_STREQ("foo", field);
+  ASSERT_STREQ("bar", reader.GetValue());
 
-const char *field;
-ASSERT_TRUE(reader
-.
-GetNextField(&field)
-);
-ASSERT_STREQ("foo", field);
-ASSERT_STREQ("bar", reader.
-
-GetValue()
-
-);
-
-ASSERT_TRUE(reader
-.
-GetNextField(&field)
-);
-ASSERT_STREQ("foo", field);
-ASSERT_STREQ("bar", reader.
-
-GetValue()
-
-);
-
-ASSERT_FALSE(reader
-.
-GetNextField(&field)
-);
+  ASSERT_FALSE(reader.GetNextField(&field));
 }
 
-TEST(ProcCpuInfoReaderTest, FieldWithSpaces
-) {
-ScopedTestFile file("foo bar    : zoo\n");
-ASSERT_TRUE(file
-.
+TEST(ProcCpuInfoReaderTest, FieldWithSpaces) {
+  ScopedTestFile file("foo bar    : zoo\n");
+  ASSERT_TRUE(file.IsOk());
+  ProcCpuInfoReader reader(file.GetFd());
 
-IsOk()
+  const char* field;
+  ASSERT_TRUE(reader.GetNextField(&field));
+  ASSERT_STREQ("foo bar", field);
+  ASSERT_STREQ("zoo", reader.GetValue());
 
-);
-ProcCpuInfoReader reader(file.GetFd());
-
-const char *field;
-ASSERT_TRUE(reader
-.
-GetNextField(&field)
-);
-ASSERT_STREQ("foo bar", field);
-ASSERT_STREQ("zoo", reader.
-
-GetValue()
-
-);
-
-ASSERT_FALSE(reader
-.
-GetNextField(&field)
-);
+  ASSERT_FALSE(reader.GetNextField(&field));
 }
 
-TEST(ProcCpuInfoReaderTest, EmptyValue
-) {
-ScopedTestFile file("foo :\n");
-ASSERT_TRUE(file
-.
+TEST(ProcCpuInfoReaderTest, EmptyValue) {
+  ScopedTestFile file("foo :\n");
+  ASSERT_TRUE(file.IsOk());
+  ProcCpuInfoReader reader(file.GetFd());
 
-IsOk()
+  const char* field;
+  ASSERT_TRUE(reader.GetNextField(&field));
+  ASSERT_STREQ("foo", field);
+  size_t value_len;
+  ASSERT_STREQ("", reader.GetValueAndLen(&value_len));
+  ASSERT_EQ(0U, value_len);
 
-);
-ProcCpuInfoReader reader(file.GetFd());
-
-const char *field;
-ASSERT_TRUE(reader
-.
-GetNextField(&field)
-);
-ASSERT_STREQ("foo", field);
-size_t value_len;
-ASSERT_STREQ("", reader.
-GetValueAndLen(&value_len)
-);
-ASSERT_EQ(0U, value_len);
-
-ASSERT_FALSE(reader
-.
-GetNextField(&field)
-);
+  ASSERT_FALSE(reader.GetNextField(&field));
 }

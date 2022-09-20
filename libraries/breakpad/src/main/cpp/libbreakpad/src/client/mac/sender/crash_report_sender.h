@@ -47,106 +47,71 @@
 // which isn't soon enough.  It is a known bug that the UI KVO didn't
 // work in the middle of a validation.
 @interface LengthLimitingTextField : NSTextField {
-@private
-    NSUInteger maximumLength_;
+  @private
+   NSUInteger maximumLength_;
 }
 
 - (void)setMaximumLength:(NSUInteger)maxLength;
 @end
 
 @interface Reporter : NSObject {
-@public
-    IBOutlet NSWindow
-    *
-    alertWindow_;        // The alert window
+ @public
+  IBOutlet NSWindow *alertWindow_;        // The alert window
 
-    // Grouping boxes used for resizing.
-    IBOutlet NSBox
-    *
-    headerBox_;
-    IBOutlet NSBox
-    *
-    preEmailBox_;
-    IBOutlet NSBox
-    *
-    emailSectionBox_;
-    // Localized elements (or things that need to be moved during localization).
-    IBOutlet NSTextField
-    *
-    dialogTitle_;
-    IBOutlet NSTextField
-    *
-    commentMessage_;
-    IBOutlet NSTextField
-    *
-    emailMessage_;
-    IBOutlet NSTextField
-    *
-    emailLabel_;
-    IBOutlet NSTextField
-    *
-    privacyLinkLabel_;
-    IBOutlet NSButton
-    *
-    sendButton_;
-    IBOutlet NSButton
-    *
-    cancelButton_;
-    IBOutlet LengthLimitingTextField
-    *
-    emailEntryField_;
-    IBOutlet LengthLimitingTextField
-    *
-    commentsEntryField_;
-    IBOutlet NSTextField
-    *
-    countdownLabel_;
-    IBOutlet NSView
-    *
-    privacyLinkArrow_;
+  // Grouping boxes used for resizing.
+  IBOutlet NSBox *headerBox_;
+  IBOutlet NSBox *preEmailBox_;
+  IBOutlet NSBox *emailSectionBox_;
+  // Localized elements (or things that need to be moved during localization).
+  IBOutlet NSTextField                *dialogTitle_;
+  IBOutlet NSTextField                *commentMessage_;
+  IBOutlet NSTextField                *emailMessage_;
+  IBOutlet NSTextField                *emailLabel_;
+  IBOutlet NSTextField                *privacyLinkLabel_;
+  IBOutlet NSButton                   *sendButton_;
+  IBOutlet NSButton                   *cancelButton_;
+  IBOutlet LengthLimitingTextField    *emailEntryField_;
+  IBOutlet LengthLimitingTextField    *commentsEntryField_;
+  IBOutlet NSTextField                *countdownLabel_;
+  IBOutlet NSView                     *privacyLinkArrow_;
 
-    // Text field bindings, for user input.
-    NSString *commentsValue_;                // Comments from the user
-    NSString *emailValue_;                   // Email from the user
-    NSString *countdownMessage_;             // Message indicating time
-    // left for input.
-@private
-    NSTimeInterval remainingDialogTime_;     // Keeps track of how long
-    // we have until we cancel
-    // the dialog
-    NSTimer *messageTimer_;                  // Timer we use to update
-    // the dialog
-    Uploader *uploader_;                     // Uploader we use to send the data.
+  // Text field bindings, for user input.
+  NSString *commentsValue_;                // Comments from the user
+  NSString *emailValue_;                   // Email from the user
+  NSString *countdownMessage_;             // Message indicating time
+                                           // left for input.
+ @private
+  NSTimeInterval remainingDialogTime_;     // Keeps track of how long
+                                           // we have until we cancel
+                                           // the dialog
+  NSTimer *messageTimer_;                  // Timer we use to update
+                                           // the dialog
+  Uploader* uploader_;                     // Uploader we use to send the data.
 }
 
 // Stops the modal panel with an NSAlertDefaultReturn value. This is the action
 // invoked by the "Send Report" button.
 - (IBAction)sendReport:(id)sender;
-
 // Stops the modal panel with an NSAlertAlternateReturn value. This is the
 // action invoked by the "Cancel" button.
 - (IBAction)cancel:(id)sender;
-
 // Opens the Privacy Policy url in the default web browser.
 - (IBAction)showPrivacyPolicy:(id)sender;
 
 // Delegate methods for the NSTextField for comments. We want to capture the
 // Return key and use it to send the message when no text has been entered.
 // Otherwise, we want Return to add a carriage return to the comments field.
-- (BOOL)    control:(NSControl *)control textView:(NSTextView *)textView
-doCommandBySelector:(SEL)commandSelector;
+- (BOOL)control:(NSControl *)control textView:(NSTextView *)textView
+                          doCommandBySelector:(SEL)commandSelector;
 
 // Accessors to make bindings work
 - (NSString *)commentsValue;
-
 - (void)setCommentsValue:(NSString *)value;
 
 - (NSString *)emailValue;
-
 - (void)setEmailValue:(NSString *)value;
 
 - (NSString *)countdownMessage;
-
 - (void)setCountdownMessage:(NSString *)value;
 
 @end
