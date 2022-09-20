@@ -15,16 +15,20 @@ dependencyResolutionManagement {
 }
 rootProject.name = "Demo"
 
+include(":JavaKT")
+
 include(":base:common")
 include(":base:commonUI")
-include(":module:stock")
 include(":libraries:breakpad")
+include(":module:stock")
 include(":app")
 
 include(":sample:compose")
 include(":sample:hilt")
 include(":sample:breakpad")
+include(":sample:capteure")
 include(":sample:binder:remote")
 include(":sample:binder:client")
+include(":sample:capture")
 
-include(":JavaKT")
+

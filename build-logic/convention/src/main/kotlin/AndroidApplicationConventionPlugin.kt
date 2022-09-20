@@ -32,6 +32,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                 apply("kotlin-kapt")
                 apply("common.android.hilt")
                 apply("common.android.compose")
+                apply("common.android.permissions")
             }
 
             extensions.configure<BaseAppModuleExtension> {
