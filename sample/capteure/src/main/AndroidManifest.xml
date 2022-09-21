@@ -3,6 +3,7 @@
     package="com.cyaan.demo.capture">
 
     <application
+        android:name=".AppApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -26,7 +27,7 @@
         <service
             android:name=".ScreenCaptureService"
             android:enabled="true"
-            android:foregroundServiceType="mediaProjection"/>
+            android:foregroundServiceType="mediaProjection" />
     </application>
 
 </manifest>

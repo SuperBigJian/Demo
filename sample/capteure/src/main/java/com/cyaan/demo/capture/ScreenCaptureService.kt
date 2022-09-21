@@ -6,22 +6,36 @@ import android.content.Intent
 import android.media.projection.MediaProjectionManager
 import android.os.Build
 import android.os.IBinder
+import android.view.Surface
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.blankj.utilcode.util.AppUtils
+import timber.log.Timber
 
 class ScreenCaptureService : Service() {
     override fun onBind(intent: Intent): IBinder? {
-        return null
-    }
-
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+        Timber.e("onBind")
         startForeground()
         val mediaProjectionManager = getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
         intent.getParcelableExtra<Intent>(MEDIA_PROJECTION_INTENT)?.let { project ->
             val mediaProjection = mediaProjectionManager.getMediaProjection(Activity.RESULT_OK, project)
-            ScreenCaptureProjection.getInstance().startScreenCapture(mediaProjection)
+            ScreenCaptureManager.startScreenCapture(this, mediaProjection)
+        }?:Timber.e("onStartCommand MEDIA_PROJECTION_INTENT = null")
+        return object : IMyAidlInterface.Stub() {
+            override fun setSurface(surface: Surface?) {
+                ScreenCaptureManager.setSurface(surface)
+            }
         }
+    }
+
+    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+//        startForeground()
+//        val mediaProjectionManager = getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+//        Timber.e("onStartCommand")
+//        intent.getParcelableExtra<Intent>(MEDIA_PROJECTION_INTENT)?.let { project ->
+//            val mediaProjection = mediaProjectionManager.getMediaProjection(Activity.RESULT_OK, project)
+//            ScreenCaptureManager.startScreenCapture(this, mediaProjection)
+//        }?:Timber.e("onStartCommand MEDIA_PROJECTION_INTENT = null")
         return super.onStartCommand(intent, flags, startId)
     }
 
