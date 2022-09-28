@@ -2,15 +2,16 @@ package com.cyaan.demo.capture
 
 import android.app.Presentation
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.Paint
 import android.hardware.display.DisplayManager
+import android.media.ImageReader
 import android.media.projection.MediaProjectionManager
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
 import android.view.Display
 import android.view.SurfaceHolder
-import android.view.SurfaceView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -61,7 +62,7 @@ class MainActivity : AppCompatActivity() {
                 width: Int,
                 height: Int
             ) {
-
+                Timber.d("surfaceChanged $holder")
             }
 
             override fun surfaceDestroyed(holder: SurfaceHolder) {
@@ -75,10 +76,9 @@ class MainActivity : AppCompatActivity() {
             @RequiresApi(Build.VERSION_CODES.O)
             override fun onScreenCaptureStarted() {
                 Timber.d("onScreenCaptureStarted")
-//                val surfaceView = SurfaceView(this@MainActivity)
-//                ScreenCaptureManager.mRemote?.setSurface(surfaceView.holder.surface)
-
-                val presentation = MyPresentation(this@MainActivity, mDisplayManager.displays[1])
+//                ScreenCaptureManager.setSurface(mBinding.surfaceView2.holder.surface)
+                val displays = mDisplayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION)
+                val presentation = MyPresentation(this@MainActivity, displays.first())
                 presentation.show()
             }
 
@@ -99,7 +99,25 @@ class MainActivity : AppCompatActivity() {
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
             setContentView(mBinding.root)
-            ScreenCaptureManager.mRemote?.setSurface(mBinding.surfaceView.holder.surface)
+            mBinding.surfaceView.holder.addCallback(object : SurfaceHolder.Callback {
+                override fun surfaceCreated(holder: SurfaceHolder) {
+                    ScreenCaptureManager.setSurface(holder.surface)
+                }
+
+                override fun surfaceChanged(
+                    holder: SurfaceHolder,
+                    format: Int,
+                    width: Int,
+                    height: Int
+                ) {
+                    Timber.d("surfaceChanged $holder")
+                }
+
+                override fun surfaceDestroyed(holder: SurfaceHolder) {
+                }
+            })
+
+
         }
     }
 

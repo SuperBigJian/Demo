@@ -14,28 +14,17 @@ import timber.log.Timber
 
 class ScreenCaptureService : Service() {
     override fun onBind(intent: Intent): IBinder? {
-        Timber.e("onBind")
+        return null
+    }
+
+    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         startForeground()
         val mediaProjectionManager = getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+        Timber.e("onStartCommand")
         intent.getParcelableExtra<Intent>(MEDIA_PROJECTION_INTENT)?.let { project ->
             val mediaProjection = mediaProjectionManager.getMediaProjection(Activity.RESULT_OK, project)
             ScreenCaptureManager.startScreenCapture(this, mediaProjection)
         }?:Timber.e("onStartCommand MEDIA_PROJECTION_INTENT = null")
-        return object : IMyAidlInterface.Stub() {
-            override fun setSurface(surface: Surface?) {
-                ScreenCaptureManager.setSurface(surface)
-            }
-        }
-    }
-
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-//        startForeground()
-//        val mediaProjectionManager = getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
-//        Timber.e("onStartCommand")
-//        intent.getParcelableExtra<Intent>(MEDIA_PROJECTION_INTENT)?.let { project ->
-//            val mediaProjection = mediaProjectionManager.getMediaProjection(Activity.RESULT_OK, project)
-//            ScreenCaptureManager.startScreenCapture(this, mediaProjection)
-//        }?:Timber.e("onStartCommand MEDIA_PROJECTION_INTENT = null")
         return super.onStartCommand(intent, flags, startId)
     }
 
