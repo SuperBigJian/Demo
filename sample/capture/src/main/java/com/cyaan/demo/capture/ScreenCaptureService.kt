@@ -6,7 +6,6 @@ import android.content.Intent
 import android.media.projection.MediaProjectionManager
 import android.os.Build
 import android.os.IBinder
-import android.view.Surface
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.blankj.utilcode.util.AppUtils
@@ -20,11 +19,10 @@ class ScreenCaptureService : Service() {
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         startForeground()
         val mediaProjectionManager = getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
-        Timber.e("onStartCommand")
         intent.getParcelableExtra<Intent>(MEDIA_PROJECTION_INTENT)?.let { project ->
             val mediaProjection = mediaProjectionManager.getMediaProjection(Activity.RESULT_OK, project)
             ScreenCaptureManager.startScreenCapture(this, mediaProjection)
-        }?:Timber.e("onStartCommand MEDIA_PROJECTION_INTENT = null")
+        } ?: Timber.e("onStartCommand MEDIA_PROJECTION_INTENT = null")
         return super.onStartCommand(intent, flags, startId)
     }
 
@@ -67,15 +65,14 @@ class ScreenCaptureService : Service() {
                 "name",
                 NotificationManager.IMPORTANCE_DEFAULT
             )
-            channel.description = "description"
+            channel.description = "Screen Recode Service"
             mNotificationManager.createNotificationChannel(channel)
         }
     }
 
     companion object {
-        const val NOTIFICATION_CHANNEL_ID = "NotificationBuilder"
+        const val NOTIFICATION_CHANNEL_ID = "screen-recode"
         const val NOTIFICATION_ID = 0xD660
-
         const val MEDIA_PROJECTION_INTENT = "MEDIA_PROJECTION_INTENT"
     }
 }

@@ -23,12 +23,11 @@ include(":libraries:breakpad")
 include(":module:stock")
 include(":app")
 
+include(":sample:binder:remote")
+include(":sample:binder:client")
 include(":sample:compose")
 include(":sample:hilt")
 include(":sample:breakpad")
-include(":sample:capteure")
-include(":sample:binder:remote")
-include(":sample:binder:client")
 include(":sample:capture")
 
 

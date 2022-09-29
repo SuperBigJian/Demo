@@ -14,7 +14,8 @@ import timber.log.Timber
 object ScreenCaptureManager {
     private var mMediaProjection: MediaProjection? = null
     private var mVirtualDisplay: VirtualDisplay? = null
-    private val encoder = H264Encoder()
+    private val encoder = ScreenH264Encoder()
+    private val decoder = ScreenH264Decoder()
     private val mScreenCaptureListenerList: MutableList<ScreenCaptureListener> = ArrayList()
     private val mMediaProjectionCallback = object : MediaProjection.Callback() {
         override fun onStop() {
@@ -42,8 +43,8 @@ object ScreenCaptureManager {
     fun startScreenCapture(context: Context, mediaProjection: MediaProjection?) {
         if (mediaProjection != null) {
             mMediaProjection = mediaProjection
-            encoder.setMediaProjection(mediaProjection)
-            mMediaProjection?.registerCallback(mMediaProjectionCallback, null)
+            encoder.setMediaProjection(context.resources.displayMetrics, mediaProjection)
+            mediaProjection.registerCallback(mMediaProjectionCallback, null)
             onScreenCaptureStarted()
         } else {
             Timber.e("MediaProjection is null")
@@ -52,7 +53,10 @@ object ScreenCaptureManager {
 
     fun setSurface(surface: Surface?) {
         surface?.let {
-            encoder.setRenderSurface(surface)
+            decoder.setSurface(surface)
+            encoder.dataListener = {
+                decoder.decodeData(it)
+            }
             encoder.start()
         } ?: Timber.e("setSurface null")
     }
@@ -64,6 +68,10 @@ object ScreenCaptureManager {
             val intent = Intent(context, ScreenCaptureService::class.java)
             context.stopService(intent)
         }
+    }
+
+    fun getProjection(): MediaProjection? {
+        return mMediaProjection
     }
 
     fun registerListener(screenCaptureListener: ScreenCaptureListener) {
