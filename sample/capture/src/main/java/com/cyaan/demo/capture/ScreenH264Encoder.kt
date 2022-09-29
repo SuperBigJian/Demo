@@ -11,13 +11,8 @@ import okhttp3.internal.and
 import timber.log.Timber
 import java.nio.ByteBuffer
 
+
 class ScreenH264Encoder : Thread() {
-    // I帧
-    private val TYPE_FRAME_INTERVAL = 19
-
-    // vps帧
-    private val TYPE_FRAME_VPS = 32
-
     // 记录vps pps sps
     private var vps_pps_sps: ByteArray? = null
 
@@ -48,7 +43,7 @@ class ScreenH264Encoder : Thread() {
         running = true
         val info = MediaCodec.BufferInfo()
         while (true) {
-            val outIndex = mMediaCodec.dequeueOutputBuffer(info, 10000) ?: 0
+            val outIndex = mMediaCodec.dequeueOutputBuffer(info, 10000)
             if (outIndex > 0) {
                 // 获取编码之后的数据输出流队列
                 mMediaCodec.getOutputBuffer(outIndex)?.let {
@@ -60,42 +55,60 @@ class ScreenH264Encoder : Thread() {
     }
 
     private fun encodeData(byteBuffer: ByteBuffer, bufferInfo: MediaCodec.BufferInfo) {
-        // 偏移4 00 00 00 01为分隔符需要跳过
-        var offSet = 4
-        if (byteBuffer[2].toInt() == 0x01) {
-            offSet = 3
+        //跳过分隔符
+        var offset = 4
+        if (byteBuffer.get(2).toInt() == 0x01) {
+            offset = 3
         }
-        // 判断当前帧类型
-        when (byteBuffer[offSet] and 0x7E shr 1) {
-            TYPE_FRAME_VPS -> {
-                vps_pps_sps = ByteArray(bufferInfo.size).also {
-                    byteBuffer.get(it)
-                }
+//H264推流
+        when (byteBuffer.get(offset) and 0x1F) {
+            7 -> {
+                vps_pps_sps = ByteArray(bufferInfo.size)
+                vps_pps_sps?.let { byteBuffer.get(it) }
             }
-            TYPE_FRAME_INTERVAL -> {
-                // 将保存的vps sps pps添加到I帧前
+            5 -> {
+                val bytes = ByteArray(bufferInfo.size)
+                byteBuffer.get(bytes)
                 vps_pps_sps?.let {
-                    val bytes = ByteArray(it.size + bufferInfo.size)
-                    System.arraycopy(it, 0, bytes, 0, it.size)
-                    byteBuffer.get(bytes, it.size, bytes.size)
-                    sendData(bytes)
-                } ?: run {
-                    val bytes = ByteArray(bufferInfo.size)
-                    byteBuffer.get(bytes)
-                    sendData(bytes)
-                }
+                    val newBytes = ByteArray(it.size + bytes.size)
+                    System.arraycopy(it, 0, newBytes, 0, it.size)
+                    System.arraycopy(bytes, 0, newBytes, it.size, bytes.size)
+                    sendData(newBytes)
+                } ?: sendData(bytes)
             }
             else -> {
-                // B帧 P帧 直接发送
                 val bytes = ByteArray(bufferInfo.size)
-                byteBuffer[bytes]
+                byteBuffer.get(bytes)
                 sendData(bytes)
             }
         }
+
+//H265推流
+//        when (byteBuffer.get(offset) and 0x7E shr 1) {
+//            32 -> {
+//                vps_pps_sps = ByteArray(bufferInfo.size)
+//                vps_pps_sps?.let { byteBuffer.get(it) }
+//            }
+//            19 -> {
+//                val bytes = ByteArray(bufferInfo.size)
+//                byteBuffer.get(bytes)
+//                vps_pps_sps?.let {
+//                    val newBytes = ByteArray(it.size + bytes.size)
+//                    System.arraycopy(it, 0, newBytes, 0, it.size)
+//                    System.arraycopy(bytes, 0, newBytes, it.size, bytes.size)
+//                    sendData(newBytes)
+//                } ?: sendData(bytes)
+//            }
+//            else -> {
+//                val bytes = ByteArray(bufferInfo.size)
+//                byteBuffer.get(bytes)
+//                sendData(bytes)
+//            }
+//        }
     }
 
     private fun sendData(bytes: ByteArray) {
-        Timber.e("send data ${bytes.size}")
+        Timber.e("send data $bytes")
         dataListener.invoke(bytes)
     }
 

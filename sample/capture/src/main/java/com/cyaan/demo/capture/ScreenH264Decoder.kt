@@ -9,7 +9,7 @@ import timber.log.Timber
 class ScreenH264Decoder {
     private val mMediaCodec by lazy { MediaCodec.createDecoderByType(MediaFormat.MIMETYPE_VIDEO_AVC) }
 
-    private val width = 1280
+    private val width = 1080
     private val height = 720
 
     fun setSurface(surface: Surface) {
