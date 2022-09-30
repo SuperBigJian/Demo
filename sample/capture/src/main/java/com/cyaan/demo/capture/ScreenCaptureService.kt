@@ -62,7 +62,7 @@ class ScreenCaptureService : Service() {
         private fun createNowPlayingChannel() {
             val channel = NotificationChannel(
                 NOTIFICATION_CHANNEL_ID,
-                "name",
+                "Capture",
                 NotificationManager.IMPORTANCE_DEFAULT
             )
             channel.description = "Screen Recode Service"

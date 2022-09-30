@@ -8,7 +8,9 @@ import android.media.projection.MediaProjectionManager
 import android.os.Build
 import android.view.Surface
 import androidx.appcompat.app.AppCompatActivity
+import com.blankj.utilcode.util.FileIOUtils
 import com.blankj.utilcode.util.ServiceUtils
+import permissions.dispatcher.RuntimePermissions
 import timber.log.Timber
 
 object ScreenCaptureManager {
@@ -23,6 +25,8 @@ object ScreenCaptureManager {
             mVirtualDisplay = null
             mMediaProjection?.unregisterCallback(this)
             mMediaProjection = null
+            encoder.releaseEncoder()
+            decoder.releaseDecode()
             onScreenCaptureStopped()
             Timber.d("MediaProjection onStopped")
         }
@@ -44,6 +48,10 @@ object ScreenCaptureManager {
         if (mediaProjection != null) {
             mMediaProjection = mediaProjection
             encoder.setMediaProjection(context.resources.displayMetrics, mediaProjection)
+            encoder.dataListener = {
+                decoder.decodeData(it)
+                FileIOUtils.writeFileFromBytesByStream("${context.filesDir}/encoder.h264", it, true)
+            }
             mediaProjection.registerCallback(mMediaProjectionCallback, null)
             onScreenCaptureStarted()
         } else {
@@ -54,19 +62,29 @@ object ScreenCaptureManager {
     fun setSurface(surface: Surface?) {
         surface?.let {
             decoder.setSurface(surface)
-            encoder.dataListener = {
-                decoder.decodeData(it)
-            }
-            encoder.start()
         } ?: Timber.e("setSurface null")
     }
 
     fun stopCapture(context: Context) {
         Timber.e("stopCapture")
+        encoder.stopEncoder()
         mMediaProjection?.stop()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && ServiceUtils.isServiceRunning(ScreenCaptureService::class.java)) {
             val intent = Intent(context, ScreenCaptureService::class.java)
             context.stopService(intent)
+        }
+    }
+
+    fun toggleStream() {
+        if (mMediaProjection == null) {
+            Timber.e("please startCapture first")
+            return
+        }
+
+        if (encoder.isEncoding()) {
+            encoder.stopEncoder()
+        } else {
+            encoder.startEncoder()
         }
     }
 

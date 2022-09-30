@@ -37,6 +37,6 @@ class ClickProxy(
     }
 }
 
-fun View.OnClick(click: ((view: View) -> Unit)) {
+fun View.onClick(click: ((view: View) -> Unit)) {
     this.setOnClickListener(ClickProxy(click))
 }
