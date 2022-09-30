@@ -1,19 +1,17 @@
 package com.cyaan.demo.capture
 
 import android.media.MediaCodec
-import android.media.MediaCodecInfo
 import android.media.MediaFormat
 import android.view.Surface
-import timber.log.Timber
 
 class ScreenH264Decoder {
-    private val mMediaCodec by lazy { MediaCodec.createDecoderByType(MediaFormat.MIMETYPE_VIDEO_HEVC) }
+    private val mMediaCodec by lazy { MediaCodec.createDecoderByType(MediaFormat.MIMETYPE_VIDEO_AVC) }
 
     private val width = 1920
     private val height = 720
 
     fun setSurface(surface: Surface) {
-        MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_HEVC, width, height).apply {
+        MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, width, height).apply {
             setInteger(MediaFormat.KEY_FRAME_RATE, 20)
             setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1)
             setInteger(MediaFormat.KEY_BIT_RATE, width * height)

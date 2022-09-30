@@ -87,6 +87,14 @@ class MainActivity : BaseActivity() {
             override fun onScreenCaptureStarted() {
                 Timber.d("onScreenCaptureStarted")
 //                ScreenCaptureManager.setSurface(mBinding.surfaceView2.holder.surface)
+//                ScreenCaptureManager.toggleStream()
+
+//                Intent(this@MainActivity, SecondActivity::class.java).apply {
+//                    val options = ActivityOptions.makeBasic()
+//                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+//                    options.launchDisplayId = displays.first().displayId
+//                    startActivity(this, options.toBundle())
+//                }
                 val displays = mDisplayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION)
                 val presentation = MyPresentation(this@MainActivity, displays.first())
                 presentation.show()
