@@ -12,16 +12,10 @@ import kotlin.properties.Delegates
 
 open class BaseApplication : Application() {
 
-    companion object {
-        var scope: CoroutineScope by Delegates.notNull()
-            private set
-    }
-
     override fun onCreate() {
         super.onCreate()
         set(this)
         Timber.plant(CustomDebugTree())
-        scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     }
 
     private fun set(baseApplication: BaseApplication) {

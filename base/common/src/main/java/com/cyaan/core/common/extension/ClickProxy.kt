@@ -1,4 +1,4 @@
-package com.cyaan.core.common.utils
+package com.cyaan.core.common.extension
 
 import android.os.SystemClock
 import android.view.View

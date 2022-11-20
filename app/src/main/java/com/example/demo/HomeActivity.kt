@@ -1,12 +1,12 @@
 package com.example.demo
 
-import com.cyaan.core.common.utils.OnClick
+import com.cyaan.core.common.extension.onClick
 import com.cyaan.core.ui.app.BaseActivity
 import com.example.demo.databinding.ActivityMainBinding
 
 class HomeActivity : BaseActivity() {
 
-    private val mBinding by lazy { ActivityMainBinding.inflate(layoutInflater) }
+    val mBinding by lazy { ActivityMainBinding.inflate(layoutInflater) }
 
     override fun initView() {
         setContentView(mBinding.root)
@@ -14,8 +14,8 @@ class HomeActivity : BaseActivity() {
 
     override fun setListener() {
 //        mBinding.wifi.text = R.string.app_name.stringCompat
-        mBinding.back.OnClick { finish() }
-        mBinding.wifi.OnClick {
+        mBinding.back.onClick { finish() }
+        mBinding.wifi.onClick {
 
         }
     }

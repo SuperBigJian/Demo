@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.cyaan.core.common.network.KResult
-import com.cyaan.core.common.network.asResult
 import com.cyaan.core.ui.app.BaseViewModel
 import com.cyaan.module.stock.network.StockData
 import com.cyaan.module.stock.network.StockDataRepository
@@ -17,8 +16,7 @@ import javax.inject.Inject
 @HiltViewModel
 class StockViewModel @Inject constructor(private val stockDataRepository: StockDataRepository) : BaseViewModel() {
 
-    private val stockListFlow: Flow<KResult<List<StockData>>> = stockDataRepository.fetchHSStockList().asResult()
-
+    private val stockListFlow: Flow<KResult<List<StockData>>> = stockDataRepository.stockListStream
 
     val stockState: LiveData<KResult<List<StockData>>> = stockListFlow.stateIn(
         scope = viewModelScope,

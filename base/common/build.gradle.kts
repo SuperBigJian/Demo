@@ -2,7 +2,6 @@ plugins {
     id("common.android.library")
     id("common.android.hilt")
     id("common.android.room")
-    id("kotlin-parcelize")
     id("kotlinx-serialization")
 }
 

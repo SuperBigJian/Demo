@@ -1,6 +1,11 @@
 pluginManagement {
     includeBuild("build-logic")
     repositories {
+        maven(url = "https://maven.aliyun.com/nexus/content/groups/public/")
+        maven(url = "https://maven.aliyun.com/repository/public/")
+        maven(url = "https://maven.aliyun.com/repository/central")
+        maven(url = "https://maven.aliyun.com/repository/google")
+        maven(url = "https://maven.aliyun.com/repository/gradle-plugin")
         mavenCentral()
         gradlePluginPortal()
         google()
@@ -9,6 +14,11 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        maven(url = "https://maven.aliyun.com/nexus/content/groups/public/")
+        maven(url = "https://maven.aliyun.com/repository/public/")
+        maven(url = "https://maven.aliyun.com/repository/central")
+        maven(url = "https://maven.aliyun.com/repository/google")
+        maven(url = "https://maven.aliyun.com/repository/gradle-plugin")
         mavenCentral()
         google()
     }

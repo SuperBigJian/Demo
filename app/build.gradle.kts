@@ -1,10 +1,13 @@
 plugins {
     id("common.android.application")
+    id("common.android.test")
 }
 
 android {
     defaultConfig {
         applicationId = "com.example.demo"
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {

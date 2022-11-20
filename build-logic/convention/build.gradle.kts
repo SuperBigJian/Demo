@@ -60,6 +60,10 @@ gradlePlugin {
             id = "common.android.module"
             implementationClass = "AndroidModuleConventionPlugin"
         }
+        register("androidTest") {
+            id = "common.android.test"
+            implementationClass = "AndroidTestConventionPlugin"
+        }
     }
 }
 

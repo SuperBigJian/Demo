@@ -7,43 +7,6 @@ import okhttp3.logging.HttpLoggingInterceptor
 import timber.log.Timber
 import java.io.IOException
 
-fun logInterceptor(): HttpLoggingInterceptor {
-    return HttpLoggingInterceptor { message -> Timber.i("HTTP: $message") }.apply {
-        level = HttpLoggingInterceptor.Level.BODY
-    }
-}
-
-object TokenInterceptor : Interceptor {
-    override fun intercept(chain: Interceptor.Chain): Response {
-        val builder = chain.request().newBuilder()
-        val token = "temp"
-        builder.addHeader("Authorization", "Bearer $token")
-        Timber.i("RequestInterceptor=====> $token")
-        return chain.proceed(builder.build())
-    }
-}
-
-object ResponseInterceptor : Interceptor {
-    override fun intercept(chain: Interceptor.Chain): Response {
-        val response = chain.proceed(chain.request())
-        val token = response.header("Authorization")
-        Timber.i("ResponseInterceptor=====> $token")
-        return response
-    }
-}
-
-object CommonParamsInterceptor : Interceptor {
-    override fun intercept(chain: Interceptor.Chain): Response {
-        val currentRequest = chain.request()
-        val newUrl = currentRequest.url
-            .newBuilder()
-//            .addQueryParameter("id", "12")
-            .build()
-
-        return chain.proceed(currentRequest.newBuilder().url(newUrl).build())
-    }
-}
-
 /**
  * 线上bug：
  * Fatal Exception: java.lang.SecurityException: Permission denied (missing INTERNET permission?)
@@ -75,5 +38,11 @@ object NetworkConnectionInterceptor : Interceptor {
     class NoConnectivityException : IOException() {
         override val message: String
             get() = "network error!"
+    }
+}
+
+fun logInterceptor(): HttpLoggingInterceptor {
+    return HttpLoggingInterceptor { message -> Timber.i("HTTP: $message") }.apply {
+        level = HttpLoggingInterceptor.Level.BODY
     }
 }
