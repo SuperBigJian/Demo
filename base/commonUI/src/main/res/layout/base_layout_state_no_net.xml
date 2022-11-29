@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/noNetRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/networkIv"
+        android:layout_width="600dp"
+        android:layout_height="500dp"
+        android:src="@mipmap/base_image_network_error"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.35" />
+
+    <TextView
+        android:id="@+id/titleTv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="25dp"
+        android:layout_marginBottom="80dp"
+        android:gravity="center"
+        android:text="@string/str_no_network"
+        android:textColor="@color/common_text"
+        android:textSize="40sp"
+        app:layout_constraintBottom_toBottomOf="@id/networkIv" />
+
+    <TextView
+        android:id="@+id/subtitleTxt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="25dp"
+        android:layout_marginBottom="80dp"
+        android:gravity="center"
+        android:text="@string/str_check_network_setting"
+        android:textColor="@color/common_text"
+        android:textSize="32sp"
+        app:layout_constraintTop_toBottomOf="@id/titleTv" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/networkBtn"
+        android:layout_width="402dp"
+        android:layout_height="92dp"
+        android:backgroundTint="@color/common_btn_background"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        android:padding="0dp"
+        android:text="@string/set_open_network_setting"
+        android:textColor="@color/common_text"
+        android:textSize="36sp"
+        app:cornerRadius="46dp"
+        app:layout_constraintEnd_toEndOf="@id/networkIv"
+        app:layout_constraintStart_toStartOf="@id/networkIv"
+        app:layout_constraintTop_toBottomOf="@id/networkIv" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

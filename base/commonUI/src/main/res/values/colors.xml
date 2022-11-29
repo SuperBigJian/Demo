@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="common_title">#FFFFFFFF</color>
+    <color name="common_subtitle">#99ECEFF4</color>
+    <color name="common_text">#FFECEFF4</color>
+    <color name="common_background">#131517</color>
+    <color name="common_btn_background">#2C2E33</color>
 </resources>

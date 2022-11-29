@@ -1,0 +1,6 @@
+<resources>
+    <string name="str_loading">加载中</string>
+    <string name="str_no_network">⽹络未连接</string>
+    <string name="str_check_network_setting">请检查⽹络设置后重试</string>
+    <string name="set_open_network_setting">查看网络设置</string>
+</resources>

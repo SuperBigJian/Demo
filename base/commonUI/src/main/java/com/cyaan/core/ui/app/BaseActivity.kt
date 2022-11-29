@@ -7,11 +7,13 @@ import timber.log.Timber
 
 abstract class BaseActivity : AppCompatActivity() {
 
+    private val mBinding by lazy { BaseActivityBaseBinding.inflate(layoutInflater) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Timber.i("onCreate: ${this.javaClass.simpleName}")
-        initParam(intent)
-        initView()
+        mBinding.baseRootView.bindContentView(initView())
+        setContentView(mBinding.root)
     }
 
     override fun onStart() {
@@ -34,9 +36,31 @@ abstract class BaseActivity : AppCompatActivity() {
         Timber.i("onDestroy: ${this.javaClass.simpleName}")
     }
 
-    open fun initParam(intent: Intent?) {}
-
-    open fun initView() {}
+    abstract fun initView(): View
 
     open fun setListener() {}
+
+    protected fun finishAll() {
+        ActivityController.finishAll()
+    }
+
+    fun showContent(view: View? = null) {
+        mBinding.baseRootView.showContent(view)
+    }
+
+    fun showLoading() {
+        mBinding.baseRootView.showLoading()
+    }
+
+    fun showEmpty(msgStr: String) {
+        mBinding.baseRootView.showErrorDefault(R.mipmap.base_image_empty, msgStr)
+    }
+
+    fun showNoNetError() {
+        mBinding.baseRootView.showNoNet()
+    }
+
+    fun showError(msgStr: String) {
+        mBinding.baseRootView.showErrorDefault(R.mipmap.base_image_network_error, msgStr)
+    }
 }

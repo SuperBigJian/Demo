@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <bool name="base_is_tablet">false</bool>
+
+    <declare-styleable name="BaseRootView">
+        <attr name="loadingView" format="reference" />
+        <attr name="errorView" format="reference" />
+        <attr name="noNetWorkView" format="reference" />
+    </declare-styleable>
+</resources>
