@@ -6,12 +6,12 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.cyaan.core.common.ActivityController
 import com.cyaan.core.ui.R
-import com.cyaan.core.ui.databinding.BaseActivityBaseBinding
+import com.cyaan.core.ui.databinding.CommonActivityBaseBinding
 import timber.log.Timber
 
 abstract class BaseActivity : AppCompatActivity() {
 
-    private val mBinding by lazy { BaseActivityBaseBinding.inflate(layoutInflater) }
+    private val mBinding by lazy { CommonActivityBaseBinding.inflate(layoutInflater) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

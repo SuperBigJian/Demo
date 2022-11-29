@@ -24,7 +24,7 @@ class BaseRootView @JvmOverloads constructor(
     private val defaultLayoutParams
         get() = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
 
-    private var mContentViewId: Int = R.id.base_root_content_view_id
+    private var mContentViewId: Int = R.id.common_root_view_content_view_id
 
     private var mLoadingLayoutId: Int = 0
     private var mError1LayoutId: Int = 0
@@ -34,16 +34,16 @@ class BaseRootView @JvmOverloads constructor(
 
     init {
         val a = context.obtainStyledAttributes(attrs, R.styleable.BaseRootView, defStyleAttr, 0)
-        mLoadingLayoutId = a.getResourceId(R.styleable.BaseRootView_loadingView, R.layout.base_layout_state_loading)
-        mError1LayoutId = a.getResourceId(R.styleable.BaseRootView_errorView, R.layout.base_layout_state_error)
-        mError2LayoutId = a.getResourceId(R.styleable.BaseRootView_noNetWorkView, R.layout.base_layout_state_error_with_button)
+        mLoadingLayoutId = a.getResourceId(R.styleable.BaseRootView_loadingView, R.layout.common_layout_state_loading)
+        mError1LayoutId = a.getResourceId(R.styleable.BaseRootView_errorView, R.layout.common_layout_state_error)
+        mError2LayoutId = a.getResourceId(R.styleable.BaseRootView_noNetWorkView, R.layout.common_layout_state_error_with_button)
         a.recycle()
     }
 
     fun bindContentView(view: View) {
         if (contains(view)) return
         if (view.id == View.NO_ID) {
-            view.id = R.id.base_root_content_view_id
+            view.id = R.id.common_root_view_content_view_id
         }
         mContentViewId = view.id
         try {
@@ -70,36 +70,36 @@ class BaseRootView @JvmOverloads constructor(
     }
 
     fun showLoading(initialization: (view: View) -> Unit = {}, update: (view: View) -> Unit = {}) {
-        var view = findViewById<View>(R.id.base_root_loading_view_id)
+        var view = findViewById<View>(R.id.common_root_view_loading_view_id)
         if (view == null) {
             view = inflateView(mLoadingLayoutId)
             initialization(view)
             addView(view, childCount, defaultLayoutParams)
         }
         update(view)
-        showViewById(R.id.base_root_loading_view_id)
+        showViewById(R.id.common_root_view_loading_view_id)
     }
 
     fun showError1(initialization: (view: View) -> Unit = {}, update: (view: View) -> Unit = {}) {
-        var view = findViewById<View>(R.id.base_root_error_view_id_1)
+        var view = findViewById<View>(R.id.common_root_view_error_view_id_1)
         if (view == null) {
             view = inflateView(mError1LayoutId)
             initialization(view)
             addView(view, childCount, defaultLayoutParams)
         }
         update(view)
-        showViewById(R.id.base_root_error_view_id_1)
+        showViewById(R.id.common_root_view_error_view_id_1)
     }
 
     fun showError2(initialization: (view: View) -> Unit = {}, update: (view: View) -> Unit = { }) {
-        var view = findViewById<View>(R.id.base_root_error_view_id_2)
+        var view = findViewById<View>(R.id.common_root_view_error_view_id_2)
         if (view == null) {
             view = inflateView(mError2LayoutId)
             initialization(view)
             addView(view, childCount, defaultLayoutParams)
         }
         update(view)
-        showViewById(R.id.base_root_error_view_id_2)
+        showViewById(R.id.common_root_view_error_view_id_2)
     }
 
     fun showLoadingView(msgStr: String = "") {

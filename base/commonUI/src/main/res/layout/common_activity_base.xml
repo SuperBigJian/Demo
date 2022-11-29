@@ -8,7 +8,7 @@
         android:id="@+id/toolbarStub"
         android:layout_width="match_parent"
         android:layout_height="?actionBarSize"
-        android:layout="@layout/base_layout_toolbar" />
+        android:layout="@layout/common_layout_toolbar" />
 
     <com.cyaan.core.ui.app.BaseRootView
         android:id="@+id/baseRootView"

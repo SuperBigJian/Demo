@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <item name="base_root_content_view_id" type="id"/>
-    <item name="base_root_loading_view_id" type="id"/>
-    <item name="base_root_error_view_id_1" type="id"/>
-    <item name="base_root_error_view_id_2" type="id"/>
+    <item name="common_root_view_content_view_id" type="id"/>
+    <item name="common_root_view_loading_view_id" type="id"/>
+    <item name="common_root_view_error_view_id_1" type="id"/>
+    <item name="common_root_view_error_view_id_2" type="id"/>
 
 </resources>

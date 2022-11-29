@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@id/base_root_error_view_id_1"
+    android:id="@id/common_root_view_loading_view_id"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/errorIv"
-        android:layout_width="600dp"
-        android:layout_height="500dp"
+    <ProgressBar
+        android:id="@+id/progressIv"
+        android:layout_width="400dp"
+        android:layout_height="400dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -16,14 +16,13 @@
         app:layout_constraintVertical_bias="0.35" />
 
     <TextView
-        android:id="@+id/errorTv"
+        android:id="@+id/progressTv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="25dp"
-        android:layout_marginBottom="80dp"
         android:gravity="center"
+        android:text="@string/str_loading"
         android:textColor="@color/common_text"
         android:textSize="40sp"
-        app:layout_constraintBottom_toBottomOf="@id/errorIv" />
+        app:layout_constraintTop_toBottomOf="@id/progressIv" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
