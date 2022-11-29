@@ -5,6 +5,7 @@ import android.app.Application
 import android.os.Bundle
 import android.os.Looper
 import com.cyaan.core.common.ActivityController
+import timber.log.Timber
 import kotlin.system.measureTimeMillis
 
 

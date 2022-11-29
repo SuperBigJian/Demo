@@ -10,9 +10,10 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.view.contains
+import androidx.core.view.isVisible
 import com.blankj.utilcode.util.ToastUtils
-import com.iflytek.autofly.lifeservice.R
-import com.iflytek.autofly.lifeservice.common.extension.onClick
+import com.cyaan.core.common.extension.onClick
+import com.cyaan.core.ui.R
 import timber.log.Timber
 
 class BaseRootView @JvmOverloads constructor(
@@ -23,116 +24,132 @@ class BaseRootView @JvmOverloads constructor(
     private val defaultLayoutParams
         get() = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
 
-    private var mErrorResId: Int = 0
-    private var mLoadingResId: Int = 0
-    private var mNoNetResId: Int = 0
+    private var mContentViewId: Int = R.id.base_root_content_view_id
+
+    private var mLoadingLayoutId: Int = 0
+    private var mError1LayoutId: Int = 0
+    private var mError2LayoutId: Int = 0
 
     private val mInflater by lazy { LayoutInflater.from(getContext()) }
 
-    private var mContentView: View? = null
-    private var mLoadingView: View? = null
-    private var mErrorView: View? = null
-    private var mNoNetView: View? = null
-
     init {
         val a = context.obtainStyledAttributes(attrs, R.styleable.BaseRootView, defStyleAttr, 0)
-        mLoadingResId = a.getResourceId(R.styleable.BaseRootView_loadingView, R.layout.base_layout_state_loading)
-        mErrorResId = a.getResourceId(R.styleable.BaseRootView_errorView, R.layout.base_layout_state_error)
-        mNoNetResId = a.getResourceId(R.styleable.BaseRootView_noNetWorkView, R.layout.base_layout_state_no_net)
+        mLoadingLayoutId = a.getResourceId(R.styleable.BaseRootView_loadingView, R.layout.base_layout_state_loading)
+        mError1LayoutId = a.getResourceId(R.styleable.BaseRootView_errorView, R.layout.base_layout_state_error)
+        mError2LayoutId = a.getResourceId(R.styleable.BaseRootView_noNetWorkView, R.layout.base_layout_state_error_with_button)
         a.recycle()
-    }
-
-    fun bindStateView(errorView: Int, loadingView: Int, noNetView: Int) {
-        mErrorResId = errorView
-        mLoadingResId = loadingView
-        mNoNetResId = noNetView
     }
 
     fun bindContentView(view: View) {
         if (contains(view)) return
-        mContentView = view
-        addView(mContentView, childCount, defaultLayoutParams)
-    }
-
-    fun showContent(view: View? = mContentView) {
-        if (view != null && view != mContentView) {
-            clear(mContentView)
-            addView(mContentView, 0, defaultLayoutParams)
-            Timber.i("replace ContentView ${mContentView?.transitionName}:${mContentView?.id} to ${view.transitionName}:${view.id}")
-            mContentView = view
+        if (view.id == View.NO_ID) {
+            view.id = R.id.base_root_content_view_id
         }
-        mContentView?.let {
-            showViewAndHideOther(it)
-        } ?: Timber.e(NoSuchElementException("Please [bindContentView] before show."))
-    }
-
-    fun showLoading() {
-        if (mLoadingView == null) {
-            mLoadingView = inflateView(mLoadingResId)
-            addView(mLoadingView, 0, defaultLayoutParams)
-        }
-        mLoadingView?.let {
-            showViewAndHideOther(it)
+        mContentViewId = view.id
+        try {
+            addView(view, childCount, defaultLayoutParams)
+        } catch (e: Exception) {
+            Timber.e(e.message)
         }
     }
 
-    fun showErrorDefault(iconRes: Int, msgStr: String) {
-        showError {
+    fun bindStateView(loadingView: Int, error1View: Int, error2View: Int) {
+        mLoadingLayoutId = loadingView
+        mError1LayoutId = error1View
+        mError2LayoutId = error2View
+    }
+
+    fun showContent(view: View? = null) {
+        val curContentView = findViewById<View>(mContentViewId)
+        if (view != null && view != curContentView) {
+            clear(curContentView)
+            bindContentView(view)
+            Timber.i("replace ContentView ${curContentView?.transitionName}:${curContentView?.id} to ${view.transitionName}:${view.id}")
+        }
+        showViewById(mContentViewId)
+    }
+
+    fun showLoading(initialization: (view: View) -> Unit = {}, update: (view: View) -> Unit = {}) {
+        var view = findViewById<View>(R.id.base_root_loading_view_id)
+        if (view == null) {
+            view = inflateView(mLoadingLayoutId)
+            initialization(view)
+            addView(view, childCount, defaultLayoutParams)
+        }
+        update(view)
+        showViewById(R.id.base_root_loading_view_id)
+    }
+
+    fun showError1(initialization: (view: View) -> Unit = {}, update: (view: View) -> Unit = {}) {
+        var view = findViewById<View>(R.id.base_root_error_view_id_1)
+        if (view == null) {
+            view = inflateView(mError1LayoutId)
+            initialization(view)
+            addView(view, childCount, defaultLayoutParams)
+        }
+        update(view)
+        showViewById(R.id.base_root_error_view_id_1)
+    }
+
+    fun showError2(initialization: (view: View) -> Unit = {}, update: (view: View) -> Unit = { }) {
+        var view = findViewById<View>(R.id.base_root_error_view_id_2)
+        if (view == null) {
+            view = inflateView(mError2LayoutId)
+            initialization(view)
+            addView(view, childCount, defaultLayoutParams)
+        }
+        update(view)
+        showViewById(R.id.base_root_error_view_id_2)
+    }
+
+    fun showLoadingView(msgStr: String = "") {
+        showLoading(update = {
+            if (msgStr.isNotBlank()) {
+                val msg = it.findViewById<TextView>(R.id.progressTv)
+                msg.text = msgStr
+            }
+        })
+    }
+
+    fun showSampleErrorView(iconRes: Int, msgStr: String) {
+        showError1(update = {
             val icon = it.findViewById<ImageView>(R.id.errorIv)
             val msg = it.findViewById<TextView>(R.id.errorTv)
             icon.setImageResource(iconRes)
             msg.text = msgStr
-        }
+        })
     }
 
-    fun showError(initView: (view: View) -> Unit = {}) {
-        if (mErrorView == null) {
-            mErrorView = inflateView(mErrorResId)
-            addView(mErrorView, 0, defaultLayoutParams)
-        }
-        mErrorView?.let {
-            initView(it)
-            showViewAndHideOther(it)
-        }
-    }
-
-    fun showNoNet() {
-        if (mNoNetView == null) {
-            mNoNetView = inflateView(mNoNetResId)
-            val btn = mNoNetView?.findViewById<Button>(R.id.networkBtn)
-            btn?.onClick {
+    fun showNoInternetConnection() {
+        showError2(initialization = {
+            val btn = it.findViewById<Button>(R.id.errorBtn)
+            btn.onClick {
                 ToastUtils.showShort("打开设置")
                 context.startActivity(Intent().apply {
                     action = "android.settings.WIFI_SETTINGS"
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 })
             }
-            addView(mNoNetView, 0, defaultLayoutParams)
-        }
-        mNoNetView?.let {
-            showViewAndHideOther(it)
-        }
+        })
     }
 
-    private fun showViewAndHideOther(showView: View) {
+    private fun showViewById(id: Int) {
         post {
-            var result = false
             val childCount = childCount
             for (i in 0 until childCount) {
                 val view = getChildAt(i)
-                view.visibility = if (view.id == showView.id) {
-                    result = true
-                    View.VISIBLE
-                } else {
-                    View.GONE
-                }
+                view.isVisible = view.id == id
             }
-            if (!result) Timber.e(IllegalStateException("showViewAndHideOther ${showView.transitionName}:${showView.id} haven`t add."))
         }
     }
 
-    private fun inflateView(layoutId: Int): View {
-        return mInflater.inflate(layoutId, null)
+    private fun inflateView(layoutId: Int): View? {
+        return try {
+            mInflater.inflate(layoutId, null)
+        } catch (e: Exception) {
+            Timber.e(e)
+            null
+        }
     }
 
     private fun clear(vararg views: View?) {
@@ -141,7 +158,7 @@ class BaseRootView @JvmOverloads constructor(
                 view?.let { removeView(it) }
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Timber.e(e)
         }
     }
 }

@@ -2,7 +2,11 @@ package com.cyaan.core.ui.app
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import com.cyaan.core.common.ActivityController
+import com.cyaan.core.ui.R
+import com.cyaan.core.ui.databinding.BaseActivityBaseBinding
 import timber.log.Timber
 
 abstract class BaseActivity : AppCompatActivity() {
@@ -12,6 +16,7 @@ abstract class BaseActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Timber.i("onCreate: ${this.javaClass.simpleName}")
+        handleIntent(intent, false)
         mBinding.baseRootView.bindContentView(initView())
         setContentView(mBinding.root)
     }
@@ -23,7 +28,7 @@ abstract class BaseActivity : AppCompatActivity() {
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        initParam(intent)
+        handleIntent(intent, true)
     }
 
     override fun onResume() {
@@ -38,29 +43,31 @@ abstract class BaseActivity : AppCompatActivity() {
 
     abstract fun initView(): View
 
-    open fun setListener() {}
+    open fun handleIntent(intent: Intent?, isNew: Boolean) {}
 
-    protected fun finishAll() {
-        ActivityController.finishAll()
-    }
+    open fun setListener() {}
 
     fun showContent(view: View? = null) {
         mBinding.baseRootView.showContent(view)
     }
 
     fun showLoading() {
-        mBinding.baseRootView.showLoading()
+        mBinding.baseRootView.showLoadingView()
     }
 
     fun showEmpty(msgStr: String) {
-        mBinding.baseRootView.showErrorDefault(R.mipmap.base_image_empty, msgStr)
-    }
-
-    fun showNoNetError() {
-        mBinding.baseRootView.showNoNet()
+        mBinding.baseRootView.showSampleErrorView(R.mipmap.base_image_empty, msgStr)
     }
 
     fun showError(msgStr: String) {
-        mBinding.baseRootView.showErrorDefault(R.mipmap.base_image_network_error, msgStr)
+        mBinding.baseRootView.showSampleErrorView(R.mipmap.base_image_network_error, msgStr)
+    }
+
+    fun showNoNet() {
+        mBinding.baseRootView.showNoInternetConnection()
+    }
+
+    protected fun finishAll() {
+        ActivityController.finishAll()
     }
 }

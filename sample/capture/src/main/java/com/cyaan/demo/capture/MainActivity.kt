@@ -5,11 +5,11 @@ import android.graphics.Color
 import android.hardware.display.DisplayManager
 import android.media.projection.MediaProjectionManager
 import android.os.Build
-import android.os.Bundle
 import android.view.SurfaceHolder
+import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import com.cyaan.core.common.utils.onClick
+import com.cyaan.core.common.extension.onClick
 import com.cyaan.core.ui.app.BaseActivity
 import com.cyaan.demo.capture.databinding.ActivityMainBinding
 import permissions.dispatcher.NeedsPermission
@@ -35,12 +35,7 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(mBinding.root)
-    }
-
-    override fun initView() {
+    override fun initView(): View {
         mBinding.surfaceView.holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder) {
                 thread {
@@ -69,6 +64,7 @@ class MainActivity : BaseActivity() {
             override fun surfaceDestroyed(holder: SurfaceHolder) {
             }
         })
+        return mBinding.root
     }
 
     @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)

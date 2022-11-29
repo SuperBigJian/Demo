@@ -10,7 +10,7 @@
         android:layout_height="?actionBarSize"
         android:layout="@layout/base_layout_toolbar" />
 
-    <com.iflytek.autofly.lifeservice.common.base.BaseRootView
+    <com.cyaan.core.ui.app.BaseRootView
         android:id="@+id/baseRootView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
