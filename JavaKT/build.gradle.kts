@@ -12,10 +12,3 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.core.jvm)
 }
-
-//buildscript {
-//    repositories {
-//        google()
-//        mavenCentral()
-//    }
-//}
