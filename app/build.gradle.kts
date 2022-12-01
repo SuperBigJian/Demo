@@ -1,6 +1,7 @@
 plugins {
-    id("common.android.application")
-    id("common.android.test")
+    id("convention.android.application")
+    id("convention.android.test")
+    id("common.flavors")
 }
 
 android {

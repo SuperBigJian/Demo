@@ -25,45 +25,16 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-dependencies {
-    implementation(libs.android.gradlePlugin)
-    implementation(libs.kotlin.gradlePlugin)
-}
-
 gradlePlugin {
     plugins {
-        register("androidApplication") {
-            id = "common.android.application"
-            implementationClass = "AndroidApplicationConventionPlugin"
-        }
-        register("androidCompose") {
-            id = "common.android.compose"
-            implementationClass = "AndroidComposeConventionPlugin"
-        }
-        register("androidHilt") {
-            id = "common.android.hilt"
-            implementationClass = "AndroidHiltConventionPlugin"
-        }
-        register("androidRoom") {
-            id = "common.android.room"
-            implementationClass = "AndroidRoomConventionPlugin"
-        }
-        register("androidPermissions") {
-            id = "common.android.permissions"
-            implementationClass = "AndroidPermissionsConventionPlugin"
-        }
-        register("androidLibrary") {
-            id = "common.android.library"
-            implementationClass = "AndroidLibraryConventionPlugin"
-        }
-        register("androidModule") {
-            id = "common.android.module"
-            implementationClass = "AndroidModuleConventionPlugin"
-        }
-        register("androidTest") {
-            id = "common.android.test"
-            implementationClass = "AndroidTestConventionPlugin"
+        register("commonFlavors") {
+            id = "common.flavors"
+            implementationClass = "AndroidFlavorsConventionPlugin"
         }
     }
 }
 
+dependencies {
+    implementation(libs.android.gradlePlugin)
+    implementation(libs.kotlin.gradlePlugin)
+}

@@ -1,7 +1,7 @@
 plugins {
-    id("common.android.library")
-    id("common.android.hilt")
-    id("common.android.room")
+    id("convention.android.library")
+    id("convention.android.hilt")
+    id("convention.android.room")
     id("kotlinx-serialization")
 }
 

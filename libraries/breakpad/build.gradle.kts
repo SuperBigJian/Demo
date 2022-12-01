@@ -1,5 +1,5 @@
 plugins {
-    id("common.android.library")
+    id("convention.android.library")
 }
 
 android {

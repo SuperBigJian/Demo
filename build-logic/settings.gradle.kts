@@ -18,12 +18,6 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 dependencyResolutionManagement {
     repositories {
-        maven(url = "https://maven.aliyun.com/nexus/content/groups/public/")
-        maven(url = "https://maven.aliyun.com/repository/public/")
-        maven(url = "https://maven.aliyun.com/repository/central")
-        maven(url = "https://maven.aliyun.com/repository/google")
-        maven(url = "https://maven.aliyun.com/repository/gradle-plugin")
-
         mavenCentral()
         gradlePluginPortal()
         google()
@@ -31,7 +25,7 @@ dependencyResolutionManagement {
 
     versionCatalogs {
         create("libs") {
-            from(files("../gradle/libs.versions.toml"))
+            from("io.github.superbigjian.plugin:version-catalog:+")
         }
     }
 }

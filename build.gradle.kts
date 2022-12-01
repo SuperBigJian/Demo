@@ -1,13 +1,11 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
+    dependencies {
+        classpath("io.github.superbigjian.plugin:convention:1.0.3")
+    }
     repositories {
-        maven(url = "https://maven.aliyun.com/nexus/content/groups/public/")
-        maven(url = "https://maven.aliyun.com/repository/public/")
-        maven(url = "https://maven.aliyun.com/repository/central")
-        maven(url = "https://maven.aliyun.com/repository/google")
-        maven(url = "https://maven.aliyun.com/repository/gradle-plugin")
-        google()
         mavenCentral()
+        google()
     }
 }
 
