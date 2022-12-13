@@ -2,6 +2,7 @@ plugins {
     id("convention.android.library")
     id("convention.android.hilt")
     id("convention.android.compose")
+    id("publish.maven")
 }
 android {
     buildTypes {

@@ -3,6 +3,7 @@ plugins {
     id("convention.android.hilt")
     id("convention.android.room")
     id("kotlinx-serialization")
+    id("publish.maven")
 }
 
 android {
