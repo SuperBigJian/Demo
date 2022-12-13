@@ -9,8 +9,7 @@ buildscript {
         classpath(libs.superbigjian.publishPlugin)
     }
     repositories {
-        maven { setUrl("https://depend.iflytek.com/artifactory/mvn-repo/") }
-        maven { setUrl("https://depend.iflytek.com/artifactory/mvn-AndroidPublic-repo/") }
+        mavenLocal()
 
         mavenCentral()
         google()
