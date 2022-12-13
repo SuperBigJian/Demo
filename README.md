@@ -4,7 +4,7 @@
 
 ## 通过Breakpad定位Native Crash
 
-Breakpad的编译和集成详见下面文章
+Breakpad的介绍和编译详见下面文章
 
 [https://www.jianshu.com/p/0bfe7800bdef](https://www.jianshu.com/p/0bfe7800bdef)
 
@@ -14,7 +14,7 @@ Breakpad的编译和集成详见下面文章
 1.implementation(project(":libraries:breakpad"))
 
 //在崩溃代码之前调用，一般来说，crash捕获初始化都会放到Application中。
-2.BreakpadDumper.initBreakpad(externalReportPath!!.absolutePath)
+2.BreakpadDumper.initBreakpad(externalReportPath.absolutePath)
 ```
 
 ### 2.解析dump文件
@@ -24,7 +24,6 @@ Breakpad的编译和集成详见下面文章
 注：AS中已经自带了该工具。
 
 ```
-
 D:\01.WorkSpace\GitHub\breakpad\crashDump>C:\Program Files\Android\Android Studio\plugins\android-ndk\resources\lldb\bin\minidump_stackwalk.exe be5015dd-53dd-4538-8c341aaf-34f8e96a.dmp > crash.txt
 ```
 
