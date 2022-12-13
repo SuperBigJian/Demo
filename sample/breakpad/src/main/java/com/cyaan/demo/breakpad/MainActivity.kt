@@ -3,7 +3,6 @@ package com.cyaan.demo.breakpad
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.os.Environment
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
@@ -55,7 +54,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun initExternalReportPath() {
-        externalReportPath = File(Environment.getExternalStorageDirectory(), "crashDump")
+        externalReportPath = File(filesDir, "crashDump")
         if (externalReportPath?.exists() != true) {
             externalReportPath?.mkdirs()
         }

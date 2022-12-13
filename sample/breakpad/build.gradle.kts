@@ -8,7 +8,6 @@ android {
 
         ndk {
             abiFilters.apply {
-                add("armeabi-v7a")
                 add("arm64-v8a")
             }
         }
