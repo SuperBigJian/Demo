@@ -14,3 +14,7 @@ android {
         }
     }
 }
+
+dependencies {
+    implementation(project(":base:commonUI"))
+}

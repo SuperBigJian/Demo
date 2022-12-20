@@ -9,7 +9,7 @@ plugins {
 android {
     buildTypes {
         val release by getting {
-            isMinifyEnabled = true
+            isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }

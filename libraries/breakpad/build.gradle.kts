@@ -1,23 +1,25 @@
 plugins {
     id("convention.android.library")
+    id("publish.maven")
 }
 
 android {
 
     defaultConfig {
-        consumerProguardFile("consumer-rules.pro")
-
-        ndk {
-            abiFilters.apply {
-                add("armeabi-v7a")
-                add("arm64-v8a")
+        externalNativeBuild {
+            cmake {
+                //生成多个版本的so文件
+                abiFilters.apply {
+                    add("armeabi-v7a")
+                    add("arm64-v8a")
+                }
             }
         }
     }
 
     buildTypes {
         val release by getting {
-            isMinifyEnabled = true
+            isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
@@ -26,4 +28,8 @@ android {
             path("src/main/cpp/CMakeLists.txt")
         }
     }
+}
+
+dependencies {
+    api(project(":base:common"))
 }

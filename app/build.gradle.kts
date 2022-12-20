@@ -21,4 +21,7 @@ android {
         }
     }
 }
-
+dependencies {
+//    api(project(":base:commonUI"))
+    api("io.github.superbigjian.base:common-ui:1.0.0")
+}

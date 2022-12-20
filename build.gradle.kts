@@ -9,8 +9,7 @@ buildscript {
         classpath(libs.superbigjian.publishPlugin)
     }
     repositories {
-        mavenLocal()
-
+//        mavenLocal()
         mavenCentral()
         google()
     }

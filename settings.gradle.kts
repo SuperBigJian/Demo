@@ -9,14 +9,14 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        //mavenLocal()
+//        mavenLocal()
         mavenCentral()
         google()
     }
 
     versionCatalogs {
         create("libs") {
-            from("io.github.superbigjian.plugin:version-catalog:1.0.5")
+            from("io.github.superbigjian.plugin:version-catalog:1.0.8")
         }
     }
 }

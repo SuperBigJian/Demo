@@ -3,12 +3,9 @@ package com.cyaan.core.common
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
-import android.util.Log
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import android.os.Looper
 import timber.log.Timber
-import kotlin.properties.Delegates
+import kotlin.system.measureTimeMillis
 
 open class BaseApplication : Application() {
 
@@ -16,7 +13,22 @@ open class BaseApplication : Application() {
         super.onCreate()
         set(this)
         Timber.plant(CustomDebugTree())
+        Timber.d("${this.javaClass.simpleName} onCreate")
+        val time = measureTimeMillis {
+            initHandler()
+        }
+        if (time > 300) {
+            Timber.e("init time $time is to long please move not important sdk init to [IdleInitSDK]")
+        }
+        Looper.myQueue().addIdleHandler {
+            IdleInitHandler()
+            false
+        }
     }
+
+    protected open fun initHandler() {}
+
+    protected open fun IdleInitHandler() {}
 
     private fun set(baseApplication: BaseApplication) {
         baseApplication.registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
@@ -47,12 +59,6 @@ open class BaseApplication : Application() {
     }
 
     class CustomDebugTree : Timber.DebugTree() {
-        override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
-            if (BuildConfig.DEBUG || Log.isLoggable("Level", Log.DEBUG)) {
-                super.log(priority, tag, message, t)
-            }
-        }
-
         override fun createStackElementTag(element: StackTraceElement): String {
             return "${element.fileName}:${element.lineNumber}"
         }
