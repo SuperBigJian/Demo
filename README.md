@@ -4,9 +4,7 @@
 
 ## 通过Breakpad定位Native Crash
 
-Breakpad的介绍和编译详见下面文章
-
-[https://www.jianshu.com/p/0bfe7800bdef](https://www.jianshu.com/p/0bfe7800bdef)
+Breakpad的介绍和编译请自行谷歌相关资料很好找，下面是编译好的依赖库，可直接使用。
 
 ### 1.集成Breakpad
 
