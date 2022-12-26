@@ -11,7 +11,7 @@ Breakpad的介绍和编译详见下面文章
 ### 1.集成Breakpad
 
 ```
-1.implementation(project(":libraries:breakpad"))
+1.implementation("io.github.superbigjian.libs:breakpad:1.0.1")
 
 //在崩溃代码之前调用，一般来说，crash捕获初始化都会放到Application中。
 2.BreakpadDumper.initBreakpad(externalReportPath.absolutePath)
